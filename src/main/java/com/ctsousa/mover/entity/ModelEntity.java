@@ -9,8 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PartnerEntity extends AbstractEntity {
+public class ModelEntity extends AbstractEntity {
 
     private String name;
-    private String email;
+    private String color;
+    private Integer yearManufacture;
+    private Integer yearModel;
 }
