@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "subcategory")
+@Table(name = "tb_subcategory")
 public class Subcategory extends AbstractEntity {
 
     @Column(name = "description", nullable = false)

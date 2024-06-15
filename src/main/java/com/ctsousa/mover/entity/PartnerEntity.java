@@ -13,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "partner")
+@Table(name = "tb_partner")
 public class PartnerEntity extends AbstractEntity {
 
     @Column(name = "name", nullable = false)

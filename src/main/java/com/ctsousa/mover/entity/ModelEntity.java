@@ -13,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "model")
+@Table(name = "tb_model")
 public class ModelEntity extends AbstractEntity {
 
     @Column(name = "name", nullable = false)

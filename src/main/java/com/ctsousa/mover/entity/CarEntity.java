@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "car")
+@Table(name = "tb_car")
 public class CarEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

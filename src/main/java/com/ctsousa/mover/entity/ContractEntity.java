@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "contract")
+@Table(name = "tb_contract")
 public class ContractEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,8 +43,8 @@ public class ContractEntity extends AbstractEntity {
     @Column(name = "rent_deposit", nullable = false)
     private BigDecimal rentDeposit;
 
-    @Column(name = "value", nullable = false)
-    private BigDecimal value;
+    @Column(name = "amount", nullable = false)
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_frequency", nullable = false)
@@ -55,6 +55,6 @@ public class ContractEntity extends AbstractEntity {
     private Situation situation;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "day", nullable = false)
-    private DayOfWeek day;
+    @Column(name = "billing_day", nullable = false)
+    private DayOfWeek billingDay;
 }

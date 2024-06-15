@@ -14,16 +14,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "history_fipe")
+@Table(name = "tb_history_fipe")
 public class HistoryFipeEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "car_id", nullable = false)
+    @JoinColumn(name = "car_id", nullable = false)
     private CarEntity car;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "value", nullable = false)
-    private BigDecimal value;
+    @Column(name = "amount", nullable = false)
+    private BigDecimal amount;
 }

@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "maintenance")
+@Table(name = "tb_maintenance")
 public class MaintenanceEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,6 +50,6 @@ public class MaintenanceEntity extends AbstractEntity {
     @Column(name = "attachment", nullable = false)
     private String attachment;
 
-    @Column(name = "value", nullable = false)
-    private BigDecimal value;
+    @Column(name = "amount", nullable = false)
+    private BigDecimal amount;
 }

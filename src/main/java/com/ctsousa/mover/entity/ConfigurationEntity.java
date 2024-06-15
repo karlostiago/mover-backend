@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "configuration")
+@Table(name = "tb_configuration")
 public class ConfigurationEntity extends AbstractEntity {
 
     @Column(name = "fipe_devaluation", nullable = false)

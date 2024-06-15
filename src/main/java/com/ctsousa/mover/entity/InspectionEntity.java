@@ -13,43 +13,43 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "inspection")
+@Table(name = "tb_inspection")
 public class InspectionEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "name", nullable = false)
+    @JoinColumn(name = "contract_id", nullable = false)
     private ContractEntity contract;
 
-    @Column(name = "date", nullable = false)
+    @Column(name = "date_create", nullable = false)
     private LocalDate date;
 
     @Column(name = "mileage", nullable = false)
     private Long mileage;
 
-    @Column(name = "key", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
-    private Boolean key;
+    @Column(name = "ignition_key", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    private Boolean ignitionKey;
 
-    @Column(name = "radio", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(name = "radio", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Boolean radio;
 
-    @Column(name = "mokey", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(name = "mokey", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Boolean monkey;
 
-    @Column(name = "triangle", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(name = "triangle", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Boolean triangle;
 
-    @Column(name = "steppe", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(name = "steppe", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Boolean steppe;
 
-    @Column(name = "glass", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(name = "glass", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Boolean glass;
 
-    @Column(name = "plate", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(name = "plate", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Boolean plate;
 
-    @Column(name = "rear_view_mirror", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(name = "rear_view_mirror", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Boolean rearViewMirror;
 
-    @Column(name = "ligthhouse", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    @Column(name = "ligthhouse", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Boolean lighthouse;
 }

@@ -3,26 +3,3 @@ server:
   servlet:
     context-path: /mover/api
 
-spring:
-  application:
-    name: mover
-  datasource:
-    url: jdbc:mysql://${MYSQL.URL}/${MYSQL.SCHEMA}?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8
-    username: ${MYSQL.USERNAME}
-    password: ${MYSQL.PASSWORD}
-    hikari:
-      auto-commit: false
-      connection-timeout: 250
-      max-lifetime: 600000
-      maximum-pool-size: 8
-      minimum-idle: 4
-      pool-name: master
-  jpa:
-    open-in-view: false
-    show-sql: true
-    hibernate:
-      ddl-auto: none
-    properties:
-      "[hibernate.dialect]": org.hibernate.dialect.MySQL5InnoDBDialect
-      "[hibernate.generate_statistics]": false
-      "[hibernate.connection.provider_disables_autocommit]": true

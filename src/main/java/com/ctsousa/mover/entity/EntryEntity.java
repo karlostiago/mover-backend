@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "entry")
+@Table(name = "tb_entry")
 public class EntryEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,8 +50,8 @@ public class EntryEntity extends AbstractEntity {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "value", nullable = false)
-    private BigDecimal value;
+    @Column(name = "amount", nullable = false)
+    private BigDecimal amount;
 
     @Column(name = "description", nullable = false)
     private String decription;

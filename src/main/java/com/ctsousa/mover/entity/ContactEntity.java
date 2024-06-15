@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "contact")
+@Table(name = "tb_contact")
 public class ContactEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

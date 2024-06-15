@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "card")
+@Table(name = "tb_card")
 public class CardEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,8 +29,8 @@ public class CardEntity extends AbstractEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "limit", nullable = false)
-    private BigDecimal limit;
+    @Column(name = "available_limit", nullable = false)
+    private BigDecimal availableLimit;
 
     @Column(name = "closing_date")
     private LocalDate closingDate;
