@@ -26,30 +26,30 @@ public class InspectionEntity extends AbstractEntity {
     @Column(name = "mileage", nullable = false)
     private Long mileage;
 
-    @Column(name = "ignition_key", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "ignition_key", nullable = false)
     private Boolean ignitionKey;
 
-    @Column(name = "radio", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "radio", nullable = false)
     private Boolean radio;
 
-    @Column(name = "mokey", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "mokey", nullable = false)
     private Boolean monkey;
 
-    @Column(name = "triangle", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "triangle", nullable = false)
     private Boolean triangle;
 
-    @Column(name = "steppe", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "steppe", nullable = false)
     private Boolean steppe;
 
-    @Column(name = "glass", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "glass", nullable = false)
     private Boolean glass;
 
-    @Column(name = "plate", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "plate", nullable = false)
     private Boolean plate;
 
-    @Column(name = "rear_view_mirror", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "rear_view_mirror", nullable = false)
     private Boolean rearViewMirror;
 
-    @Column(name = "ligthhouse", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "ligthhouse", nullable = false)
     private Boolean lighthouse;
 }

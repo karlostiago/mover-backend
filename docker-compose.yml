@@ -1,29 +1,25 @@
 version: '3.7'
 
 services:
-  mysql:
+  postgresql:
     container_name: mover_prod
-    image: mysql:latest
+    image: postgres:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_DATABASE=mover
-    security_opt:
-      - seccomp:unconfined
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=mover
     ports:
-      - 3306:3306
+      - 5432:5432
     networks:
       - mover_network
 
-  mysql_test:
+  postgresql_test:
     container_name: mover_test
-    image: mysql:latest
+    image: postgres:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_DATABASE=mover_test
-    security_opt:
-      - seccomp:unconfined
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=mover_test
     ports:
-      - 3307:3306
+      - 5433:5432
     networks:
       - mover_network
 
