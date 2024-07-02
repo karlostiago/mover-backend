@@ -1,4 +1,4 @@
-package com.ctsousa.mover.infrastructure.entity;
+package com.ctsousa.mover.core.entity;
 
 import com.ctsousa.mover.enumeration.CardType;
 import jakarta.persistence.*;

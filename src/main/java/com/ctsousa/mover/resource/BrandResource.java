@@ -2,7 +2,7 @@ package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.api.BrandApi;
 import com.ctsousa.mover.domain.Brand;
-import com.ctsousa.mover.infrastructure.entity.BrandEntity;
+import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.mapper.BrandMapper;
 import com.ctsousa.mover.service.BrandService;
 import org.springframework.http.ResponseEntity;

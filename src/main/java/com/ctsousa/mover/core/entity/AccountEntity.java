@@ -1,4 +1,4 @@
-package com.ctsousa.mover.infrastructure.entity;
+package com.ctsousa.mover.core.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,17 +8,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tb_partner")
-public class PartnerEntity extends AbstractEntity {
+@Table(name = "tb_account")
+public class AccountEntity extends AbstractEntity {
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email", nullable = false)
-    private String email;
+    @Column(name = "icon")
+    private String icon;
+
+    @Column(name = "initial_balance", nullable = false)
+    private BigDecimal InitialBalance;
 }

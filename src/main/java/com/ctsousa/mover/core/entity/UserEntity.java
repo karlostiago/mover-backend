@@ -1,4 +1,4 @@
-package com.ctsousa.mover.infrastructure.entity;
+package com.ctsousa.mover.core.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,12 +13,18 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tb_brand")
-public class BrandEntity extends AbstractEntity {
+@Table(name = "tb_user")
+public class UserEntity extends AbstractEntity {
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "symbol")
-    private String symbol;
+    @Column(name = "email", nullable = false)
+    private String email;
+
+    @Column(name = "login", nullable = false)
+    private String login;
+
+    @Column(name = "password", nullable = false)
+    private String password;
 }

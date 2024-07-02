@@ -1,4 +1,4 @@
-package com.ctsousa.mover.core.impl;
+package com.ctsousa.mover.core.service.impl;
 
 import com.ctsousa.mover.core.service.AbstractService;
 import org.springframework.data.jpa.repository.JpaRepository;

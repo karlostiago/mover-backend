@@ -1,6 +1,6 @@
 package com.ctsousa.mover.core.mapper;
 
-import com.ctsousa.mover.infrastructure.entity.AbstractEntity;
+import com.ctsousa.mover.core.entity.AbstractEntity;
 
 import java.util.List;
 

@@ -3,7 +3,7 @@ package com.ctsousa.mover.mapper;
 import com.ctsousa.mover.core.mapper.MapperToDomain;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
 import com.ctsousa.mover.domain.Brand;
-import com.ctsousa.mover.infrastructure.entity.BrandEntity;
+import com.ctsousa.mover.core.entity.BrandEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.ctsousa.mover.infrastructure.entity;
+package com.ctsousa.mover.core.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
