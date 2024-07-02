@@ -1,4 +1,4 @@
-package com.ctsousa.mover.entity;
+package com.ctsousa.mover.infrastructure.entity;
 
 import com.ctsousa.mover.enumeration.DayOfWeek;
 import com.ctsousa.mover.enumeration.PaymentFrequency;

@@ -1,4 +1,4 @@
-package com.ctsousa.mover.entity;
+package com.ctsousa.mover.infrastructure.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

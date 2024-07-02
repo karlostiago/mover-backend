@@ -1,4 +1,4 @@
-package com.ctsousa.mover.entity;
+package com.ctsousa.mover.infrastructure.entity;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
