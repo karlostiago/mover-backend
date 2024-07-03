@@ -14,6 +14,7 @@ public class BrandMapper implements MapperToEntity<BrandEntity, Brand>, MapperTo
     @Override
     public BrandEntity toEntity(Brand domain) {
         BrandEntity entity = new BrandEntity();
+        entity.setId(domain.getId());
         entity.setName(domain.getName());
         entity.setSymbol(domain.getSymbol());
         entity.setAsset(Boolean.TRUE);

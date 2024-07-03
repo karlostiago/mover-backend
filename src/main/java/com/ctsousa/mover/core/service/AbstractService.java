@@ -8,11 +8,13 @@ import java.util.Optional;
 @Service
 public interface AbstractService<T, ID> {
 
-    Optional<T> add(T entity);
+    Optional<T> save(T entity);
 
     void deleteById(ID id);
 
     T findById(ID id);
 
     List<T> findAll();
+
+    T update(T entity);
 }

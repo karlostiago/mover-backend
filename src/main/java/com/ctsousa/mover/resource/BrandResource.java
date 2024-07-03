@@ -27,7 +27,7 @@ public class BrandResource implements BrandApi {
 
     @Override
     public ResponseEntity<Brand> add(Brand brand) {
-        Optional<BrandEntity> branchOpt = brandService.add(brandMapper.toEntity(brand));
+        Optional<BrandEntity> branchOpt = brandService.save(brandMapper.toEntity(brand));
         return ResponseEntity.ok(brandMapper.toDomain(branchOpt.get()));
     }
 
@@ -44,5 +44,13 @@ public class BrandResource implements BrandApi {
     @Override
     public ResponseEntity<Brand> findById(Long id) {
         return ResponseEntity.ok(brandMapper.toDomain(brandService.findById(id)));
+    }
+
+    @Override
+    public ResponseEntity<Brand> update(Long id, Brand requestBody) {
+        brandService.findById(id);
+        requestBody.setId(id);
+        var brandEntity = brandService.update(brandMapper.toEntity(requestBody));
+        return ResponseEntity.ok(brandMapper.toDomain(brandEntity));
     }
 }
