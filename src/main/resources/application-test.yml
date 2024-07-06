@@ -21,3 +21,19 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
       hibernate.connection.provider_disables_autocommit: true
       hibernate.generate_statistics: false
+
+  mail:
+    host: ${HOST_SMTP}
+    port: ${PORT_SMTP}
+    username: ${USER_NAME_SMTP}
+    password: ${PASSWORD_SMTP}
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: "*"
+          auth: true
+          starttls: false
+          socketFactory:
+            port: ${PORT_SMTP}
+            class: javax.net.ssl.SSLSocketFactory
