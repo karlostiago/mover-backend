@@ -1,6 +1,7 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.ClientEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
 import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.repository.ClientRepository;
@@ -24,16 +25,16 @@ public class ClientServiceImpl extends AbstractServiceImpl <ClientEntity, Long> 
     public ClientEntity existsCpfRegistered(String cpf) {
 
         if (StringUtils.isBlank(cpf)) {
-            throw new IllegalArgumentException("CPF não fornecido corretamente");
+            throw new NotificationException("CPF não fornecido corretamente");
         }
 
         if (!CpfValidator.isValid(cpf)) {
-            throw new IllegalArgumentException("CPF inválido");
+            throw new NotificationException("CPF inválido");
         }
 
         ClientEntity client = clientRepository.existsCpfRegisteredInApplication(cpf);
         if (client == null) {
-            throw new RuntimeException("CPF não encontrado no sistema");
+            throw new NotificationException("CPF não encontrado no sistema");
         }
 
         return client;

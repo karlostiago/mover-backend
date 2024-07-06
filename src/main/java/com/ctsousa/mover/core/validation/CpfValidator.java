@@ -1,5 +1,7 @@
 package com.ctsousa.mover.core.validation;
 
+import com.ctsousa.mover.core.exception.notification.NotificationException;
+
 public class CpfValidator {
 
     public static boolean isValid(String value) {
@@ -44,14 +46,14 @@ public class CpfValidator {
      */
     public static void formatCpf(String cpf) {
         if (cpf == null || cpf.isEmpty()) {
-            throw new IllegalArgumentException("CPF não fornecido corretamente");
+            throw new NotificationException("CPF não fornecido corretamente");
         }
 
         // Remove pontos e traços
         cpf = cpf.replaceAll("[.-]", "");
 
         if (cpf.length() != 11) {
-            throw new IllegalArgumentException("CPF deve ter exatamente 11 dígitos.");
+            throw new NotificationException("CPF deve ter exatamente 11 dígitos.");
         }
     }
 
