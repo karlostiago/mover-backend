@@ -17,6 +17,7 @@ public class ClientMapper implements MapperToEntity<ClientEntity, Client>, Mappe
         client.setName(entity.getName());
         client.setCpf(entity.getCpf());
         client.setEmail(entity.getEmail());
+        client.setNumber(entity.getNumber());
         return client;
     }
 
@@ -34,6 +35,7 @@ public class ClientMapper implements MapperToEntity<ClientEntity, Client>, Mappe
         client.setCpf(domain.getCpf());
         client.setEmail(domain.getEmail());
         client.setName(domain.getName());
+        client.setNumber(domain.getNumber());
         return client;
     }
 
