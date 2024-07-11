@@ -4,6 +4,7 @@ import com.ctsousa.mover.core.entity.AbstractEntity;
 
 import java.util.List;
 
+@Deprecated
 public interface MapperToDomain<D, E extends AbstractEntity> {
 
     D toDomain(E entity);

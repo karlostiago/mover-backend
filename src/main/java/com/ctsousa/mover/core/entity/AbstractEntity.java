@@ -18,13 +18,13 @@ public class AbstractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Boolean asset;
+    private Boolean active;
 
     public AbstractEntity() { }
 
     public AbstractEntity(final Long id) {
         setId(id);
-        setAsset(true);
+        setActive(true);
     }
 
     @Override

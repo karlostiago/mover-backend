@@ -1,46 +1,42 @@
 package com.ctsousa.mover.mapper;
 
-import com.ctsousa.mover.core.mapper.MapperToDomain;
-import com.ctsousa.mover.core.mapper.MapperToEntity;
-import com.ctsousa.mover.domain.Brand;
 import com.ctsousa.mover.core.entity.BrandEntity;
+import com.ctsousa.mover.core.mapper.MapperToDomainV2;
+import com.ctsousa.mover.core.mapper.MapperToResponse;
+import com.ctsousa.mover.domain.Brand;
+import com.ctsousa.mover.request.BrandRequest;
+import com.ctsousa.mover.response.BrandResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class BrandMapper implements MapperToEntity<BrandEntity, Brand>, MapperToDomain<Brand, BrandEntity> {
+public class BrandMapper implements MapperToDomainV2<Brand, BrandRequest>, MapperToResponse<BrandResponse, BrandEntity> {
 
     @Override
-    public BrandEntity toEntity(Brand domain) {
-        BrandEntity entity = new BrandEntity();
-        entity.setId(domain.getId());
-        entity.setName(domain.getName());
-        entity.setSymbol(domain.getSymbol());
-        entity.setAsset(Boolean.TRUE);
-        return entity;
+    public Brand toDomain(BrandRequest request) {
+        Brand domain  = new Brand();
+        domain.setId(request.getId());
+        domain.setName(request.getName());
+        domain.setSymbol(request.getSymbol());
+        domain.setActive(request.getActive());
+        return domain;
     }
 
     @Override
-    public List<BrandEntity> toEntities(List<Brand> domains) {
-        return domains.stream()
-                .map(this::toEntity)
-                .toList();
+    public BrandResponse toResponse(BrandEntity entity) {
+        BrandResponse response = new BrandResponse();
+        response.setId(entity.getId());
+        response.setName(entity.getName().toUpperCase());
+        response.setSymbol(entity.getSymbol());
+        response.setActive(entity.getActive());
+        return response;
     }
 
     @Override
-    public Brand toDomain(BrandEntity entity) {
-        Brand brand = new Brand();
-        brand.setId(entity.getId());
-        brand.setName(entity.getName());
-        brand.setSymbol(entity.getSymbol());
-        return brand;
-    }
-
-    @Override
-    public List<Brand> toDomains(List<BrandEntity> entities) {
+    public List<BrandResponse> toCollections(List<BrandEntity> entities) {
         return entities.stream()
-                .map(this::toDomain)
+                .map(this::toResponse)
                 .toList();
     }
 }

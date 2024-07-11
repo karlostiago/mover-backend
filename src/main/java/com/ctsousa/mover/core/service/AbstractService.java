@@ -8,7 +8,7 @@ import java.util.Optional;
 @Service
 public interface AbstractService<T, ID> {
 
-    Optional<T> save(T entity);
+    T save(T entity);
 
     void deleteById(ID id);
 

@@ -19,6 +19,6 @@ public class BrandEntity extends AbstractEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "symbol")
+    @Column(name = "symbol", columnDefinition = "TEXT")
     private String symbol;
 }

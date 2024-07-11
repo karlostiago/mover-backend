@@ -17,8 +17,8 @@ public abstract class AbstractServiceImpl<T, ID> implements AbstractService<T, I
     }
 
     @Override
-    public Optional<T> save(T entity) {
-        return Optional.of(repository.save(entity));
+    public T save(T entity) {
+        return repository.save(entity);
     }
 
     @Override
