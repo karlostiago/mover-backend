@@ -22,3 +22,19 @@ spring:
       "[hibernate.dialect]": org.hibernate.dialect.PostgreSQLDialect
       "[hibernate.generate_statistics]": false
       "[hibernate.connection.provider_disables_autocommit]": true
+
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: username
+    password: password
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: "*"
+          auth: true
+          starttls: false
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
