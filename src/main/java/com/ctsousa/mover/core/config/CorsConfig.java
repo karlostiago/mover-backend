@@ -21,10 +21,10 @@ public class CorsConfig implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        response.setHeader("Access-Control-Allow-Origin", origemPermitida(request));
+        response.setHeader("Access-Control-Allow-Origin", enabledOrigin(request));
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
-        if ("OPTIONS".equals(request.getMethod()) && temOrigemPermitida(request)) {
+        if ("OPTIONS".equals(request.getMethod()) && isEnabledOrigin(request)) {
             response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, PATCH, OPTIONS");
             response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept");
             response.setHeader("Access-Control-Max-Age", "3600");
@@ -35,9 +35,9 @@ public class CorsConfig implements Filter {
         }
     }
 
-    private String origemPermitida(final HttpServletRequest request) {
+    private String enabledOrigin(final HttpServletRequest request) {
         String[] origens = getOrigensPermidas();
-        String origemPermitida = "http://localhost:4200";
+        String origemPermitida = null;
 
         for (String origem : origens) {
             if (request.getHeader(ORIGIN) != null && request.getHeader(ORIGIN).equals(origem.trim())) {
@@ -49,12 +49,12 @@ public class CorsConfig implements Filter {
         return origemPermitida;
     }
 
-    private boolean temOrigemPermitida(final HttpServletRequest request) {
-        return origemPermitida(request) != null;
+    private boolean isEnabledOrigin(final HttpServletRequest request) {
+        return enabledOrigin(request) != null;
     }
 
     private String [] getOrigensPermidas() {
-        return "http://localhost:4200, https://localhost:4200"
+        return "http://localhost:4200, https://localhost:4200, http://192.168.1.2:8081, https://192.168.1.2:8081"
                 .split(",");
     }
 }

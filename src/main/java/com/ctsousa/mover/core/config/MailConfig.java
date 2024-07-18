@@ -1,4 +1,4 @@
-package com.ctsousa.mover.core.configuration;
+package com.ctsousa.mover.core.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +9,6 @@ import java.util.Properties;
 
 @Configuration
 public class MailConfig {
-
 
     @Bean
     public JavaMailSender getJavaMailSender() {

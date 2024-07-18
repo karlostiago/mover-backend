@@ -7,13 +7,12 @@ import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
 import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.service.ClientService;
-import com.ctsousa.mover.service.customServices.CustomClientService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ClientServiceImpl extends AbstractServiceImpl <ClientEntity, Long> implements ClientService, CustomClientService {
+public class ClientServiceImpl extends AbstractServiceImpl <ClientEntity, Long> implements ClientService {
 
     private final ClientRepository clientRepository;
 

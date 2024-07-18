@@ -1,13 +1,13 @@
 package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.BrandEntity;
-import com.ctsousa.mover.core.mapper.MapperToEntityV2;
+import com.ctsousa.mover.core.mapper.MapperToEntity;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class Brand implements MapperToEntityV2<BrandEntity> {
+public class Brand implements MapperToEntity<BrandEntity> {
     private Long id;
     private String name;
     private String symbol;

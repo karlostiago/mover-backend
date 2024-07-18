@@ -1,47 +1,29 @@
 package com.ctsousa.mover.mapper;
 
 import com.ctsousa.mover.core.entity.SenderEntity;
-import com.ctsousa.mover.core.mapper.MapperToDomain;
-import com.ctsousa.mover.core.mapper.MapperToEntity;
-import com.ctsousa.mover.domain.Sender;
+import com.ctsousa.mover.core.mapper.MapperToResponse;
+import com.ctsousa.mover.response.SenderResponse;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 @Component
-public class SenderMapper implements MapperToEntity<SenderEntity, Sender>, MapperToDomain<Sender, SenderEntity> {
+public class SenderMapper implements MapperToResponse<SenderResponse, SenderEntity> {
     @Override
-    public Sender toDomain(SenderEntity entity) {
-        Sender sender = new Sender();
-        sender.setCode(entity.getCode());
-        sender.setEmail(entity.getEmail());
-        sender.setExpiryDate(entity.getExpiryDate());
-        sender.setClientId(entity.getClientId());
-        sender.setId(entity.getId());
-        return sender;
+    public SenderResponse toResponse(SenderEntity entity) {
+        SenderResponse response = new SenderResponse();
+        response.setCode(entity.getCode());
+        response.setEmail(entity.getEmail());
+        response.setExpiryDate(entity.getExpiryDate());
+        response.setClientId(entity.getClientId());
+        response.setId(entity.getId());
+        return response;
     }
 
     @Override
-    public List<Sender> toDomains(List<SenderEntity> entities) {
+    public List<SenderResponse> toCollections(List<SenderEntity> entities) {
         return entities.stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public SenderEntity toEntity(Sender domain) {
-        SenderEntity senderEntity = new SenderEntity();
-        senderEntity.setCode(domain.getCode());
-        senderEntity.setEmail(domain.getEmail());
-        senderEntity.setExpiryDate(domain.getExpiryDate());
-        senderEntity.setClientId(domain.getClientId());
-        senderEntity.setId(domain.getId());
-        return senderEntity;
-    }
-
-    @Override
-    public List<SenderEntity> toEntities(List<Sender> domains) {
-        return domains.stream()
-                .map(this::toEntity)
+                .map(this::toResponse)
                 .toList();
     }
 }

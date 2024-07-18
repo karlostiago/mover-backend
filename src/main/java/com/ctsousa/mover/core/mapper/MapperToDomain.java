@@ -1,13 +1,6 @@
 package com.ctsousa.mover.core.mapper;
 
-import com.ctsousa.mover.core.entity.AbstractEntity;
+public interface MapperToDomain<D, E> {
 
-import java.util.List;
-
-@Deprecated
-public interface MapperToDomain<D, E extends AbstractEntity> {
-
-    D toDomain(E entity);
-
-    List<D> toDomains(List<E> entities);
+    D toDomain(E request);
 }

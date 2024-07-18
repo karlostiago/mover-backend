@@ -5,20 +5,20 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
 import com.ctsousa.mover.repository.SenderRepository;
 import com.ctsousa.mover.service.SenderService;
-import com.ctsousa.mover.service.customServices.CustomSenderService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.mail.javamail.JavaMailSender;
+
 import java.time.LocalDateTime;
 
 @Component
-public class SenderServiceImpl extends AbstractServiceImpl <SenderEntity, Long> implements SenderService, CustomSenderService  {
+public class SenderServiceImpl extends AbstractServiceImpl <SenderEntity, Long> implements SenderService  {
 
     private final SenderRepository senderRepository;
     private final JavaMailSender javaMailSender;

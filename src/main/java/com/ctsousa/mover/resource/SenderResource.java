@@ -1,8 +1,9 @@
 package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.api.SenderApi;
-import com.ctsousa.mover.domain.Sender;
+import com.ctsousa.mover.core.entity.SenderEntity;
 import com.ctsousa.mover.mapper.SenderMapper;
+import com.ctsousa.mover.response.SenderResponse;
 import com.ctsousa.mover.service.SenderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,12 +22,16 @@ public class SenderResource implements SenderApi {
     }
 
     @Override
-    public ResponseEntity<Sender> sendSecurityCode(Long clientId, String email) {
-        return ResponseEntity.ok(mapper.toDomain(service.sendSecurityCode(clientId, email)));
+    public ResponseEntity<SenderResponse> sendSecurityCode(Long clientId, String email) {
+        SenderEntity entity = service.sendSecurityCode(clientId, email);
+        SenderResponse response = mapper.toResponse(entity);
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<Sender> validateSecurityCode(Long clientId, String email, String code) {
-        return ResponseEntity.ok(mapper.toDomain(service.validateSecurityCode(clientId,email, code)));
+    public ResponseEntity<SenderResponse> validateSecurityCode(Long clientId, String email, String code) {
+        SenderEntity entity = service.validateSecurityCode(clientId,email, code);
+        SenderResponse response = mapper.toResponse(entity);
+        return ResponseEntity.ok(response);
     }
 }

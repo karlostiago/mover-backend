@@ -1,8 +1,10 @@
 package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.api.ClientApi;
+import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.domain.Client;
 import com.ctsousa.mover.mapper.ClientMapper;
+import com.ctsousa.mover.response.ClientResponse;
 import com.ctsousa.mover.service.ClientService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +24,9 @@ public class ClientResource implements ClientApi {
     }
 
     @Override
-    public ResponseEntity<Client> existingCpfRegister(String cpf) {
-        return ResponseEntity.ok(clientMapper.toDomain(clientService.existsCpfRegistered(cpf)));
+    public ResponseEntity<ClientResponse> existingCpfRegister(String cpf) {
+        ClientEntity entity = clientService.existsCpfRegistered(cpf);
+        ClientResponse clientResponse = clientMapper.toResponse(entity);
+        return ResponseEntity.ok(clientResponse);
     }
 }

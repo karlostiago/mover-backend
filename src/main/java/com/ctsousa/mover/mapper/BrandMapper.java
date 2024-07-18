@@ -1,7 +1,7 @@
 package com.ctsousa.mover.mapper;
 
 import com.ctsousa.mover.core.entity.BrandEntity;
-import com.ctsousa.mover.core.mapper.MapperToDomainV2;
+import com.ctsousa.mover.core.mapper.MapperToDomain;
 import com.ctsousa.mover.core.mapper.MapperToResponse;
 import com.ctsousa.mover.domain.Brand;
 import com.ctsousa.mover.request.BrandRequest;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class BrandMapper implements MapperToDomainV2<Brand, BrandRequest>, MapperToResponse<BrandResponse, BrandEntity> {
+public class BrandMapper implements MapperToDomain<Brand, BrandRequest>, MapperToResponse<BrandResponse, BrandEntity> {
 
     @Override
     public Brand toDomain(BrandRequest request) {
