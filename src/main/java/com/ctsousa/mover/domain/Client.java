@@ -23,25 +23,25 @@ public class Client implements MapperToEntity<ClientEntity> {
 
     public void setName(String name) {
         if (StringUtils.isBlank(name)) throw new RuntimeException("");
-        if (StringUtils.equalsIgnoreCase(name, "undefined"))throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(name, "undefined")) throw new RuntimeException("");
         this.name = name.toUpperCase();
     }
 
     public void setCpf(String cpf) {
         if (StringUtils.isBlank(cpf)) throw new RuntimeException("");
-        if (StringUtils.equalsIgnoreCase(cpf, "undefined"))throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(cpf, "undefined")) throw new RuntimeException("");
         this.cpf = cpf;
     }
 
     public void setEmail(String email) {
         if (StringUtils.isBlank(email)) throw new RuntimeException("");
-        if (StringUtils.equalsIgnoreCase(email, "undefined"))throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(email, "undefined")) throw new RuntimeException("");
         this.email = email.toUpperCase();
     }
 
     public void setNumber(String number) {
         if (StringUtils.isBlank(number)) throw new RuntimeException("");
-        if (StringUtils.equalsIgnoreCase(number, "undefined"))throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(number, "undefined")) throw new RuntimeException("");
         this.number = number;
     }
 

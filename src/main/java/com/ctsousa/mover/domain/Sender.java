@@ -29,13 +29,13 @@ public class Sender implements MapperToEntity<SenderEntity> {
 
     public void setEmail(String email) {
         if (StringUtils.isBlank(email)) throw new RuntimeException("");
-        if (StringUtils.equalsIgnoreCase(email, "undefined"))throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(email, "undefined")) throw new RuntimeException("");
         this.email = email;
     }
 
     public void setCode(String code) {
         if (StringUtils.isBlank(code)) throw new RuntimeException("");
-        if (StringUtils.equalsIgnoreCase(code, "undefined"))throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(code, "undefined")) throw new RuntimeException("");
         this.code = code;
     }
 

@@ -16,13 +16,13 @@ public class Brand implements MapperToEntity<BrandEntity> {
 
     public void setName(String name) {
         if (StringUtils.isBlank(name)) throw new RuntimeException("");
-        if (StringUtils.equalsIgnoreCase(name, "undefined"))throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(name, "undefined")) throw new RuntimeException("");
         this.name = name.toUpperCase();
     }
 
     public void setSymbol(String symbol) {
         if (StringUtils.isBlank(symbol)) throw new RuntimeException("");
-        if (StringUtils.equalsIgnoreCase(symbol, "undefined"))throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(symbol, "undefined")) throw new RuntimeException("");
         this.symbol = symbol;
     }
 
