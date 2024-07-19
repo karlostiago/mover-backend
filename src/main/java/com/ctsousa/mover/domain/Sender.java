@@ -5,6 +5,7 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -27,16 +28,14 @@ public class Sender implements MapperToEntity<SenderEntity> {
     }
 
     public void setEmail(String email) {
-        if (email == null) throw new NotificationException("");
-        if (email.isEmpty()) throw new NotificationException("");
-        if (email.equalsIgnoreCase("undefined")) throw new NotificationException("");
+        if (StringUtils.isBlank(email)) throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(email, "undefined"))throw new RuntimeException("");
         this.email = email;
     }
 
     public void setCode(String code) {
-        if (code == null) throw new NotificationException("");
-        if (code.isEmpty()) throw new NotificationException("");
-        if (code.equalsIgnoreCase("undefined")) throw new NotificationException("");
+        if (StringUtils.isBlank(code)) throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(code, "undefined"))throw new RuntimeException("");
         this.code = code;
     }
 

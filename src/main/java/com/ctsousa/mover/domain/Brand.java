@@ -4,6 +4,7 @@ import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 @Setter
@@ -14,16 +15,14 @@ public class Brand implements MapperToEntity<BrandEntity> {
     private Boolean active;
 
     public void setName(String name) {
-        if (name == null) throw new RuntimeException("");
-        if (name.isEmpty()) throw new RuntimeException("");
-        if (name.equalsIgnoreCase("undefined")) throw new RuntimeException("");
+        if (StringUtils.isBlank(name)) throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(name, "undefined"))throw new RuntimeException("");
         this.name = name.toUpperCase();
     }
 
     public void setSymbol(String symbol) {
-        if (symbol == null) throw new RuntimeException("");
-        if (symbol.isEmpty()) throw new RuntimeException("");
-        if (symbol.equalsIgnoreCase("undefined")) throw new RuntimeException("");
+        if (StringUtils.isBlank(symbol)) throw new RuntimeException("");
+        if (StringUtils.equalsIgnoreCase(symbol, "undefined"))throw new RuntimeException("");
         this.symbol = symbol;
     }
 

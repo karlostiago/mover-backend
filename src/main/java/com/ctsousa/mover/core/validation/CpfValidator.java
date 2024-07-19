@@ -1,6 +1,7 @@
 package com.ctsousa.mover.core.validation;
 
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import org.apache.commons.lang3.StringUtils;
 
 public class CpfValidator {
 
@@ -45,7 +46,7 @@ public class CpfValidator {
      * @throws IllegalArgumentException se o CPF não tiver exatamente 11 dígitos após remover pontos e traços.
      */
     public static void formatCpf(String cpf) {
-        if (cpf == null || cpf.isEmpty()) {
+        if (StringUtils.isBlank(cpf)) {
             throw new NotificationException("CPF não fornecido corretamente");
         }
 
