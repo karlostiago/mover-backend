@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  postgresql:
+  mysql:
     container_name: mover_prod
     image: mysql:latest
     environment:
@@ -12,7 +12,7 @@ services:
     networks:
       - mover_network
 
-  postgresql_test:
+  mysql_test:
     container_name: mover_test
     image: mysql:latest
     environment:
