@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 public class Brand implements MapperToEntity<BrandEntity> {
     private Long id;
     private String name;
-    private String symbol;
+    private Symbol symbol;
     private Boolean active;
 
     public void setName(String name) {
@@ -20,18 +20,12 @@ public class Brand implements MapperToEntity<BrandEntity> {
         this.name = name.toUpperCase();
     }
 
-    public void setSymbol(String symbol) {
-        if (StringUtils.isBlank(symbol)) throw new RuntimeException("");
-        if (StringUtils.equalsIgnoreCase(symbol, "undefined")) throw new RuntimeException("");
-        this.symbol = symbol;
-    }
-
     @Override
     public BrandEntity toEntity() {
         BrandEntity entity = new BrandEntity();
         entity.setId(this.getId());
         entity.setName(this.getName().toUpperCase());
-        entity.setSymbol(this.getSymbol());
+        entity.setSymbol(this.getSymbol().toEntity());
         entity.setActive(this.active);
         return entity;
     }
