@@ -2,6 +2,7 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.service.BrandService;
@@ -31,14 +32,14 @@ public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> imp
 
     @Override
     public List<BrandEntity> filterByName(String name) {
-        if (name == null || name.isEmpty()) throw new NotificationException("Informe pelo menos um palavra para prosseguir com a pesquisa.");
+        if (name == null || name.isEmpty()) throw new NotificationException("Informe pelo menos um palavra para prosseguir com a pesquisa.", Severity.WARNING);
         return brandRepository.findByNameContainingIgnoreCase(name);
     }
 
     @Override
     public BrandEntity save(BrandEntity entity) {
         if (entity.getId() == null) {
-            if (brandRepository.existsByName(entity.getName())) throw new NotificationException("Existe uma marca, cadastrada com o nome informado.");
+            if (brandRepository.existsByName(entity.getName())) throw new NotificationException("Existe uma marca, cadastrada com o nome informado.", Severity.INFO);
         }
         return super.save(entity);
     }
