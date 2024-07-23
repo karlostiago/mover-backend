@@ -3,6 +3,7 @@ package com.ctsousa.mover.service.impl;
 import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
+import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.service.BrandService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
@@ -13,14 +14,33 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 @Component
 public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> implements BrandService {
 
+    private final BrandRepository brandRepository;
+
     public BrandServiceImpl(JpaRepository<BrandEntity, Long> repository) {
         super(repository);
+        this.brandRepository = (BrandRepository) repository;
+    }
+
+    @Override
+    public List<BrandEntity> filterByName(String name) {
+        if (name == null || name.isEmpty()) throw new NotificationException("Informe pelo menos um palavra para prosseguir com a pesquisa.");
+        return brandRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public BrandEntity save(BrandEntity entity) {
+        if (entity.getId() == null) {
+            if (brandRepository.existsByName(entity.getName())) throw new NotificationException("Existe uma marca, cadastrada com o nome informado.");
+        }
+        return super.save(entity);
     }
 
     @Override

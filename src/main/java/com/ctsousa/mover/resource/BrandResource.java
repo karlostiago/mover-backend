@@ -35,6 +35,12 @@ public class BrandResource implements BrandApi {
     }
 
     @Override
+    public ResponseEntity<List<BrandResponse>> filterByName(String name) {
+        List<BrandEntity> entities = brandService.filterByName(name);
+        return ResponseEntity.ok(brandMapper.toCollections(entities));
+    }
+
+    @Override
     public ResponseEntity<BrandResponse> add(BrandRequest request) {
         Brand brand = brandMapper.toDomain(request);
         BrandEntity entity = brandService.save(brand.toEntity());

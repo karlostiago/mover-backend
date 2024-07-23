@@ -54,7 +54,7 @@ public class CorsConfig implements Filter {
     }
 
     private String [] getOrigensPermidas() {
-        return "http://localhost:4200, https://localhost:4200, http://192.168.1.2:8081, https://192.168.1.2:8081"
+        return "http://localhost:4200, https://localhost:4200, http://192.168.1.2:8081, https://192.168.1.2:8081, https://mover-frontend.onrender.com, http://mover-frontend.onrender.com"
                 .split(",");
     }
 }
