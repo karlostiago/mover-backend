@@ -62,7 +62,9 @@ public class BrandResource implements BrandApi {
 
     @Override
     public void delete(Long id) {
+        BrandEntity entity = brandService.findById(id);
         brandService.deleteById(id);
+        symbolService.deleteById(entity.getSymbol().getId());
     }
 
     @Override
