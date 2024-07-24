@@ -32,7 +32,6 @@ public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> imp
 
     @Override
     public List<BrandEntity> filterByName(String name) {
-        if (name == null || name.isEmpty()) throw new NotificationException("Informe pelo menos um palavra para prosseguir com a pesquisa.", Severity.WARNING);
         return brandRepository.findByNameContainingIgnoreCase(name);
     }
 
