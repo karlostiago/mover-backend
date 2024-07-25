@@ -1,8 +1,6 @@
 package com.ctsousa.mover.core.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,4 +25,8 @@ public class UserEntity extends AbstractEntity {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name = "client_id")
+    private Long clientId;
+
 }

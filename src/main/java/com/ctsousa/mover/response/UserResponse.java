@@ -5,16 +5,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ClientResponse {
+
+public class UserResponse {
     private Long id;
 
     private String name;
 
-    private String cpf;
-
     private String email;
 
-    private String number;
-
-    private UserResponse user;
+    private String login;
 }
