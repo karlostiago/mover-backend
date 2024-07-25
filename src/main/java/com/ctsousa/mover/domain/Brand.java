@@ -22,7 +22,7 @@ public class Brand implements MapperToEntity<BrandEntity> {
     }
 
     public void setSymbol(Symbol symbol) {
-        if (symbol.getId() == 0) throw new NotificationException("Selecione um simbolo");
+        if (symbol.getId() == null || symbol.getId() == 0 || symbol.getId() == -1) throw new NotificationException("Selecione um símbolo");
         this.symbol = symbol;
     }
 
