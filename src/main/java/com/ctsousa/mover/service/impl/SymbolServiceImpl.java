@@ -8,6 +8,8 @@ import com.ctsousa.mover.service.SymbolService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class SymbolServiceImpl extends AbstractServiceImpl<SymbolEntity, Long> implements SymbolService {
 
@@ -35,5 +37,32 @@ public class SymbolServiceImpl extends AbstractServiceImpl<SymbolEntity, Long> i
         }
 
         return entity;
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        boolean removeSymbol = true;
+
+        SymbolEntity symbol = findById(id);
+
+        for (String s : loadPredefinedSymbols()) {
+            if (s.equalsIgnoreCase(symbol.getDescription())) {
+                removeSymbol = false;
+                break;
+            }
+        }
+
+        if (removeSymbol) {
+            symbolRepository.deleteById(id);
+        }
+    }
+
+    private List<String> loadPredefinedSymbols() {
+        return List.of("VOLKSWAGEN", "CHEVROLET", "AUDI", "FORD",
+            "RENAULT", "HYUNDAI", "TOYOTA", "HONDA", "NISSAN", "JEEP", "JAGUAR",
+            "LAND_ROVER", "LAND ROVER", "LANDROVER", "LAND", "ROVER", "VOLVO", "PORSCHE",
+            "LEXUS", "KIA", "CITROEN", "PEUGEOT", "MITSUBISHI", "SUZUKI", "MINI",
+            "SUBARU", "RAM", "DODGE", "GMC", "TESLA", "MERCEDES", "BMW", "FIAT"
+        );
     }
 }
