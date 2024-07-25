@@ -37,8 +37,14 @@ public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> imp
 
     @Override
     public BrandEntity save(BrandEntity entity) {
-        if (entity.getId() == null) {
-            if (brandRepository.existsByName(entity.getName())) throw new NotificationException("Existe uma marca, cadastrada com o nome informado.", Severity.INFO);
+        if (entity.isNew()) {
+            if (brandRepository.existsByName(entity.getName())) {
+                throw new NotificationException("Existe uma marca, cadastrada com o nome informado.", Severity.WARNING);
+            }
+        } else if (!entity.isNew()) {
+            if (brandRepository.existsByNameNotId(entity.getName(), entity.getId())) {
+                throw new NotificationException("Não foi possível atualizar, pois já tem uma marca, com o nome informado.", Severity.WARNING);
+            }
         }
         return super.save(entity);
     }
