@@ -26,17 +26,18 @@ spring:
       "[hibernate.connection.provider_disables_autocommit]": true
 
   mail:
-    host: ${HOST_SMTP}
-    port: ${PORT_SMTP}
-    username: ${USER_NAME_SMTP}
-    password: ${PASSWORD_SMTP}
+    host: smtp.gmail.com
+    port: 465
+    username: movertech59@gmail.com
+    password: ohep ihxe ppcz nyjj
     properties:
       mail:
         smtp:
           ssl:
             trust: "*"
           auth: true
-          starttls: false
+          starttls:
+            enable: false
           socketFactory:
-            port: ${PORT_SMTP}
+            port: 465
             class: javax.net.ssl.SSLSocketFactory
