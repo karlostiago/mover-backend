@@ -15,10 +15,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
 
 @Component
 public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> implements BrandService {
@@ -37,8 +35,14 @@ public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> imp
 
     @Override
     public BrandEntity save(BrandEntity entity) {
-        if (entity.getId() == null) {
-            if (brandRepository.existsByName(entity.getName())) throw new NotificationException("Existe uma marca, cadastrada com o nome informado.", Severity.INFO);
+        if (entity.isNew()) {
+            if (brandRepository.existsByName(entity.getName())) {
+                throw new NotificationException("Existe uma marca, cadastrada com o nome informado.", Severity.WARNING);
+            }
+        } else if (!entity.isNew()) {
+            if (brandRepository.existsByNameNotId(entity.getName(), entity.getId())) {
+                throw new NotificationException("Não foi possível atualizar, pois já tem uma marca, com o nome informado.", Severity.WARNING);
+            }
         }
         return super.save(entity);
     }
@@ -58,11 +62,11 @@ public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> imp
                 throw new NotificationException("Arquivo não é uma imagem válida.");
             }
 
-            int width = image.getWidth();
-            int height = image.getHeight();
-
-//            if (width != height) {
-//                throw new NotificationException("A larguta e altura da imagem são diferentes");
+//            int width = image.getWidth();
+//            int height = image.getHeight();
+//
+//            if (width != 48 && height != 48) {
+//                throw new NotificationException("A larguta e altura da imagem são diferentes. Tamanho permitido é de 48x48");
 //            }
 
             return image;
