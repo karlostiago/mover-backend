@@ -62,11 +62,11 @@ public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> imp
                 throw new NotificationException("Arquivo não é uma imagem válida.");
             }
 
-            int width = image.getWidth();
-            int height = image.getHeight();
-
-//            if (width != height) {
-//                throw new NotificationException("A larguta e altura da imagem são diferentes");
+//            int width = image.getWidth();
+//            int height = image.getHeight();
+//
+//            if (width != 48 && height != 48) {
+//                throw new NotificationException("A larguta e altura da imagem são diferentes. Tamanho permitido é de 48x48");
 //            }
 
             return image;
