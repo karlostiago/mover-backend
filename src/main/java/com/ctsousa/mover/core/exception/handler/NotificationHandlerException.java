@@ -22,6 +22,7 @@ public class NotificationHandlerException extends ResponseEntityExceptionHandler
         List<Error> errors = List.of((ErrorBuilder.builder()
                 .withStatus(HttpStatus.BAD_REQUEST)
                 .withMessage(ex.getMessage())
+                .withDetails(ex)
                 .withSeverity(ex.getSeverity())
                 .build()));
         return ResponseEntity.badRequest().body(errors);
@@ -33,6 +34,7 @@ public class NotificationHandlerException extends ResponseEntityExceptionHandler
                 .withStatus(HttpStatus.NOT_FOUND)
                 .withMessage(ex.getMessage())
                 .withSeverity(ex.getSeverity())
+                .withDetails(ex)
                 .build()));
         return ResponseEntity.badRequest().body(errors);
     }

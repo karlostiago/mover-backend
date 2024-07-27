@@ -1,6 +1,7 @@
 package com.ctsousa.mover.mapper;
 
 import com.ctsousa.mover.core.entity.BrandEntity;
+import com.ctsousa.mover.core.entity.SymbolEntity;
 import com.ctsousa.mover.core.mapper.MapperToDomain;
 import com.ctsousa.mover.core.mapper.MapperToResponse;
 import com.ctsousa.mover.domain.Brand;
@@ -28,7 +29,7 @@ public class BrandMapper implements MapperToDomain<Brand, BrandRequest>, MapperT
         BrandResponse response = new BrandResponse();
         response.setId(entity.getId());
         response.setName(entity.getName().toUpperCase());
-        response.setSymbol(entity.getSymbol());
+        response.setSymbol(new SymbolMapper().toResponse(entity.getSymbol()));
         response.setActive(entity.getActive());
         return response;
     }
