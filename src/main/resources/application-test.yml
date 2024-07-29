@@ -23,17 +23,18 @@ spring:
       hibernate.generate_statistics: false
 
   mail:
-    host: ${HOST_SMTP}
-    port: ${PORT_SMTP}
-    username: ${USER_NAME_SMTP}
-    password: ${PASSWORD_SMTP}
+    host: host
+    port: 1105
+    username: mail_username
+    password: xyz@123
     properties:
       mail:
         smtp:
           ssl:
             trust: "*"
           auth: true
-          starttls: false
+          starttls:
+            enable: false
           socketFactory:
-            port: ${PORT_SMTP}
+            port: 1100
             class: javax.net.ssl.SSLSocketFactory
