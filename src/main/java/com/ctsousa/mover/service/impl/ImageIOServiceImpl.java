@@ -11,6 +11,7 @@ import java.io.InputStream;
 
 @Service
 public class ImageIOServiceImpl implements ImageIOService {
+
     @Override
     public BufferedImage read(InputStream inputStream) throws IOException {
         return ImageIO.read(inputStream);

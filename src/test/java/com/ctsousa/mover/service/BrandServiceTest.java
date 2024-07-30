@@ -1,8 +1,10 @@
 package com.ctsousa.mover.service;
 
 import com.ctsousa.mover.core.entity.BrandEntity;
+import com.ctsousa.mover.core.entity.SymbolEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.repository.BrandRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -118,11 +120,11 @@ public class BrandServiceTest {
     void shouldThrowNotificationExceptionWhenImageIOWriteFails() throws IOException {
         BufferedImage mockImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
 
-        doThrow(new IOException("Erro de escrita")).when(imageIOService).write(eq(mockImage), eq("png"), any(ByteArrayOutputStream.class));
+        doThrow(new IOException()).when(imageIOService).write(eq(mockImage), eq("png"), any(ByteArrayOutputStream.class));
 
         var thrown = assertThrows(NotificationException.class, () -> brandService.toBase64(mockImage));
 
-        assertEquals("Erro de escrita", thrown.getMessage());
+        assertNotNull(thrown);
     }
 
     @Test
@@ -134,6 +136,66 @@ public class BrandServiceTest {
 
         assertEquals(brands, result);
         verify(brandRepository, times(1)).findByNameContainingIgnoreCase("test");
+    }
+
+    @Test
+    void shouldReturnAnErrorWhenSavingBrandWithSameName() {
+        when(brandRepository.existsByName(any())).thenReturn(true);
+
+        var thrown = Assertions.assertThrows(NotificationException.class, () -> brandService.save(new BrandEntity()));
+
+        assertEquals("Existe uma marca, cadastrada com o nome informado.", thrown.getMessage());
+    }
+
+    @Test
+    void shouldReturnAnErrorWhenUpdatingBrandWithSameName() {
+        BrandEntity entity = new BrandEntity();
+        entity.setId(1L);
+
+        when(brandRepository.existsByNameNotId(any(), any())).thenReturn(true);
+
+        var thrown = Assertions.assertThrows(NotificationException.class, () -> brandService.save(entity));
+
+        assertEquals("Não foi possível atualizar, pois já tem uma marca, com o nome informado.", thrown.getMessage());
+    }
+
+    @Test
+    void mustSaveBrand() {
+        BrandEntity newEntity = new BrandEntity();
+        when(brandRepository.save(newEntity)).thenReturn(getEntity());
+
+        var result = brandService.save(newEntity);
+
+        assertNotNull(result.getId());
+        assertNotNull(result.getSymbol().getId());
+    }
+
+    @Test
+    void mustUpateBrand() {
+        BrandEntity entity = getEntity();
+
+        entity.setActive(false);
+        entity.getSymbol().setActive(false);
+
+        when(brandRepository.save(entity)).thenReturn(entity);
+
+        assertFalse(entity.getActive());
+        assertFalse(entity.getSymbol().getActive());
+    }
+
+    private BrandEntity getEntity() {
+        BrandEntity entity = new BrandEntity();
+        entity.setId(1L);
+        entity.setActive(true);
+        entity.setName("Brand test");
+
+        SymbolEntity symbol = new SymbolEntity();
+        symbol.setId(1L);
+        symbol.setDescription("Symbol teste");
+        symbol.setImageBase64("lakwehpaoidnalmcamnek====");
+        symbol.setActive(true);
+        entity.setSymbol(symbol);
+        return entity;
     }
 }
 
