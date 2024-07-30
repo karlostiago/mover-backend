@@ -6,6 +6,7 @@ import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.service.BrandService;
+import com.ctsousa.mover.service.ImageIOService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,15 +18,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> implements BrandService {
 
     private final BrandRepository brandRepository;
 
-    public BrandServiceImpl(JpaRepository<BrandEntity, Long> repository) {
+    private final ImageIOService imageIOService;
+
+    public BrandServiceImpl(JpaRepository<BrandEntity, Long> repository, ImageIOService imageIOService) {
         super(repository);
         this.brandRepository = (BrandRepository) repository;
+        this.imageIOService = imageIOService;
     }
 
     @Override
@@ -49,25 +54,22 @@ public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> imp
 
     @Override
     public BufferedImage upload(MultipartFile file) {
-        String filename = file.getOriginalFilename();
+        String filename = Objects.requireNonNull(file.getOriginalFilename()).isEmpty() ? null : file.getOriginalFilename();
 
-        if (filename == null || !filename.endsWith(".png")) {
+        if (filename == null) {
+            throw new NotificationException("Nenhum arquivo carregado.");
+        }
+
+        if (!filename.endsWith(".png")) {
             throw new NotificationException("O arquivo deve ter a extensão .png");
         }
 
         try(InputStream inputStream = file.getInputStream()) {
-            BufferedImage image = ImageIO.read(inputStream);
+            BufferedImage image = imageIOService.read(inputStream);
 
             if (image == null) {
                 throw new NotificationException("Arquivo não é uma imagem válida.");
             }
-
-//            int width = image.getWidth();
-//            int height = image.getHeight();
-//
-//            if (width != 48 && height != 48) {
-//                throw new NotificationException("A larguta e altura da imagem são diferentes. Tamanho permitido é de 48x48");
-//            }
 
             return image;
 
@@ -79,7 +81,7 @@ public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> imp
     public String toBase64(BufferedImage image) {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write(image, "png", outputStream);
+            imageIOService.write(image, "png", outputStream);
             byte [] imageBytes = outputStream.toByteArray();
             return Base64.getEncoder().encodeToString(imageBytes);
         } catch (IOException e) {
