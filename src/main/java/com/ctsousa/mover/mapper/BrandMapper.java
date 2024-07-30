@@ -7,6 +7,7 @@ import com.ctsousa.mover.core.mapper.MapperToResponse;
 import com.ctsousa.mover.domain.Brand;
 import com.ctsousa.mover.request.BrandRequest;
 import com.ctsousa.mover.response.BrandResponse;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
