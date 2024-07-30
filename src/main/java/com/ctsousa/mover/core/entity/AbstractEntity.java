@@ -20,9 +20,11 @@ public class AbstractEntity {
 
     private Boolean active;
 
-    public AbstractEntity() { }
+    public AbstractEntity() {
+        setActive(true);
+    }
 
-    public AbstractEntity(final Long id) {
+    public AbstractEntity(Long id) {
         setId(id);
         setActive(true);
     }

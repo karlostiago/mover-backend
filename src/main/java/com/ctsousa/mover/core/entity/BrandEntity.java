@@ -1,6 +1,5 @@
 package com.ctsousa.mover.core.entity;
 
-import com.ctsousa.mover.domain.Symbol;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

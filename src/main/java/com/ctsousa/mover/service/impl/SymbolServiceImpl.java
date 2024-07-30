@@ -29,17 +29,6 @@ public class SymbolServiceImpl extends AbstractServiceImpl<SymbolEntity, Long> i
     }
 
     @Override
-    public SymbolEntity findByDescription(String description) {
-        SymbolEntity entity = this.symbolRepository.findByDescription(description.toUpperCase());
-
-        if (entity == null) {
-            throw new NotificationException("Não foi encontrado um simbolo com a descrição informada.");
-        }
-
-        return entity;
-    }
-
-    @Override
     public void deleteById(Long id) {
         boolean removeSymbol = true;
 
