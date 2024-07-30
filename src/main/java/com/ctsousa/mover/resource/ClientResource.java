@@ -48,4 +48,12 @@ public class ClientResource implements ClientApi {
         return ResponseEntity.ok(response);
     }
 
+    @Override
+    public ResponseEntity<ClientResponse> updateClient(Long id, ClientRequest clientRequest) {
+        Client clientUpdates = clientMapper.toDomain(clientRequest);
+        ClientEntity updatedClient = clientService.updateClient(id, clientUpdates.toEntity());
+
+        ClientResponse response = clientMapper.toResponse(updatedClient);
+        return ResponseEntity.ok(response);
+    }
 }
