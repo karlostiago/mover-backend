@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT u FROM UserEntity u WHERE u.email = :email")
@@ -15,7 +14,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT u FROM UserEntity u WHERE u.login = :login")
     List<UserEntity> findByLogin(String login);
 
-    @Query("SELECT u FROM UserEntity u WHERE u.clientId = :clientId AND u.password = :password")
-    List<UserEntity> findByClientIdAndPassword(@Param("clientId") Long clientId, @Param("password") String password);
+    @Query("SELECT u FROM UserEntity u WHERE u.id = :id AND u.password = :password")
+    List<UserEntity> findByClientIdAndPassword(@Param("id") Long id, @Param("password") String password);
 
 }

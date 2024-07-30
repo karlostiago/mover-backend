@@ -19,6 +19,7 @@ public class UserMapper implements MapperToDomain<User, UserRequest>, MapperToRe
         response.setName(entity.getName());
         response.setEmail(entity.getEmail());
         response.setLogin(entity.getLogin());
+        response.setClientId(entity.getClientId());
         return response;
     }
 

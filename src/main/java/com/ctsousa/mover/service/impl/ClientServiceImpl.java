@@ -13,10 +13,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+import static com.ctsousa.mover.core.validation.PasswordValidator.defaultPasswordMover;
 
 @Component
-public class ClientServiceImpl extends AbstractServiceImpl <ClientEntity, Long> implements ClientService {
+public class ClientServiceImpl extends AbstractServiceImpl<ClientEntity, Long> implements ClientService {
 
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
@@ -48,40 +48,57 @@ public class ClientServiceImpl extends AbstractServiceImpl <ClientEntity, Long> 
 
     @Override
     @Transactional
-    public ClientEntity registerClientAndUser(ClientEntity client, UserEntity user) {
-        ClientEntity savedClient = repository.save(client);
-        user.setClientId(savedClient.getId());
+    public ClientEntity registerClient(ClientEntity client, String password) {
+        ClientEntity existingClient = removeExistingClientIfDefaultPassword(client);
 
-        updateOrSaveUser(user);
+        ClientEntity savedClient = clientRepository.save(client);
+        UserEntity user = client.getUser();
+
+        if (user == null) {
+            createUserForClient(savedClient, password);
+        } else {
+            updateUserIfExists(user, existingClient, password);
+        }
+
         return savedClient;
     }
 
-    private void updateOrSaveUser(UserEntity user) {
-        List<UserEntity> usersWithEmail = userRepository.findByEmail(user.getEmail());
-        List<UserEntity> usersWithLogin = userRepository.findByLogin(user.getLogin());
+    private ClientEntity removeExistingClientIfDefaultPassword(ClientEntity client) {
+        ClientEntity existingClient = clientRepository.findByEmail(client.getEmail());
 
-        updateExistingUsers(usersWithEmail, user);
-        updateExistingUsers(usersWithLogin, user);
+        if (existingClient != null && defaultPasswordMover().equals(existingClient.getUser().getPassword())) {
+            clientRepository.delete(existingClient);
+            existingClient = null;
+        }
 
-        if (usersWithEmail.isEmpty() && usersWithLogin.isEmpty()) {
-            userRepository.save(user);
+        return existingClient;
+    }
+
+    private void createUserForClient(ClientEntity savedClient, String password) {
+        String defaultPassword = defaultPasswordMover();
+        UserEntity user = createUserFromClient(savedClient, defaultPassword);
+        user.setPassword(password);
+        savedClient.setUser(user);
+        userRepository.save(user);
+    }
+
+    private void updateUserIfExists(UserEntity user, ClientEntity existingClient, String password) {
+        if (existingClient != null && existingClient.getUser() != null) {
+            user.setId(existingClient.getUser().getId());
+        }
+        if (StringUtils.isNotBlank(password)) {
+            user.setPassword(password);
         }
     }
 
-    private void updateExistingUsers(List<UserEntity> existingUsers, UserEntity userEntity) {
-        existingUsers.stream()
-                .filter(existingUser -> !existingUser.getId().equals(userEntity.getId()))
-                .forEach(existingUser -> {
-                    updateUserDetails(existingUser, userEntity);
-                    userRepository.save(existingUser);
-                });
-    }
+    private UserEntity createUserFromClient(ClientEntity client, String password) {
+        UserEntity user = new UserEntity();
+        user.setName(client.getName());
+        user.setEmail(client.getEmail());
+        user.setLogin(client.getEmail());
+        user.setClientId(client.getId());
+        user.setPassword(password);
 
-    private void updateUserDetails(UserEntity existingUser, UserEntity entity) {
-        existingUser.setLogin(entity.getLogin());
-        existingUser.setName(entity.getName());
-        existingUser.setPassword(entity.getPassword());
-        existingUser.setClientId(entity.getClientId());
+        return user;
     }
 }
-

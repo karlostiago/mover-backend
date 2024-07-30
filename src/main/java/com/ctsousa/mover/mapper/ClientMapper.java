@@ -24,6 +24,9 @@ public class ClientMapper implements MapperToDomain<Client, ClientRequest>, Mapp
     public ClientResponse toResponse(ClientEntity entity) {
         ClientResponse response = new ClientResponse();
         response.setId(entity.getId());
+        response.setRg(entity.getRg());
+        response.setCep(entity.getCep());
+        response.setState(entity.getState());
         response.setName(entity.getName());
         response.setCpf(entity.getCpf());
         response.setEmail(entity.getEmail());

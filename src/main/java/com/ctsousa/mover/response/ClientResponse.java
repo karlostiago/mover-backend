@@ -10,6 +10,12 @@ public class ClientResponse {
 
     private String name;
 
+    private String rg;
+
+    private String state;
+
+    private String cep;
+
     private String cpf;
 
     private String email;
