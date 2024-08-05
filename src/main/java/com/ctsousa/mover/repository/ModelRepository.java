@@ -31,7 +31,7 @@ public interface ModelRepository extends JpaRepository<ModelEntity, Long> {
     boolean existsByNameNotId(@Param("modelName") String modelName, @Param("yearManufacture") Integer yearManufacture,
                          @Param("yearModel") Integer yearModel, @Param("color") String color, @Param("brandName") String brandName, @Param("id") Long id);
 
-    @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand b WHERE m.name = :modelName OR b.name = :brandName OR m.yearManufacture = :yearManufacture OR m.yearModel = :yearModel OR m.color = :color")
+    @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand b WHERE (m.name = :modelName OR b.name = :brandName OR m.color = :color) OR (m.yearModel = :yearModel OR m.yearManufacture = :yearManufacture)")
     List<ModelEntity> findBy(@Param("modelName") String modelName, @Param("yearManufacture") Integer yearManufacture,
                              @Param("yearModel") Integer yearModel, @Param("color") String color, @Param("brandName") String brandName);
 }

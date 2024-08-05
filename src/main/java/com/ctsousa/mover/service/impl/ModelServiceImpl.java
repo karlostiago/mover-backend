@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -58,7 +59,21 @@ public class ModelServiceImpl extends AbstractServiceImpl<ModelEntity, Long> imp
         String modelName = !params[0].isEmpty() ? params[0] : "";
         String color = !params[0].isEmpty() ? params[0] : "";
         Integer yearManufacture = params.length > 1 && !params[1].isEmpty() ? Integer.valueOf(params[1]) : null;
-        Integer yearModel = params.length > 2 && !params[2].isEmpty() ? Integer.valueOf(params[2]) : null;;
-        return modelRepository.findBy(modelName, yearManufacture, yearModel, color, brandName);
+        Integer yearModel = params.length > 2 && !params[2].isEmpty() ? Integer.valueOf(params[2]) : null;
+
+        List<ModelEntity> entities = modelRepository.findBy(modelName, yearManufacture, yearModel, color, brandName);
+        List<ModelEntity> entitiesFiltered = new ArrayList<>(entities.size());
+
+        if (!entities.isEmpty() && yearManufacture != null) {
+            entitiesFiltered = entities.stream().filter(m -> m.getYearManufacture().equals(yearManufacture))
+                    .toList();
+        }
+
+        if (!entities.isEmpty() && yearModel != null) {
+            entitiesFiltered = entities.stream().filter(m -> m.getYearModel().equals(yearModel))
+                    .toList();
+        }
+
+        return entitiesFiltered;
     }
 }
