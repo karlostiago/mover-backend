@@ -33,8 +33,14 @@ public class ModelServiceImpl extends AbstractServiceImpl<ModelEntity, Long> imp
                 .orElseThrow(() -> new NotificationException("Marca não encontrada ao realizar o cadastro de modelo."));
         entity.setBrand(brandEntity);
 
-        if (modelRepository.existsByName(entity.getName(), entity.getYearManufacture(), entity.getYearModel(), entity.getColor(), entity.getBrand().getName())) {
-            throw new NotificationException("Já existe um modelo, com os dados informados.", Severity.WARNING);
+        if (entity.isNew()) {
+            if (modelRepository.existsByName(entity.getName(), entity.getYearManufacture(), entity.getYearModel(), entity.getColor(), entity.getBrand().getName())) {
+                throw new NotificationException("Já existe um modelo, com os dados informados.", Severity.WARNING);
+            }
+        } else if (!entity.isNew()) {
+            if (modelRepository.existsByNameNotId(entity.getName(), entity.getYearManufacture(), entity.getYearModel(), entity.getColor(), entity.getBrand().getName(), entity.getId())) {
+                throw new NotificationException("Não foi possível atualizar, pois já existe um modelo, com os dados informados.", Severity.WARNING);
+            }
         }
 
         return super.save(entity);

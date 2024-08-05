@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 /*
 @SpringBootTest
 @ActiveProfiles("test")
@@ -24,7 +23,7 @@ public class SymbolServiceTest {
 
     @AfterEach
     void after() {
-        symbolRepository.deleteAll();
+//        symbolRepository.deleteAll();
     }
 
     @Test
@@ -86,4 +85,5 @@ public class SymbolServiceTest {
         }
     }
 }
+
  */

@@ -39,11 +39,13 @@ public class Model implements MapperToEntity<ModelEntity> {
 
     public void setYearManufacture(Integer yearManufacture) {
         if (yearManufacture == null || yearManufacture < 0) throw new NotificationException("Ano fabricação inválida.");
+        if (yearManufacture.toString().length() != 4) throw new NotificationException("Ano fabricação inválida.");
         this.yearManufacture = yearManufacture;
     }
 
     public void setYearModel(Integer yearModel) {
         if (yearModel == null || yearModel < 0) throw new NotificationException("Ano do modelo inválida.");
+        if (yearModel.toString().length() != 4) throw new NotificationException("Ano do modelo inválida.");
         this.yearModel = yearModel;
     }
 
