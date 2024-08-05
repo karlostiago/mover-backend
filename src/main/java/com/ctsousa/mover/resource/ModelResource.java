@@ -60,4 +60,10 @@ public class ModelResource implements ModelApi {
         modelService.save(entity);
         return ResponseEntity.ok(modelMapper.toResponse(entity));
     }
+
+    @Override
+    public ResponseEntity<List<ModelResponse>> filterBy(String search) {
+        List<ModelEntity> entities = modelService.findBy(search);
+        return ResponseEntity.ok(modelMapper.toCollections(entities));
+    }
 }

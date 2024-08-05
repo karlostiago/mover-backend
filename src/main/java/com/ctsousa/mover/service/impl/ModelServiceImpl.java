@@ -8,8 +8,11 @@ import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.repository.ModelRepository;
 import com.ctsousa.mover.service.ModelService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class ModelServiceImpl extends AbstractServiceImpl<ModelEntity, Long> implements ModelService {
@@ -35,5 +38,21 @@ public class ModelServiceImpl extends AbstractServiceImpl<ModelEntity, Long> imp
         }
 
         return super.save(entity);
+    }
+
+    @Override
+    public List<ModelEntity> findBy(String paramFilter) {
+        String [] params = paramFilter.trim()
+                .replaceAll("null", "")
+                .split(";");
+
+        if (params.length == 0) return modelRepository.findAll();
+
+        String brandName = !params[0].isEmpty() ? params[0] : "";
+        String modelName = !params[0].isEmpty() ? params[0] : "";
+        String color = !params[0].isEmpty() ? params[0] : "";
+        Integer yearManufacture = params.length > 1 && !params[1].isEmpty() ? Integer.valueOf(params[1]) : null;
+        Integer yearModel = params.length > 2 && !params[2].isEmpty() ? Integer.valueOf(params[2]) : null;;
+        return modelRepository.findBy(modelName, yearManufacture, yearModel, color, brandName);
     }
 }
