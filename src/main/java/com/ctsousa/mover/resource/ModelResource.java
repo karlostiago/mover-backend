@@ -24,6 +24,8 @@ public class ModelResource implements ModelApi {
     public ModelResource(ModelService modelService, ModelMapper modelMapper) {
         this.modelService = modelService;
         this.modelMapper = modelMapper;
+
+        System.out.println("API de Models");
     }
 
     @Override
