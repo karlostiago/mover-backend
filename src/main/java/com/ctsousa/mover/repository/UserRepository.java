@@ -13,7 +13,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     boolean existsUserEntityByLogin(String login);
 
-    @Query("SELECT u FROM UserEntity u WHERE u.id = :id AND u.password = :password")
-    List<UserEntity> findByClientIdAndPassword(@Param("id") Long id, @Param("password") String password);
+    @Query("SELECT u FROM UserEntity u WHERE u.clientId = :clientId AND u.password = :password")
+    List<UserEntity> findByClientIdAndPassword(@Param("clientId") Long clientId, @Param("password") String password);
 
 }
