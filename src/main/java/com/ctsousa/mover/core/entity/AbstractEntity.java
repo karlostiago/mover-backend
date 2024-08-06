@@ -27,6 +27,10 @@ public class AbstractEntity {
         setActive(true);
     }
 
+    public boolean isNew() {
+        return this.id == null || this.id == -1 || this.id == 0;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
