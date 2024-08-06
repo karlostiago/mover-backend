@@ -61,19 +61,35 @@ public class ModelServiceImpl extends AbstractServiceImpl<ModelEntity, Long> imp
         Integer yearManufacture = params.length > 1 && !params[1].isEmpty() ? Integer.valueOf(params[1]) : null;
         Integer yearModel = params.length > 2 && !params[2].isEmpty() ? Integer.valueOf(params[2]) : null;
 
-        List<ModelEntity> entities = modelRepository.findBy(modelName, yearManufacture, yearModel, color, brandName);
-        List<ModelEntity> entitiesFiltered = new ArrayList<>(entities.size());
+        List<ModelEntity> entities = modelRepository.findByColorAndYearModel(yearModel, color);
 
-        if (!entities.isEmpty() && yearManufacture != null) {
-            entitiesFiltered = entities.stream().filter(m -> m.getYearManufacture().equals(yearManufacture))
-                    .toList();
-        }
+        if(entities.isEmpty())
+            entities = modelRepository.findByColorAndYearManufacture(yearManufacture, color);
 
-        if (!entities.isEmpty() && yearModel != null) {
-            entitiesFiltered = entities.stream().filter(m -> m.getYearModel().equals(yearModel))
-                    .toList();
-        }
+        if(entities.isEmpty())
+            entities = modelRepository.findByBrandNameAndYearModel(yearModel, brandName);
 
-        return entitiesFiltered;
+        if(entities.isEmpty())
+            entities = modelRepository.findByBrandNameAndYearManufacture(yearManufacture, brandName);
+
+        if(entities.isEmpty())
+            entities = modelRepository.findByModelNameAndYearModel(yearModel, modelName);
+
+        if(entities.isEmpty())
+            entities = modelRepository.findByModelNameAndYearManufacture(yearManufacture, modelName);
+
+        if(entities.isEmpty() && yearModel != null && yearManufacture != null)
+            entities = modelRepository.findByYearManufactureAndYearModel(yearManufacture, yearModel);
+
+        if(entities.isEmpty() && yearModel != null)
+            entities = modelRepository.findByYearModel(yearModel);
+
+        if(entities.isEmpty() && yearManufacture != null)
+            entities = modelRepository.findByYearManufacture(yearManufacture);
+
+        if(entities.isEmpty())
+            entities = modelRepository.findBy(modelName, color, brandName);
+
+        return entities;
     }
 }
