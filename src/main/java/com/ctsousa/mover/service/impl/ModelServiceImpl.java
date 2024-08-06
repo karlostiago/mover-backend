@@ -8,11 +8,9 @@ import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.repository.ModelRepository;
 import com.ctsousa.mover.service.ModelService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component

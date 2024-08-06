@@ -27,8 +27,8 @@ public class ModelResource implements ModelApi {
     }
 
     @Override
-    public ResponseEntity<ModelResponse> add(ModelRequest requestBody) {
-        Model model = modelMapper.toDomain(requestBody);
+    public ResponseEntity<ModelResponse> add(ModelRequest request) {
+        Model model = modelMapper.toDomain(request);
         ModelEntity entity = modelService.save(model.toEntity());
         ModelResponse response = modelMapper.toResponse(entity);
         return ResponseEntity.ok(response);
