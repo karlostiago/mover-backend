@@ -63,19 +63,19 @@ public class ModelServiceImpl extends AbstractServiceImpl<ModelEntity, Long> imp
 
         List<ModelEntity> entities = modelRepository.findByColorAndYearModel(yearModel, color);
 
-        if(entities.isEmpty())
+        if(entities.isEmpty() && yearManufacture != null)
             entities = modelRepository.findByColorAndYearManufacture(yearManufacture, color);
 
-        if(entities.isEmpty())
+        if(entities.isEmpty() && yearModel != null)
             entities = modelRepository.findByBrandNameAndYearModel(yearModel, brandName);
 
-        if(entities.isEmpty())
+        if(entities.isEmpty() && yearManufacture != null)
             entities = modelRepository.findByBrandNameAndYearManufacture(yearManufacture, brandName);
 
-        if(entities.isEmpty())
+        if(entities.isEmpty() && yearModel != null)
             entities = modelRepository.findByModelNameAndYearModel(yearModel, modelName);
 
-        if(entities.isEmpty())
+        if(entities.isEmpty() && yearManufacture != null)
             entities = modelRepository.findByModelNameAndYearManufacture(yearManufacture, modelName);
 
         if(entities.isEmpty() && yearModel != null && yearManufacture != null)
