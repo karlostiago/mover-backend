@@ -1,8 +1,6 @@
 package com.ctsousa.mover.core.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,4 +25,8 @@ public class ModelEntity extends AbstractEntity {
 
     @Column(name = "year_model", nullable = false)
     private Integer yearModel;
+
+    @JoinColumn(name = "brand_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private BrandEntity brand;
 }

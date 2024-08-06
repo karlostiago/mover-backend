@@ -47,7 +47,7 @@ public class BrandResourceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void shouldReturnAnSuccessWhenFilterByName() throws Exception {
+    void shouldFilterByName() throws Exception {
 
         BrandEntity brand1 = new BrandEntity("Brand1", new SymbolEntity("", ""));
         BrandEntity brand2 = new BrandEntity("Brand2", new SymbolEntity("", ""));
@@ -73,7 +73,7 @@ public class BrandResourceTest {
     }
 
     @Test
-    void shouldReturnAnSuccessWhenFindAll() throws Exception {
+    void shouldFindAll() throws Exception {
 
         BrandEntity brand1 = new BrandEntity("Brand1", new SymbolEntity("", ""));
         BrandEntity brand2 = new BrandEntity("Brand2", new SymbolEntity("", ""));
@@ -98,7 +98,7 @@ public class BrandResourceTest {
     }
 
     @Test
-    void shouldReturnAnSuccessWhenFindById() throws Exception {
+    void shouldFindById() throws Exception {
 
         Long id = 1L;
         BrandEntity brand = new BrandEntity("Brand", new SymbolEntity("Symbol", ""));
@@ -119,7 +119,7 @@ public class BrandResourceTest {
     }
 
     @Test
-    void shouldReturnAnSuccessWhenAdd() throws Exception {
+    void shouldInsert() throws Exception {
         BrandRequest request = new BrandRequest();
         request.setName("Brand");
         request.setActive(true);
@@ -157,7 +157,7 @@ public class BrandResourceTest {
     }
 
     @Test
-    void shouldReturnAnSuccessWheDelete() throws Exception {
+    void shouldDelete() throws Exception {
         Long brandId = 1L;
         Long symbolId = 2L;
 
@@ -179,7 +179,7 @@ public class BrandResourceTest {
     }
 
     @Test
-    void shouldReturnAnSuccessWheUpdate() throws Exception {
+    void shouldUpdate() throws Exception {
         Long id = 1L;
 
         BrandRequest request = new BrandRequest();
@@ -217,7 +217,7 @@ public class BrandResourceTest {
     }
 
     @Test
-    void shouldReturnAnSuccessWheUpload() throws Exception {
+    void shouldUpload() throws Exception {
         String filename = "test-image.png";
         String imageBase64 = "base64string";
         BufferedImage mockImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
