@@ -8,7 +8,7 @@ import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.repository.ModelRepository;
 import com.ctsousa.mover.service.ModelService;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,13 +16,13 @@ import java.util.List;
 @Component
 public class ModelServiceImpl extends AbstractServiceImpl<ModelEntity, Long> implements ModelService {
 
-    private final ModelRepository modelRepository;
+    @Autowired
+    private ModelRepository modelRepository;
 
     private final BrandRepository brandRepository;
 
-    public ModelServiceImpl(JpaRepository<ModelEntity, Long> repository, BrandRepository brandRepository) {
+    public ModelServiceImpl(ModelRepository repository, BrandRepository brandRepository) {
         super(repository);
-        this.modelRepository = (ModelRepository) repository;
         this.brandRepository = brandRepository;
     }
 

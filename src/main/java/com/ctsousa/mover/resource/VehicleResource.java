@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/vechicles")
+//@RestController
+//@RequestMapping("/vechicles")
 public class VehicleResource implements VehicleApi {
 
-    private final VehicleService vehicleService;
-
-    private final VehicleMapper vehicleMapper;
-
-    public VehicleResource(VehicleService vehicleService, VehicleMapper vehicleMapper) {
-        this.vehicleService = vehicleService;
-        this.vehicleMapper = vehicleMapper;
-    }
+//    private final VehicleService vehicleService;
+//
+//    private final VehicleMapper vehicleMapper;
+//
+//    public VehicleResource(VehicleService vehicleService, VehicleMapper vehicleMapper) {
+//        this.vehicleService = vehicleService;
+//        this.vehicleMapper = vehicleMapper;
+//    }
 
     @Override
     public ResponseEntity<VehicleResponse> add(VehicleRequest requestBody) {

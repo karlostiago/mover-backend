@@ -2,12 +2,9 @@ package com.ctsousa.mover.core.service.impl;
 
 import com.ctsousa.mover.core.service.AbstractService;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
-@Component
 public abstract class AbstractServiceImpl<T, ID> implements AbstractService<T, ID> {
 
     protected JpaRepository<T, ID> repository;
