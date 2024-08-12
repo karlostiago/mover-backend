@@ -7,6 +7,7 @@ import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ImageIOService;
+import com.ctsousa.mover.service.SymbolService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,15 +27,29 @@ public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> imp
 
     private final ImageIOService imageIOService;
 
-    public BrandServiceImpl(JpaRepository<BrandEntity, Long> repository, ImageIOService imageIOService) {
+    private final SymbolService symbolService;
+
+    public BrandServiceImpl(JpaRepository<BrandEntity, Long> repository, ImageIOService imageIOService, SymbolService symbolService) {
         super(repository);
         this.brandRepository = (BrandRepository) repository;
         this.imageIOService = imageIOService;
+        this.symbolService = symbolService;
     }
 
     @Override
     public List<BrandEntity> filterByName(String name) {
         return brandRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        try {
+            BrandEntity entity = findById(id);
+            brandRepository.deleteById(entity.getId());
+            symbolService.deleteById(entity.getSymbol().getId());
+        } catch (Exception e) {
+            throw new NotificationException("Não é possível excluir esse registro, pois existem entidades associadas.", Severity.ERROR);
+        }
     }
 
     @Override

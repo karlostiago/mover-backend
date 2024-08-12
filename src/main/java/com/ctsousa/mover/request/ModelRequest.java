@@ -8,9 +8,6 @@ import lombok.Setter;
 public class ModelRequest {
     private Long id;
     private String name;
-    private String color;
-    private Integer yearManufacture;
-    private Integer yearModel;
     private Long brandId;
     private Boolean active;
 

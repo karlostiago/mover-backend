@@ -1,6 +1,5 @@
 package com.ctsousa.mover.resource;
 
-import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.domain.Model;
 import com.ctsousa.mover.mapper.ModelMapper;
@@ -179,9 +178,6 @@ public class ModelResourceTest {
         request.setId(id);
         request.setActive(true);
         request.setName(name);
-        request.setColor("BRANCO");
-        request.setYearModel(2025);
-        request.setYearManufacture(2025);
         request.setBrandId(1L);
         return request;
     }

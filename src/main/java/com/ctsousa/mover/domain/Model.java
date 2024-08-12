@@ -14,9 +14,6 @@ public class Model implements MapperToEntity<ModelEntity> {
 
     private Long id;
     private String name;
-    private String color;
-    private Integer yearManufacture;
-    private Integer yearModel;
     private Boolean active;
     private Brand brand;
 
@@ -26,27 +23,9 @@ public class Model implements MapperToEntity<ModelEntity> {
         this.name = name.toUpperCase();
     }
 
-    public void setColor(String color) {
-        if (StringUtils.isBlank(color)) throw new NotificationException("Informe uma cor.");
-        if (StringUtils.equalsIgnoreCase(color, "undefined")) throw new NotificationException("Informe uma cor.");
-        this.color = color.toUpperCase();
-    }
-
     public void setBrand(Brand brand) {
         if (brand == null || brand.getId() == null) throw new NotificationException("Selecione uma marca.");
         this.brand = brand;
-    }
-
-    public void setYearManufacture(Integer yearManufacture) {
-        if (yearManufacture == null || yearManufacture < 0) throw new NotificationException("Ano fabricação inválida.");
-        if (yearManufacture.toString().length() != 4) throw new NotificationException("Ano fabricação inválida.");
-        this.yearManufacture = yearManufacture;
-    }
-
-    public void setYearModel(Integer yearModel) {
-        if (yearModel == null || yearModel < 0) throw new NotificationException("Ano do modelo inválida.");
-        if (yearModel.toString().length() != 4) throw new NotificationException("Ano do modelo inválida.");
-        this.yearModel = yearModel;
     }
 
     @Override
@@ -54,9 +33,6 @@ public class Model implements MapperToEntity<ModelEntity> {
         ModelEntity entity = new ModelEntity();
         entity.setId(this.getId());
         entity.setName(this.getName());
-        entity.setColor(this.getColor());
-        entity.setYearModel(this.getYearModel());
-        entity.setYearManufacture(this.getYearManufacture());
         entity.setActive(this.getActive());
 
         BrandEntity brandEntity = new BrandEntity();

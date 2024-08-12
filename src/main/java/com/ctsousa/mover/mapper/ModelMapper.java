@@ -19,10 +19,7 @@ public class ModelMapper implements MapperToDomain<Model, ModelRequest>, MapperT
         Model domain  = new Model();
         domain.setId(request.getId());
         domain.setName(request.getName());
-        domain.setColor(request.getColor());
         domain.setActive(request.getActive());
-        domain.setYearModel(request.getYearModel());
-        domain.setYearManufacture(request.getYearManufacture());
 
         Brand brand = new Brand();
         brand.setId(request.getBrandId());
@@ -35,11 +32,8 @@ public class ModelMapper implements MapperToDomain<Model, ModelRequest>, MapperT
         ModelResponse response = new ModelResponse();
         response.setId(entity.getId());
         response.setName(entity.getName().toUpperCase());
-        response.setColor(entity.getColor().toUpperCase());
         response.setBrandId(entity.getBrand().getId());
         response.setBrandName(entity.getBrand().getName());
-        response.setYearManufacture(entity.getYearManufacture());
-        response.setYearModel(entity.getYearModel());
         response.setActive(entity.getActive());
         return response;
     }
