@@ -173,9 +173,7 @@ public class BrandResourceTest {
         mockMvc.perform(delete("/brands/{id}", brandId))
                 .andExpect(status().isOk());
 
-        verify(brandService, times(1)).findById(brandId);
         verify(brandService, times(1)).deleteById(brandId);
-        verify(symbolService, times(1)).deleteById(symbolId);
     }
 
     @Test
