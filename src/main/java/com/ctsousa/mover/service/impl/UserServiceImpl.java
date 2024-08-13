@@ -11,9 +11,8 @@ import com.ctsousa.mover.service.UserService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.Optional;
+
 
 @Component
 public class UserServiceImpl extends AbstractServiceImpl<UserEntity, Long> implements UserService {
@@ -31,6 +30,10 @@ public class UserServiceImpl extends AbstractServiceImpl<UserEntity, Long> imple
     public UserEntity login(String cpf, String password) {
         String formattedCpf = CpfValidator.formatCpf(cpf);
         ClientEntity client = clientRepository.existsCpfRegisteredInApplication(formattedCpf);
+
+        if (client == null) {
+            throw new NotificationException("CPF ou senha inválidos");
+        }
 
         List<UserEntity> userEntities = userRepository.findByClientIdAndPassword(client.getId(),password);
         return userEntities.stream()

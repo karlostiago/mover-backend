@@ -45,14 +45,14 @@ public class CpfValidator {
      */
     public static String formatCpf(String cpf) {
         if (StringUtils.isBlank(cpf)) {
-            throw new NotificationException("CPF não fornecido corretamente");
+            throw new NotificationException("CPF não fornecido corretamente.");
         }
 
         // Remove pontos e traços
         cpf = removeFormatting(cpf);
 
         if (cpf.length() != 11) {
-            throw new NotificationException("CPF deve ter exatamente 11 dígitos.");
+            throw new NotificationException("Formato do CPF incorreto.");
         }
 
         return cpf;
