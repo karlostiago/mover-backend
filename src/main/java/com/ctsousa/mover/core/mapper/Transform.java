@@ -178,7 +178,7 @@ public class Transform {
                     break;
                 }
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.warn(e.getMessage());
             } finally {
                 field.setAccessible(false);
                 targetField.setAccessible(false);
@@ -193,7 +193,6 @@ public class Transform {
             Method method = instance.getClass().getMethod(methodName, value.getClass());
             method.invoke(instance, value);
         } catch (Exception e) {
-            log.error(e.getMessage());
             throw new NotificationException(e.getMessage());
         }
     }
