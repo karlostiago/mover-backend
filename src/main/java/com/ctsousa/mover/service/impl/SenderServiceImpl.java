@@ -2,7 +2,7 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.SenderEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
-import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
+import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.repository.SenderRepository;
 import com.ctsousa.mover.service.SenderService;
 import jakarta.mail.MessagingException;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 @Component
-public class SenderServiceImpl extends AbstractServiceImpl <SenderEntity, Long> implements SenderService  {
+public class SenderServiceImpl extends BaseServiceImpl<SenderEntity, Long> implements SenderService  {
 
     private final SenderRepository senderRepository;
     private final JavaMailSender javaMailSender;

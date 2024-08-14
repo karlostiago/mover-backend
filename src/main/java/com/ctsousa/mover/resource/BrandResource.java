@@ -18,6 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
+import static com.ctsousa.mover.core.mapper.Transform.toCollection;
+import static com.ctsousa.mover.core.mapper.Transform.toMapper;
+
 @RestController
 @RequestMapping("/brands")
 public class BrandResource implements BrandApi {
@@ -37,27 +40,26 @@ public class BrandResource implements BrandApi {
     @Override
     public ResponseEntity<List<BrandResponse>> filterByName(String name) {
         List<BrandEntity> entities = brandService.filterByName(name);
-        return ResponseEntity.ok(brandMapper.toCollections(entities));
+        return ResponseEntity.ok(toCollection(entities, BrandResponse.class));
     }
 
     @Override
     public ResponseEntity<BrandResponse> add(BrandRequest request) {
-        Brand brand = brandMapper.toDomain(request);
+        Brand brand = toMapper(request, Brand.class);
         BrandEntity entity = brandService.save(brand.toEntity());
-        BrandResponse response = brandMapper.toResponse(entity);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(toMapper(entity, BrandResponse.class));
     }
 
     @Override
     public ResponseEntity<List<BrandResponse>> findAll() {
         List<BrandEntity> entities = brandService.findAll();
-        return ResponseEntity.ok(brandMapper.toCollections(entities));
+        return ResponseEntity.ok(toCollection(entities, BrandResponse.class));
     }
 
     @Override
     public ResponseEntity<BrandResponse> findById(Long id) {
         BrandEntity entity = brandService.findById(id);
-        return ResponseEntity.ok(brandMapper.toResponse(entity));
+        return ResponseEntity.ok(toMapper(entity, BrandResponse.class));
     }
 
     @Override
@@ -67,10 +69,9 @@ public class BrandResource implements BrandApi {
 
     @Override
     public ResponseEntity<BrandResponse> update(Long id, BrandRequest request) {
-        brandService.findById(id);
-        Brand domain = brandMapper.toDomain(request);
+        brandService.existsById(id);
+        Brand domain = toMapper(request, Brand.class);
         BrandEntity entity = domain.toEntity();
-        entity.setId(id);
         brandService.save(entity);
         return ResponseEntity.ok(brandMapper.toResponse(entity));
     }

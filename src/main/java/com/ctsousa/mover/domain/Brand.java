@@ -4,8 +4,11 @@ import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter

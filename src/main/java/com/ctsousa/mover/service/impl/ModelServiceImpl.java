@@ -4,7 +4,7 @@ import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
-import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
+import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.repository.ModelRepository;
 import com.ctsousa.mover.service.ModelService;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class ModelServiceImpl extends AbstractServiceImpl<ModelEntity, Long> implements ModelService {
+public class ModelServiceImpl extends BaseServiceImpl<ModelEntity, Long> implements ModelService {
 
     @Autowired
     private ModelRepository modelRepository;

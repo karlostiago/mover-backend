@@ -3,10 +3,9 @@ package com.ctsousa.mover.core.service;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public interface AbstractService<T, ID> {
+public interface BaseService<T, ID> {
 
     T save(T entity);
 
@@ -17,4 +16,6 @@ public interface AbstractService<T, ID> {
     List<T> findAll();
 
     T update(T entity);
+
+    void existsById(ID id);
 }

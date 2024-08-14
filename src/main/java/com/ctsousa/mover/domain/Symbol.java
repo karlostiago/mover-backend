@@ -17,6 +17,8 @@ public class Symbol implements MapperToEntity<SymbolEntity> {
 
     private String imageBase64;
 
+    public Symbol() { }
+
     public Symbol(String description, String imageBase64) {
         setDescription(description);
         setImageBase64(imageBase64);
@@ -24,14 +26,14 @@ public class Symbol implements MapperToEntity<SymbolEntity> {
 
     public void setDescription(String description) {
         if (StringUtils.isBlank(description)) throw new NotificationException("");
-        if (StringUtils.equalsIgnoreCase(description, "undefined")) throw new NotificationException("");
-        this.description = description.replace(",", "")
+        if (StringUtils.equalsIgnoreCase(description, "undefined")) throw new NotificationException("Informe uma descrição para o símbolo.");
+        this.description = description.replace(",", "Informe uma descrição para o símbolo.")
                 .trim().toUpperCase();
     }
 
     public void setImageBase64(String imageBase64) {
-        if (StringUtils.isBlank(imageBase64)) throw new NotificationException("");
-        if (StringUtils.equalsIgnoreCase(imageBase64, "undefined")) throw new NotificationException("");
+        if (StringUtils.isBlank(imageBase64)) throw new NotificationException("Informe uma imagem para o símbolo.");
+        if (StringUtils.equalsIgnoreCase(imageBase64, "undefined")) throw new NotificationException("Informe uma imagem para o símbolo.");
         this.imageBase64 = imageBase64;
     }
 

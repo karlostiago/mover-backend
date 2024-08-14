@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_subcategory")
-public class Subcategory extends AbstractEntity {
+public class SubcategoryEntity extends AbstractEntity {
 
     @Column(name = "description", nullable = false)
     private String description;

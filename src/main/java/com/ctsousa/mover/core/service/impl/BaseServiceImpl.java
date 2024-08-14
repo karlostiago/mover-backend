@@ -1,15 +1,15 @@
 package com.ctsousa.mover.core.service.impl;
 
-import com.ctsousa.mover.core.service.AbstractService;
+import com.ctsousa.mover.core.service.BaseService;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public abstract class AbstractServiceImpl<T, ID> implements AbstractService<T, ID> {
+public abstract class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
 
     protected JpaRepository<T, ID> repository;
 
-    public AbstractServiceImpl(JpaRepository<T, ID> repository) {
+    public BaseServiceImpl(JpaRepository<T, ID> repository) {
         this.repository = repository;
     }
 
@@ -38,5 +38,10 @@ public abstract class AbstractServiceImpl<T, ID> implements AbstractService<T, I
     @Override
     public T update(T entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    public void existsById(ID id) {
+        findById(id);
     }
 }

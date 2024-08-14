@@ -1,13 +1,13 @@
 package com.ctsousa.mover.service;
 
-import com.ctsousa.mover.core.service.AbstractService;
+import com.ctsousa.mover.core.service.BaseService;
 import com.ctsousa.mover.core.entity.BrandEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-public interface BrandService extends AbstractService<BrandEntity, Long> {
+public interface BrandService extends BaseService<BrandEntity, Long> {
 
     BufferedImage upload(MultipartFile file);
 

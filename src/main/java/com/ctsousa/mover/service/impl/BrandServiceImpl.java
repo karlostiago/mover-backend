@@ -3,7 +3,7 @@ package com.ctsousa.mover.service.impl;
 import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
-import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
+import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ImageIOService;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> implements BrandService {
+public class BrandServiceImpl extends BaseServiceImpl<BrandEntity, Long> implements BrandService {
 
     @Autowired
     private BrandRepository brandRepository;
