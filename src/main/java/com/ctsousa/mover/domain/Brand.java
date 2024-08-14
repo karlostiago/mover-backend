@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class Brand implements MapperToEntity<BrandEntity> {
+public class Brand extends DomainModel<BrandEntity> {
     private Long id;
     private String name;
     private Symbol symbol;

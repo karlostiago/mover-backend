@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Getter
 @Setter
-public class Model implements MapperToEntity<ModelEntity> {
+public class Model extends DomainModel<ModelEntity> {
 
     private Long id;
     private String name;

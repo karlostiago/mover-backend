@@ -27,13 +27,10 @@ public class BrandResource implements BrandApi {
 
     private final BrandService brandService;
 
-    private final BrandMapper brandMapper;
-
     private final SymbolService symbolService;
 
-    public BrandResource(BrandService brandService, BrandMapper brandMapper, SymbolService symbolService) {
+    public BrandResource(BrandService brandService, SymbolService symbolService) {
         this.brandService = brandService;
-        this.brandMapper = brandMapper;
         this.symbolService = symbolService;
     }
 
@@ -73,7 +70,7 @@ public class BrandResource implements BrandApi {
         Brand domain = toMapper(request, Brand.class);
         BrandEntity entity = domain.toEntity();
         brandService.save(entity);
-        return ResponseEntity.ok(brandMapper.toResponse(entity));
+        return ResponseEntity.ok(toMapper(entity, BrandResponse.class));
     }
 
     @Override

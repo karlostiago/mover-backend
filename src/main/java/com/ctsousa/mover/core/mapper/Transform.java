@@ -47,19 +47,11 @@ public class Transform {
         for (Field targetField : targetFields) {
             if (contains(ignoreAttrs, targetField.getName())) continue;
 
-            Boolean mapped = directMapping(sourceFields, targetField, source, target);
+            boolean mapped = directMapping(sourceFields, targetField, source, target)
+                    || mapperByAssociation(sourceFields, targetField, source, target)
+                    || mapperByInvertAssociation(sourceFields, targetField, source, target);
 
-            if (!mapped) {
-                mapped = mapperByAssociation(sourceFields, targetField, source, target);
-
-                if (!mapped) {
-                    mapped = mapperByInvertAssociation(sourceFields, targetField, source, target);
-
-                    if (!mapped) {
-                        mapperByComplexAssociation(sourceFields, targetField, source, target);
-                    }
-                }
-            }
+            if (!mapped) mapperByComplexAssociation(sourceFields, targetField, source, target);
         }
 
         return target;
