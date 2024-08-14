@@ -3,12 +3,12 @@ package com.ctsousa.mover.service.impl;
 import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
-import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
+import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ImageIOService;
 import com.ctsousa.mover.service.SymbolService;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,17 +21,17 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class BrandServiceImpl extends AbstractServiceImpl<BrandEntity, Long> implements BrandService {
+public class BrandServiceImpl extends BaseServiceImpl<BrandEntity, Long> implements BrandService {
 
-    private final BrandRepository brandRepository;
+    @Autowired
+    private BrandRepository brandRepository;
 
     private final ImageIOService imageIOService;
 
     private final SymbolService symbolService;
 
-    public BrandServiceImpl(JpaRepository<BrandEntity, Long> repository, ImageIOService imageIOService, SymbolService symbolService) {
+    public BrandServiceImpl(BrandRepository repository, ImageIOService imageIOService, SymbolService symbolService) {
         super(repository);
-        this.brandRepository = (BrandRepository) repository;
         this.imageIOService = imageIOService;
         this.symbolService = symbolService;
     }

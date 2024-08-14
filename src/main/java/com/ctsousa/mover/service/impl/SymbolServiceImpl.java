@@ -2,7 +2,7 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.SymbolEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
-import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
+import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.repository.SymbolRepository;
 import com.ctsousa.mover.service.SymbolService;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class SymbolServiceImpl extends AbstractServiceImpl<SymbolEntity, Long> implements SymbolService {
+public class SymbolServiceImpl extends BaseServiceImpl<SymbolEntity, Long> implements SymbolService {
 
     private final SymbolRepository symbolRepository;
 

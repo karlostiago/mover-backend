@@ -32,12 +32,11 @@ public class Model implements MapperToEntity<ModelEntity> {
     public ModelEntity toEntity() {
         ModelEntity entity = new ModelEntity();
         entity.setId(this.getId());
-        entity.setName(this.getName());
+        entity.setName(this.getName().toUpperCase());
         entity.setActive(this.getActive());
 
         BrandEntity brandEntity = new BrandEntity();
         brandEntity.setId(this.getBrand().getId());
-        brandEntity.setName(this.getBrand().getName());
         entity.setBrand(brandEntity);
         return entity;
     }

@@ -1,8 +1,8 @@
 package com.ctsousa.mover.service;
 
 import com.ctsousa.mover.core.entity.UserEntity;
-import com.ctsousa.mover.core.service.AbstractService;
+import com.ctsousa.mover.core.service.BaseService;
 
-public interface UserService extends AbstractService<UserEntity, Long> {
+public interface UserService extends BaseService<UserEntity, Long> {
    UserEntity login(String cpf, String password);
 }

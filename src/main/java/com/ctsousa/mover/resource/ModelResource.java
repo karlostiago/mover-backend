@@ -3,7 +3,6 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.ModelApi;
 import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.domain.Model;
-import com.ctsousa.mover.mapper.ModelMapper;
 import com.ctsousa.mover.request.ModelRequest;
 import com.ctsousa.mover.response.ModelResponse;
 import com.ctsousa.mover.service.ModelService;
@@ -13,36 +12,35 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.ctsousa.mover.core.mapper.Transform.toCollection;
+import static com.ctsousa.mover.core.mapper.Transform.toMapper;
+
 @RestController
 @RequestMapping("/models")
 public class ModelResource implements ModelApi {
 
     private final ModelService modelService;
 
-    private final ModelMapper modelMapper;
-
-    public ModelResource(ModelService modelService, ModelMapper modelMapper) {
+    public ModelResource(ModelService modelService) {
         this.modelService = modelService;
-        this.modelMapper = modelMapper;
     }
 
     @Override
     public ResponseEntity<ModelResponse> add(ModelRequest request) {
-        Model model = modelMapper.toDomain(request);
+        Model model = toMapper(request, Model.class);
         ModelEntity entity = modelService.save(model.toEntity());
-        ModelResponse response = modelMapper.toResponse(entity);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(toMapper(entity, ModelResponse.class));
     }
 
     @Override
     public ResponseEntity<List<ModelResponse>> findAll() {
-        return ResponseEntity.ok(modelMapper.toCollections(modelService.findAll()));
+        return ResponseEntity.ok(toCollection(modelService.findAll(), ModelResponse.class));
     }
 
     @Override
     public ResponseEntity<ModelResponse> findById(Long id) {
         ModelEntity entity = modelService.findById(id);
-        return ResponseEntity.ok(modelMapper.toResponse(entity));
+        return ResponseEntity.ok(toMapper(entity, ModelResponse.class));
     }
 
     @Override
@@ -53,17 +51,16 @@ public class ModelResource implements ModelApi {
 
     @Override
     public ResponseEntity<ModelResponse> update(Long id, ModelRequest requestBody) {
-        modelService.findById(id);
-        Model domain = modelMapper.toDomain(requestBody);
+        modelService.existsById(id);
+        Model domain = toMapper(requestBody, Model.class);
         ModelEntity entity = domain.toEntity();
-        entity.setId(id);
         modelService.save(entity);
-        return ResponseEntity.ok(modelMapper.toResponse(entity));
+        return ResponseEntity.ok(toMapper(entity, ModelResponse.class));
     }
 
     @Override
     public ResponseEntity<List<ModelResponse>> filterBy(String search) {
         List<ModelEntity> entities = modelService.findBy(search);
-        return ResponseEntity.ok(modelMapper.toCollections(entities));
+        return ResponseEntity.ok(toCollection(entities, ModelResponse.class));
     }
 }

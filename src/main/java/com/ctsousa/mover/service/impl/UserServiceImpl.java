@@ -3,7 +3,7 @@ package com.ctsousa.mover.service.impl;
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
-import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
+import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.UserRepository;
@@ -13,9 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
-
 @Component
-public class UserServiceImpl extends AbstractServiceImpl<UserEntity, Long> implements UserService {
+public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implements UserService {
     private final UserRepository userRepository;
     private final ClientRepository clientRepository;
 

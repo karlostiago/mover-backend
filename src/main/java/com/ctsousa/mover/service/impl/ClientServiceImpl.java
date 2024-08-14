@@ -4,7 +4,7 @@ import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.notification.NotificationNotFoundException;
-import com.ctsousa.mover.core.service.impl.AbstractServiceImpl;
+import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.UserRepository;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class ClientServiceImpl extends AbstractServiceImpl<ClientEntity, Long> implements ClientService {
+public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> implements ClientService {
 
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
