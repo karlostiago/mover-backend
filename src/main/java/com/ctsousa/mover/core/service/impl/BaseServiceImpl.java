@@ -1,5 +1,6 @@
 package com.ctsousa.mover.core.service.impl;
 
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.BaseService;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -27,7 +28,7 @@ public abstract class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
     @Override
     public T findById(ID id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Id solicitado nao encontrado."));
+                .orElseThrow(() -> new NotificationException("Id solicitado nao encontrado."));
     }
 
     @Override
