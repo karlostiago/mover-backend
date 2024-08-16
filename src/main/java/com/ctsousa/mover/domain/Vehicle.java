@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -43,8 +44,10 @@ public class Vehicle extends DomainModel<VehicleEntity> {
         entity.setMileageAtAcquisition(this.getMileageAtAcquisition());
         entity.setAuction(this.getAuction());
         entity.setFipeDepreciation(this.getFipeDepreciation());
-        entity.setColor(this.getColor());
-        entity.setSituation(Situation.toCode(this.getCodeSituation()));
+        entity.setColor(this.getColor().toUpperCase());
+
+        Situation situation = Situation.toCode(codeSituation);
+        entity.setSituation(situation.getDescription());
         return entity;
     }
 }

@@ -13,13 +13,10 @@ public class Error {
     private String message;
 
     @Setter
-    private Throwable details;
+    private Integer code;
 
     @Setter
     private HttpStatus status;
-
-    @Setter
-    private Integer code;
 
     @Setter
     private String severity;
@@ -27,4 +24,7 @@ public class Error {
     private final LocalDate date = LocalDate.now();
 
     private final LocalTime time = LocalTime.now();
+
+    @Setter
+    private Throwable details;
 }

@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -62,7 +63,11 @@ public class VehicleEntity extends AbstractEntity {
     @Column(name = "color", nullable = false)
     private String color;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "situation", nullable = false)
-    private Situation situation;
+    private String situation;
+
+    public void setSituation(String situation) {
+        this.situation = Objects.requireNonNull(Situation.toDescription(situation))
+                .getDescription();
+    }
 }

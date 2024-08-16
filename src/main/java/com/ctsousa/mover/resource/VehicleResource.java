@@ -1,25 +1,21 @@
 package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.api.VehicleApi;
-import com.ctsousa.mover.core.entity.BrandEntity;
-import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.core.entity.VehicleEntity;
-import com.ctsousa.mover.core.mapper.Transform;
 import com.ctsousa.mover.domain.Vehicle;
 import com.ctsousa.mover.request.VehicleRequest;
 import com.ctsousa.mover.response.VehicleResponse;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ModelService;
 import com.ctsousa.mover.service.VehicleService;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
+import static com.ctsousa.mover.core.mapper.Transform.toCollection;
+import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
 @RequestMapping("/vehicles")
@@ -37,31 +33,53 @@ public class VehicleResource implements VehicleApi {
 
     @Override
     public ResponseEntity<VehicleResponse> add(VehicleRequest request) {
-        Vehicle domain = Transform.toMapper(request, Vehicle.class);
+        Vehicle domain = toMapper(request, Vehicle.class);
         VehicleEntity entity = domain.toEntity();
         entity.setBrand(brandService.findById(domain.getBrand().getId()));
         entity.setModel(modelService.findById(domain.getModel().getId()));
         entity = vehicleService.save(entity);
-        return null;
+        return ResponseEntity.ok(toMapper(entity, VehicleResponse.class));
     }
 
     @Override
     public ResponseEntity<List<VehicleResponse>> findAll() {
-        return null;
+        List<VehicleEntity> entyties = vehicleService.findAll();
+        return ResponseEntity.ok(toCollection(entyties, VehicleResponse.class));
     }
 
     @Override
     public ResponseEntity<VehicleResponse> findById(Long id) {
-        return null;
+        VehicleEntity entity = vehicleService.findById(id);
+        return ResponseEntity.ok(toMapper(entity, VehicleResponse.class));
     }
 
     @Override
     public void delete(Long id) {
-
+        VehicleEntity entity = vehicleService.findById(id);
+        vehicleService.deleteById(entity.getId());
     }
 
     @Override
-    public ResponseEntity<VehicleResponse> update(Long id, VehicleRequest requestBody) {
-        return null;
+    public ResponseEntity<VehicleResponse> update(Long id, VehicleRequest request) {
+        vehicleService.existsById(id);
+        Vehicle domain = toMapper(request, Vehicle.class);
+        VehicleEntity entity = domain.toEntity();
+        entity.setId(id);
+        entity.setBrand(brandService.findById(domain.getBrand().getId()));
+        entity.setModel(modelService.findById(domain.getModel().getId()));
+        vehicleService.save(entity);
+        return ResponseEntity.ok(toMapper(entity, VehicleResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<VehicleResponse> findByLicensePlate(String licensePlate) {
+        VehicleEntity entity = vehicleService.findByLicensePlate(licensePlate);
+        return ResponseEntity.ok(toMapper(entity, VehicleResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<VehicleResponse> findByRenavam(String renavam) {
+        VehicleEntity entity = vehicleService.findByRenavam(renavam);
+        return ResponseEntity.ok(toMapper(entity, VehicleResponse.class));
     }
 }

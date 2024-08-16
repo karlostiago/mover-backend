@@ -16,6 +16,7 @@ public class Transform {
     private Transform() { }
 
     public static <S, T> T toMapper(S source, Class<T> targetClass, String ... ignoreAttrs) {
+        if (source == null) return null;
         try {
             Constructor<T> constructor = findMatchingConstructor(targetClass, source);
             T target = constructor.newInstance(extractConstructorArguments(source, constructor, ignoreAttrs));
@@ -91,7 +92,11 @@ public class Transform {
         for (Field field : sourceFields) {
             try {
                 if (nestedInstance == null) {
-                    nestedInstance = targetField.getType().getDeclaredConstructor().newInstance();
+                    if (!isPrimitive(targetField.getType())) {
+                        nestedInstance = targetField.getType().getDeclaredConstructor().newInstance();
+                    } else {
+                        nestedInstance = targetField.getType();
+                    }
                 }
 
                 if (field.getName().startsWith(targetField.getName()) && isComplexObject(targetField)) {
@@ -252,5 +257,14 @@ public class Transform {
 
     private static boolean isComplexObject(Field field) {
         return !field.getType().isPrimitive() && !field.getType().equals(String.class);
+    }
+
+    private static boolean isPrimitive(Object object) {
+        String [] types = { "string", "long", "integer", "byte", "float", "short", "boolean", "character" };
+        String clazz = object.toString().toLowerCase();
+        for (String type : types) {
+            if (clazz.contains(type)) return true;
+        }
+        return false;
     }
 }
