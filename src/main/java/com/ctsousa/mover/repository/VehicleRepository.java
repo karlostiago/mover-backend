@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,11 +23,8 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
     @Query("SELECT v FROM VehicleEntity v JOIN FETCH v.brand JOIN FETCH v.model WHERE 1 = 1")
     List<VehicleEntity> findAll();
 
-    @Query("SELECT v FROM VehicleEntity v JOIN FETCH v.brand JOIN FETCH v.model WHERE v.licensePlate = :licensePlate")
-    VehicleEntity findBylicensePlate(@Param("licensePlate") String licensePlate);
-
-    @Query("SELECT v FROM VehicleEntity v JOIN FETCH v.brand JOIN FETCH v.model WHERE v.renavam = :renavam")
-    VehicleEntity findByRenavam(@Param("renavam") String renavam);
+    @Query("SELECT v FROM VehicleEntity v JOIN FETCH v.brand JOIN FETCH v.model WHERE v.licensePlate LIKE %:licensePlate% OR v.renavam LIKE %:renavam%")
+    List<VehicleEntity> findBy(@Param("licensePlate") String licensePlate, @Param("renavam") String renavam);
 
     @Query("SELECT CASE WHEN COUNT(v.id) > 0 THEN TRUE ELSE FALSE END FROM VehicleEntity v WHERE v.licensePlate = :licensePlate")
     boolean existsByLicensePlate(@Param("licensePlate") String licensePlate);

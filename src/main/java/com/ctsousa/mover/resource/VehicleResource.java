@@ -72,14 +72,8 @@ public class VehicleResource implements VehicleApi {
     }
 
     @Override
-    public ResponseEntity<VehicleResponse> findByLicensePlate(String licensePlate) {
-        VehicleEntity entity = vehicleService.findByLicensePlate(licensePlate);
-        return ResponseEntity.ok(toMapper(entity, VehicleResponse.class));
-    }
-
-    @Override
-    public ResponseEntity<VehicleResponse> findByRenavam(String renavam) {
-        VehicleEntity entity = vehicleService.findByRenavam(renavam);
-        return ResponseEntity.ok(toMapper(entity, VehicleResponse.class));
+    public ResponseEntity<List<VehicleResponse>> findBy(String search) {
+        List<VehicleEntity> entities = vehicleService.findBy(search);
+        return ResponseEntity.ok(toCollection(entities, VehicleResponse.class));
     }
 }

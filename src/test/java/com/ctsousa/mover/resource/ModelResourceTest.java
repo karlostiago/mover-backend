@@ -17,6 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.ctsousa.mover.core.mapper.Transform.toCollection;
+import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -43,14 +45,12 @@ public class ModelResourceTest {
         ModelRequest request1 = getRequest(1L, "FASTBACK");
         ModelRequest request2 = getRequest(2L, "MOBI LIKE");
 
-        Model domain1 = new ModelMapper().toDomain(request1);
-        Model domain2 = new ModelMapper().toDomain(request2);
+        Model domain1 = toMapper(request1, Model.class);
+        Model domain2 = toMapper(request2, Model.class);
 
-        List<ModelEntity> entities = Arrays.asList(domain1.toEntity(), domain2.toEntity());
-        List<ModelResponse> response = new ModelMapper().toCollections(entities);
+        List<ModelEntity> entities = List.of(domain1.toEntity(), domain2.toEntity());
 
         when(modelService.findAll()).thenReturn(entities);
-        when(modelMapper.toCollections(entities)).thenReturn(response);
 
         mockMvc.perform(get("/models")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -59,7 +59,6 @@ public class ModelResourceTest {
                 .andExpect(jsonPath("$[1].name").value("MOBI LIKE".toUpperCase()));
 
         verify(modelService, times(1)).findAll();
-        verify(modelMapper, times(1)).toCollections(entities);
     }
 
     @Test
@@ -67,12 +66,10 @@ public class ModelResourceTest {
         ModelRequest request = getRequest(1L, "FASTBACK");
         Model domain = new ModelMapper().toDomain(request);
         ModelEntity entity = domain.toEntity();
-        ModelResponse response = new ModelMapper().toResponse(entity);
 
         Long id = 1L;
 
         when(modelService.findById(id)).thenReturn(entity);
-        when(modelMapper.toResponse(entity)).thenReturn(response);
 
         mockMvc.perform(get("/models/{id}", id))
                 .andExpect(status().isOk())
@@ -80,7 +77,6 @@ public class ModelResourceTest {
                 .andExpect(jsonPath("$.name").value("FASTBACK".toUpperCase()));
 
         verify(modelService, times(1)).findById(id);
-        verify(modelMapper, times(1)).toResponse(entity);
     }
 
     @Test
@@ -88,7 +84,7 @@ public class ModelResourceTest {
         Long id = 1L;
 
         ModelRequest request = getRequest(1L, "FASTBACK");
-        Model domain = new ModelMapper().toDomain(request);
+        Model domain = toMapper(request, Model.class);
 
         when(modelService.findById(id)).thenReturn(domain.toEntity());
         doNothing().when(modelService).deleteById(id);
@@ -105,11 +101,11 @@ public class ModelResourceTest {
         ModelRequest request1 = getRequest(1L, "FASTBACK");
         ModelRequest request2 = getRequest(2L, "MOBI LIKE");
 
-        Model domain1 = new ModelMapper().toDomain(request1);
-        Model domain2 = new ModelMapper().toDomain(request2);
+        Model domain1 = toMapper(request1, Model.class);
+        Model domain2 = toMapper(request2, Model.class);
 
         List<ModelEntity> entities = Arrays.asList(domain1.toEntity(), domain2.toEntity());
-        List<ModelResponse> response = new ModelMapper().toCollections(entities);
+        List<ModelResponse> response = toCollection(entities, ModelResponse.class);
 
         String params = "";
 
@@ -123,20 +119,17 @@ public class ModelResourceTest {
                 .andExpect(jsonPath("$[1].name").value("MOBI LIKE".toUpperCase()));
 
         verify(modelService, times(1)).findBy(params);
-        verify(modelMapper, times(1)).toCollections(entities);
     }
 
     @Test
     void shouldUpdate() throws Exception {
         Long id = 1L;
         ModelRequest request = getRequest(1L, "FASTBACK");
-        Model domain = new ModelMapper().toDomain(request);
+        Model domain = toMapper(request, Model.class);
         ModelEntity entity = domain.toEntity();
 
         when(modelService.findById(id)).thenReturn(entity);
-        when(modelMapper.toDomain(refEq(request))).thenReturn(domain);
-        when(modelMapper.toResponse(entity)).thenReturn(new ModelMapper().toResponse(entity));
-        when(modelService.save(entity)).thenReturn(entity);
+        when(modelService.save(any(ModelEntity.class))).thenReturn(entity);
 
         mockMvc.perform(put("/models/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -144,22 +137,17 @@ public class ModelResourceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id));
 
-        verify(modelService, times(1)).findById(id);
+        verify(modelService, times(1)).existsById(id);
         verify(modelService, times(1)).save(entity);
-        verify(modelMapper, times(1)).toDomain(refEq(request));
-        verify(modelMapper, times(1)).toResponse(entity);
     }
 
     @Test
     void shouldInsert() throws Exception {
         ModelRequest request = getRequest(1L, "FASTBACK");
-        Model domain = new ModelMapper().toDomain(request);
+        Model domain = toMapper(request, Model.class);
         ModelEntity entity = domain.toEntity();
-        ModelResponse response = new ModelMapper().toResponse(entity);
 
-        when(modelMapper.toDomain(refEq(request))).thenReturn(domain);
         when(modelService.save(any(ModelEntity.class))).thenReturn(entity);
-        when(modelMapper.toResponse(refEq(entity))).thenReturn(response);
 
         mockMvc.perform(post("/models")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -169,8 +157,6 @@ public class ModelResourceTest {
                 .andExpect(jsonPath("$.name").value("FASTBACK"));
 
         verify(modelService, times(1)).save(entity);
-        verify(modelMapper, times(1)).toDomain(refEq(request));
-        verify(modelMapper, times(1)).toResponse(entity);
     }
 
     private ModelRequest getRequest(Long id, String name) {

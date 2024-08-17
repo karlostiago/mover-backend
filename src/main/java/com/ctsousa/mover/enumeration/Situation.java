@@ -6,9 +6,9 @@ import lombok.Getter;
 @Getter
 public enum Situation {
 
-    IN_PROGRESS(1,"Em Progresso"),
-    UNDER_ANALYSIS(2,"Em Analise"),
-    FLEET(3,"Frota");
+    IN_PROGRESS(1,"EM PROGRESSO"),
+    UNDER_ANALYSIS(2,"EM ANALIE"),
+    IN_FLEET(3,"EM FROTA");
 
     private final Integer code;
     private final String description;

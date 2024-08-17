@@ -4,9 +4,7 @@ import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.entity.SymbolEntity;
 import com.ctsousa.mover.domain.Brand;
 import com.ctsousa.mover.domain.Symbol;
-import com.ctsousa.mover.mapper.BrandMapper;
 import com.ctsousa.mover.request.BrandRequest;
-import com.ctsousa.mover.response.BrandResponse;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.SymbolService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,9 +36,6 @@ public class BrandResourceTest {
     private BrandService brandService;
 
     @MockBean
-    private BrandMapper brandMapper;
-
-    @MockBean
     private SymbolService symbolService;
 
     @Autowired
@@ -53,23 +48,16 @@ public class BrandResourceTest {
         BrandEntity brand2 = new BrandEntity("Brand2", new SymbolEntity("", ""));
         List<BrandEntity> brands = Arrays.asList(brand1, brand2);
 
-        BrandResponse response1 = new BrandMapper().toResponse(brand1);
-        BrandResponse response2 = new BrandMapper().toResponse(brand2);
-
-        List<BrandResponse> responses = Arrays.asList(response1, response2);
-
         when(brandService.filterByName("Brand")).thenReturn(brands);
-        when(brandMapper.toCollections(brands)).thenReturn(responses);
 
         mockMvc.perform(get("/brands/filterBy")
                         .param("name", "Brand")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Brand1".toUpperCase()))
-                .andExpect(jsonPath("$[1].name").value("Brand2".toUpperCase()));
+                .andExpect(jsonPath("$[0].name").value("Brand1"))
+                .andExpect(jsonPath("$[1].name").value("Brand2"));
 
         verify(brandService, times(1)).filterByName("Brand");
-        verify(brandMapper, times(1)).toCollections(brands);
     }
 
     @Test
@@ -79,22 +67,15 @@ public class BrandResourceTest {
         BrandEntity brand2 = new BrandEntity("Brand2", new SymbolEntity("", ""));
         List<BrandEntity> brands = Arrays.asList(brand1, brand2);
 
-        BrandResponse response1 = new BrandMapper().toResponse(brand1);
-        BrandResponse response2 = new BrandMapper().toResponse(brand2);
-
-        List<BrandResponse> responses = Arrays.asList(response1, response2);
-
         when(brandService.findAll()).thenReturn(brands);
-        when(brandMapper.toCollections(brands)).thenReturn(responses);
 
         mockMvc.perform(get("/brands")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Brand1".toUpperCase()))
-                .andExpect(jsonPath("$[1].name").value("Brand2".toUpperCase()));
+                .andExpect(jsonPath("$[0].name").value("Brand1"))
+                .andExpect(jsonPath("$[1].name").value("Brand2"));
 
         verify(brandService, times(1)).findAll();
-        verify(brandMapper, times(1)).toCollections(brands);
     }
 
     @Test
@@ -104,18 +85,14 @@ public class BrandResourceTest {
         BrandEntity brand = new BrandEntity("Brand", new SymbolEntity("Symbol", ""));
         brand.setId(id);
 
-        BrandResponse response = new BrandMapper().toResponse(brand);
-
         when(brandService.findById(id)).thenReturn(brand);
-        when(brandMapper.toResponse(brand)).thenReturn(response);
 
         mockMvc.perform(get("/brands/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value("Brand".toUpperCase()));
+                .andExpect(jsonPath("$.name").value("Brand"));
 
         verify(brandService, times(1)).findById(id);
-        verify(brandMapper, times(1)).toResponse(brand);
     }
 
     @Test
@@ -124,36 +101,25 @@ public class BrandResourceTest {
         request.setName("Brand");
         request.setActive(true);
 
-        Brand brand = new Brand();
-        brand.setId(1L);
-        brand.setName("Brand");
-
-        var symbol = new Symbol("Symbol", "das54d5457===");
-        symbol.setId(1L);
+        Brand brand = getBrand();
+        Symbol symbol = getSymbol();
 
         brand.setSymbol(symbol);
+        request.setSymbol(symbol);
 
         BrandEntity entity = brand.toEntity();
         entity.setSymbol(symbol.toEntity());
 
-        BrandResponse response = new BrandResponse();
-        response.setId(1L);
-        response.setName("Brand");
-
-        when(brandMapper.toDomain(refEq(request))).thenReturn(brand);
         when(brandService.save(any(BrandEntity.class))).thenReturn(entity);
-        when(brandMapper.toResponse(refEq(entity))).thenReturn(response);
 
         mockMvc.perform(post("/brands")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Brand"));
+                .andExpect(jsonPath("$.name").value("BRAND"));
 
-        verify(brandMapper, times(1)).toDomain(refEq(request));
         verify(brandService, times(1)).save(any(BrandEntity.class));
-        verify(brandMapper, times(1)).toResponse(refEq(entity));
     }
 
     @Test
@@ -181,26 +147,21 @@ public class BrandResourceTest {
         Long id = 1L;
 
         BrandRequest request = new BrandRequest();
+        request.setId(id);
         request.setName("Brand");
         request.setActive(true);
 
-        Brand brand = new Brand();
-        brand.setId(1L);
-        brand.setName("Brand");
-
-        var symbol = new Symbol("Symbol", "das54d5457===");
-        symbol.setId(1L);
+        Brand brand = getBrand();
+        Symbol symbol = getSymbol();
 
         brand.setSymbol(symbol);
+        request.setSymbol(symbol);
 
         BrandEntity entity = brand.toEntity();
         entity.setSymbol(symbol.toEntity());
 
-        when(brandMapper.toDomain(refEq(request))).thenReturn(brand);
-        when(brandMapper.toResponse(entity)).thenReturn(new BrandMapper().toResponse(entity));
-
         when(brandService.findById(id)).thenReturn(entity);
-        when(brandService.save(entity)).thenReturn(entity);
+        when(brandService.save(any(BrandEntity.class))).thenReturn(entity);
 
         mockMvc.perform(put("/brands/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -208,10 +169,8 @@ public class BrandResourceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id));
 
-        verify(brandService, times(1)).findById(id);
+        verify(brandService, times(1)).existsById(id);
         verify(brandService, times(1)).save(entity);
-        verify(brandMapper, times(1)).toDomain(refEq(request));
-        verify(brandMapper, times(1)).toResponse(entity);
     }
 
     @Test
@@ -231,5 +190,19 @@ public class BrandResourceTest {
                 .andExpect(status().isOk());
 
         verify(brandService, times(1)).upload(file);
+    }
+
+    private Brand getBrand() {
+        Brand brand = new Brand();
+        brand.setId(1L);
+        brand.setName("Brand");
+        brand.setActive(true);
+        return brand;
+    }
+
+    private Symbol getSymbol() {
+        Symbol symbol = new Symbol("Symbol", "das54d5457===");
+        symbol.setId(1L);
+        return symbol;
     }
 }

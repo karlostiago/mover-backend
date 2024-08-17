@@ -29,6 +29,6 @@ public interface ModelRepository extends JpaRepository<ModelEntity, Long> {
     @Query("SELECT CASE WHEN COUNT(m.id) > 0 THEN TRUE ELSE FALSE END FROM ModelEntity m INNER JOIN m.brand b WHERE m.name = :modelName AND b.name = :brandName AND m.id NOT IN(:id)")
     boolean existsByNameAndBrandNameNotId(@Param("modelName") String modelName, @Param("brandName") String brandName, @Param("id") Long id);
 
-    @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand b WHERE m.name LIKE :name OR b.name LIKE :name")
+    @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand b WHERE m.name LIKE %:name% OR b.name LIKE %:name%")
     List<ModelEntity> findBy(@Param("name") String name);
 }

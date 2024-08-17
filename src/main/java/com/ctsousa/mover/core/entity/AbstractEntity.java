@@ -30,7 +30,7 @@ public class AbstractEntity {
     }
 
     public boolean isNew() {
-        return this.id == null || this.id == -1 || this.id == 0;
+        return this.id == null || this.id <= 0;
     }
 
     @Override

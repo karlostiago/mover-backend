@@ -9,6 +9,8 @@ import com.ctsousa.mover.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class VehicleServiceImpl extends BaseServiceImpl<VehicleEntity, Long> implements VehicleService {
 
@@ -37,12 +39,7 @@ public class VehicleServiceImpl extends BaseServiceImpl<VehicleEntity, Long> imp
     }
 
     @Override
-    public VehicleEntity findByLicensePlate(String licensePlate) {
-        return repository.findBylicensePlate(licensePlate);
-    }
-
-    @Override
-    public VehicleEntity findByRenavam(String renavam) {
-        return repository.findByRenavam(renavam);
+    public List<VehicleEntity> findBy(String search) {
+        return repository.findBy(search, search);
     }
 }

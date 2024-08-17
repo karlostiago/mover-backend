@@ -22,6 +22,6 @@ public class HealthCheckResourceTest {
     public void shouldReturnStatusOk() throws Exception {
         mockMvc.perform(get("/health"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("API está rodando!"));
+                .andExpect(content().string("{\"running\":true}"));
     }
 }

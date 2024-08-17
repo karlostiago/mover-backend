@@ -9,22 +9,13 @@ import java.time.LocalDate;
 @Setter
 public class ClientRequest {
     private Long id;
-
     private String name;
-
     private String cpf;
-
     private String rg;
-
     private String email;
-
     private String number;
-
     private String state;
-
     private String cep;
-
     private LocalDate birthDate;
-
     private UserRequest user;
 }

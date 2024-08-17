@@ -146,7 +146,7 @@ public class TransformTest {
 
         var result = Transform.toMapper(entity, VehicleResponse.class);
 
-        Assertions.assertEquals(Situation.FLEET.getDescription(), result.getSituation());
+        Assertions.assertEquals(Situation.IN_FLEET.getDescription(), result.getSituation());
     }
 
     private VehicleEntity getVehicleEntity() {
@@ -165,7 +165,7 @@ public class TransformTest {
         entity.setAuction(false);
         entity.setFipeDepreciation(new BigDecimal("5000"));
         entity.setColor("Prata");
-        entity.setSituation(Situation.FLEET.getDescription());
+        entity.setSituation(Situation.IN_FLEET.getDescription());
         return entity;
     }
 

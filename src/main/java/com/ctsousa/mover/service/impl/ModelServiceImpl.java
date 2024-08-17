@@ -49,6 +49,6 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelEntity, Long> impleme
     public List<ModelEntity> findBy(String paramFilter) {
         if (paramFilter == null || paramFilter.trim().isEmpty()) return modelRepository.findAll();
 
-        return modelRepository.findBy("%" + paramFilter.toUpperCase() + "%");
+        return modelRepository.findBy(paramFilter.toUpperCase());
     }
 }
