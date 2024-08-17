@@ -9,12 +9,8 @@ import java.time.LocalDateTime;
 @Setter
 public class SenderResponse {
     private Long id;
-
     private Long clientId;
-
     private String email;
-
     private String code;
-
     private LocalDateTime expiryDate;
 }

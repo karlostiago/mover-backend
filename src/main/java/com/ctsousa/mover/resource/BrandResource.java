@@ -5,7 +5,6 @@ import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.entity.SymbolEntity;
 import com.ctsousa.mover.domain.Brand;
 import com.ctsousa.mover.domain.Symbol;
-import com.ctsousa.mover.mapper.BrandMapper;
 import com.ctsousa.mover.request.BrandRequest;
 import com.ctsousa.mover.response.BrandResponse;
 import com.ctsousa.mover.service.BrandService;
