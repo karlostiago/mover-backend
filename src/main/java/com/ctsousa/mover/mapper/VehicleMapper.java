@@ -9,6 +9,11 @@ import com.ctsousa.mover.response.VehicleResponse;
 
 import java.util.List;
 
+/**
+ * Essa classe esta depreciada, utilizar a classe de mapeamento com.ctsousa.mover.core.mapper.Transform,
+ * Na classe VehicleResource tem exemplos de como utilizar.
+ */
+@Deprecated
 public class VehicleMapper implements MapperToDomain<Vehicle, VehicleRequest>, MapperToResponse<VehicleResponse, VehicleEntity> {
 
     @Override

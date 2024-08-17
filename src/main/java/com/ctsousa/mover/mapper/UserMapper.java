@@ -9,6 +9,11 @@ import com.ctsousa.mover.response.UserResponse;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
+/**
+ * Essa classe esta depreciada, utilizar a classe de mapeamento com.ctsousa.mover.core.mapper.Transform,
+ * Na classe VehicleResource tem exemplos de como utilizar.
+ */
+@Deprecated
 @Component
 public class UserMapper implements MapperToDomain<User, UserRequest>, MapperToResponse<UserResponse, UserEntity> {
 
