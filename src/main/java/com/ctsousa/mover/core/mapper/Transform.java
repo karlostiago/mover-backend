@@ -10,6 +10,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Essa é uma classe de mapeamento simples, que permite copiar o valor de um objeto para outro,
+ * bastanto que o nome dos atributos entre os objetos sejam identicos ou tenha o prefixo.
+ * por exemplo:
+ *  class Brand {
+ *      private String codigo
+ *  },
+ *  class ModelResponse {
+ *      private String brandCodigo
+ *  }.
+ *  No exemplo acima o valor do atributo codigo da classe Brand sera atribuido a classe ModelResponse pois nela tem
+ *  uma atributo prefixado como brandCodigo. Dessa forma o Transform consegue identificar o valor e transferir.
+ */
 @Slf4j
 public class Transform {
 
