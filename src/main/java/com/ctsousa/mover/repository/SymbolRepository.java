@@ -18,6 +18,6 @@ public interface SymbolRepository extends JpaRepository<SymbolEntity, Long> {
 
     @NonNull
     @Override
-    @Query("SELECT s FROM SymbolEntity s WHERE s.id NOT IN (SELECT b.symbol.id FROM BrandEntity b) ORDER BY s.id ")
+    @Query("SELECT s FROM SymbolEntity s WHERE s.id NOT IN (SELECT b.symbol.id FROM BrandEntity b) ORDER BY s.description ")
     List<SymbolEntity> findAll();
 }
