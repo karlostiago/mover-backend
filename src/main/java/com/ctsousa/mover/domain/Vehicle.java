@@ -27,14 +27,14 @@ public class Vehicle extends DomainModel<VehicleEntity> {
     private Boolean auction;
     private BigDecimal fipeDepreciation;
     private String color;
-    private Integer codeSituation;
-    private Integer codeFuelType;
+    private String situation;
+    private String fuelType;
 
     @Override
     public VehicleEntity toEntity() {
         VehicleEntity entity = new VehicleEntity();
         entity.setId(this.getId());
-        entity.setLicensePlate(this.getLicensePlate());
+        entity.setLicensePlate(this.getLicensePlate().toUpperCase());
         entity.setYearManufacture(this.getYearManufacture());
         entity.setModelYear(this.getModelYear());
         entity.setRenavam(this.getRenavam());
@@ -47,10 +47,10 @@ public class Vehicle extends DomainModel<VehicleEntity> {
         entity.setFipeDepreciation(this.getFipeDepreciation());
         entity.setColor(this.getColor().toUpperCase());
 
-        Situation situation = Situation.toCode(codeSituation);
+        Situation situation = Situation.toDescription(this.getSituation());
         entity.setSituation(situation.getDescription());
 
-        FuelType fuelType = FuelType.toCode(codeFuelType);
+        FuelType fuelType = FuelType.toDescription(this.getFuelType());
         entity.setFuelType(fuelType.getDescription());
         return entity;
     }

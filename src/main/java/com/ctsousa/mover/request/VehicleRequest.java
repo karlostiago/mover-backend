@@ -37,7 +37,6 @@ public class VehicleRequest {
     @NotEmpty(message = "Campo data de aquisição não pode ser vázio")
     private LocalDate acquisitionDate;
 
-    @NotEmpty(message = "Campo data de disponibilidade não pode ser vázio")
     private LocalDate availabilityDate;
 
     @NotEmpty(message = "Campo quilometragem de aquisição não pode ser vázio")
@@ -52,8 +51,8 @@ public class VehicleRequest {
     private String color;
 
     @NotEmpty(message = "Campo situação não pode ser vázio")
-    private Integer codeSituation;
+    private String situation;
 
     @NotEmpty(message = "Campo tipo de combustivel não pode ser vázio")
-    private Integer codeFuelType;
+    private String fuelType;
 }

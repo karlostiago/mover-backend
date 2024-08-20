@@ -2,7 +2,6 @@ package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.domain.Model;
-import com.ctsousa.mover.mapper.ModelMapper;
 import com.ctsousa.mover.request.ModelRequest;
 import com.ctsousa.mover.response.ModelResponse;
 import com.ctsousa.mover.service.ModelService;
@@ -34,9 +33,6 @@ public class ModelResourceTest {
     @MockBean
     private ModelService modelService;
 
-    @MockBean
-    private ModelMapper modelMapper;
-
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -64,7 +60,7 @@ public class ModelResourceTest {
     @Test
     void shouldFilterById() throws Exception {
         ModelRequest request = getRequest(1L, "FASTBACK");
-        Model domain = new ModelMapper().toDomain(request);
+        Model domain = toMapper(request, Model.class);
         ModelEntity entity = domain.toEntity();
 
         Long id = 1L;
@@ -110,7 +106,6 @@ public class ModelResourceTest {
         String params = "";
 
         when(modelService.findBy(params)).thenReturn(entities);
-        when(modelMapper.toCollections(entities)).thenReturn(response);
 
         mockMvc.perform(get("/models/filterBy")
                         .param("search", params))

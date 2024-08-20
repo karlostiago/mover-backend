@@ -7,10 +7,11 @@ import lombok.Getter;
 public enum Situation {
 
     IN_PROGRESS(1,"EM PROGRESSO"),
-    UNDER_ANALYSIS(2,"EM ANALIE"),
+    UNDER_ANALYSIS(2,"EM ANALISE"),
     IN_FLEET(3,"EM FROTA"),
     SOLD(4, "VENDIDO"),
-    TOTAL_LOSS(5, "PERDA TOTAL");
+    TOTAL_LOSS(5, "PERDA TOTAL"),
+    IN_ACQUISITION(6, "EM AQUISICAO");
 
     private final Integer code;
     private final String description;

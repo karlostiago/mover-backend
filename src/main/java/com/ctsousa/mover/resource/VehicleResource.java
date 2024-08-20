@@ -89,7 +89,7 @@ public class VehicleResource implements VehicleApi {
 
     @Override
     public ResponseEntity<List<SituationResponse>> findAllSituation() {
-        List<Situation> situations = List.of(Situation.IN_FLEET, Situation.SOLD, Situation.TOTAL_LOSS);
+        List<Situation> situations = List.of(Situation.IN_FLEET, Situation.SOLD, Situation.TOTAL_LOSS, Situation.IN_ACQUISITION);
         return ResponseEntity.ok(toCollection(situations, SituationResponse.class));
     }
 }
