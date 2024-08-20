@@ -1,6 +1,7 @@
 package com.ctsousa.mover.core.api;
 
 import com.ctsousa.mover.request.VehicleRequest;
+import com.ctsousa.mover.response.FuelTypeResponse;
 import com.ctsousa.mover.response.VehicleResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,4 +13,7 @@ public interface VehicleApi extends Api<VehicleRequest, VehicleResponse> {
 
     @GetMapping("/findBy")
     ResponseEntity<List<VehicleResponse>> findBy(@RequestParam("search") String search);
+
+    @GetMapping("/fuel-type")
+    ResponseEntity<List<FuelTypeResponse>> findFuelType();
 }

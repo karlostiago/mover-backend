@@ -53,4 +53,7 @@ public class VehicleRequest {
 
     @NotEmpty(message = "Campo situação não pode ser vázio")
     private Integer codeSituation;
+
+    @NotEmpty(message = "Campo tipo de combustivel não pode ser vázio")
+    private Integer codeFuelType;
 }

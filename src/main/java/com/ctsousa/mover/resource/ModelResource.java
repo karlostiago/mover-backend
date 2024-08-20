@@ -63,4 +63,10 @@ public class ModelResource implements ModelApi {
         List<ModelEntity> entities = modelService.findBy(search);
         return ResponseEntity.ok(toCollection(entities, ModelResponse.class));
     }
+
+    @Override
+    public ResponseEntity<List<ModelResponse>> findByBrandId(Long brandId) {
+        List<ModelEntity> entities = modelService.findByBrandId(brandId);
+        return ResponseEntity.ok(toCollection(entities, ModelResponse.class));
+    }
 }

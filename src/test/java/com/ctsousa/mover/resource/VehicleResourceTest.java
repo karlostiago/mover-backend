@@ -198,6 +198,7 @@ public class VehicleResourceTest {
         request.setFipeDepreciation(new BigDecimal("5000.00"));
         request.setColor("Red");
         request.setCodeSituation(1);
+        request.setCodeFuelType(1);
         return request;
     }
 }

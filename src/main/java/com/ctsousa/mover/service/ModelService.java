@@ -8,4 +8,6 @@ import java.util.List;
 public interface ModelService extends BaseService<ModelEntity, Long> {
 
     List<ModelEntity> findBy(String paramFilter);
+
+    List<ModelEntity> findByBrandId(Long brandId);
 }

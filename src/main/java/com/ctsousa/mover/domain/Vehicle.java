@@ -1,6 +1,7 @@
 package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.VehicleEntity;
+import com.ctsousa.mover.enumeration.FuelType;
 import com.ctsousa.mover.enumeration.Situation;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,7 @@ public class Vehicle extends DomainModel<VehicleEntity> {
     private BigDecimal fipeDepreciation;
     private String color;
     private Integer codeSituation;
+    private Integer codeFuelType;
 
     @Override
     public VehicleEntity toEntity() {
@@ -47,6 +49,9 @@ public class Vehicle extends DomainModel<VehicleEntity> {
 
         Situation situation = Situation.toCode(codeSituation);
         entity.setSituation(situation.getDescription());
+
+        FuelType fuelType = FuelType.toCode(codeFuelType);
+        entity.setFuelType(fuelType.getDescription());
         return entity;
     }
 }

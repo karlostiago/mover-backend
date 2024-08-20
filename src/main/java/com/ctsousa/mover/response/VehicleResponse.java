@@ -27,4 +27,5 @@ public class VehicleResponse {
     private BigDecimal fipeDepreciation;
     private String color;
     private String situation;
+    private String fuelType;
 }

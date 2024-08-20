@@ -1,5 +1,6 @@
 package com.ctsousa.mover.core.entity;
 
+import com.ctsousa.mover.enumeration.FuelType;
 import com.ctsousa.mover.enumeration.Situation;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -65,8 +66,16 @@ public class VehicleEntity extends AbstractEntity {
     @Column(name = "situation", nullable = false)
     private String situation;
 
+    @Column(name = "fuel_type", nullable = false)
+    private String fuelType;
+
     public void setSituation(String descriptionSituation) {
         Situation situation = Situation.toDescription(descriptionSituation);
         this.situation = situation.getDescription();
+    }
+
+    public void setFuelType(String fuelTypeDescription) {
+        FuelType fuelType = FuelType.toDescription(fuelTypeDescription);
+        this.fuelType = fuelType.getDescription();
     }
 }

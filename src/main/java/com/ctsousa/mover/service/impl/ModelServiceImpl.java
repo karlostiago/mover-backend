@@ -51,4 +51,11 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelEntity, Long> impleme
 
         return modelRepository.findBy(paramFilter.toUpperCase());
     }
+
+    @Override
+    public List<ModelEntity> findByBrandId(Long brandId) {
+        if (brandId == null) throw new NotificationException("Não foi informado o id da marca.");
+
+        return modelRepository.findByBrandId(brandId);
+    }
 }

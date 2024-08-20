@@ -3,7 +3,9 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.VehicleApi;
 import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.domain.Vehicle;
+import com.ctsousa.mover.enumeration.FuelType;
 import com.ctsousa.mover.request.VehicleRequest;
+import com.ctsousa.mover.response.FuelTypeResponse;
 import com.ctsousa.mover.response.VehicleResponse;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ModelService;
@@ -75,5 +77,11 @@ public class VehicleResource implements VehicleApi {
     public ResponseEntity<List<VehicleResponse>> findBy(String search) {
         List<VehicleEntity> entities = vehicleService.findBy(search);
         return ResponseEntity.ok(toCollection(entities, VehicleResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<List<FuelTypeResponse>> findFuelType() {
+        List<FuelType> types = List.of(FuelType.values());
+        return ResponseEntity.ok(toCollection(types, FuelTypeResponse.class));
     }
 }

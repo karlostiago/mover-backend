@@ -31,4 +31,7 @@ public interface ModelRepository extends JpaRepository<ModelEntity, Long> {
 
     @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand b WHERE m.name LIKE %:name% OR b.name LIKE %:name%")
     List<ModelEntity> findBy(@Param("name") String name);
+
+    @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand b WHERE b.id = :brandId")
+    List<ModelEntity> findByBrandId(@Param("brandId") Long brandId);
 }

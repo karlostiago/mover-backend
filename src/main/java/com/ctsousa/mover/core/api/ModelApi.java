@@ -12,4 +12,7 @@ public interface ModelApi extends Api<ModelRequest, ModelResponse> {
 
     @GetMapping(value = "/filterBy")
     ResponseEntity<List<ModelResponse>> filterBy(@Param("search") String search);
+
+    @GetMapping(value = "/find-by-brand-id")
+    ResponseEntity<List<ModelResponse>> findByBrandId(@Param("branId") Long brandId);
 }
