@@ -7,10 +7,14 @@ import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumYearEn
 
 import java.util.List;
 
-public interface FipeParallelumGateway {
+public interface FipeParallelumGateway  {
 
     List<FipeParallelumBrandEntity> listBrands();
     List<FipeParallelumModelEntity> listModels(String codeBrand);
     List<FipeParallelumYearEntity> listYear(String codeBrand, String codeModel);
-    FipeParallelumFipeEntity findBy(String codeBrand, String codeModel, String codeYear);
+
+    FipeParallelumBrandEntity findByBrand(String brandName);
+    FipeParallelumYearEntity findByYear(String codeBrand, String codeModel, Integer modelYear, String fuelType);
+    FipeParallelumModelEntity findByModel(String codeBrand, String modelName);
+    FipeParallelumFipeEntity findByFipe(String codeBrand, String codeModel, String codeYear);
 }

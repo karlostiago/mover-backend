@@ -32,6 +32,6 @@ public class FipeParallelumYearServiceImpl extends FipeParallelumBaseService imp
 
     @Override
     public String pathBase() {
-        return "http://fipe.parallelum.com.br/api/v2/cars/brands/"+codeBrand+"/models/"+codeModel+"/years";
+        return "https://fipe.parallelum.com.br/api/v2/cars/brands/"+codeBrand+"/models/"+codeModel+"/years";
     }
 }

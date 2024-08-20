@@ -1,5 +1,6 @@
 package com.ctsousa.mover.integration.fipe.parallelum.gateway.impl;
 
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumBrandEntity;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumFipeEntity;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumModelEntity;
@@ -44,8 +45,33 @@ public class FipeParallelumGatewayImpl implements FipeParallelumGateway {
     }
 
     @Override
-    public FipeParallelumFipeEntity findBy(String codeBrand, String codeModel, String codeYear) {
+    public FipeParallelumFipeEntity findByFipe(String codeBrand, String codeModel, String codeYear) {
         return fipeParallelumFipeService.findBy(new FipeParallelumBrandEntity(codeBrand),
                 new FipeParallelumModelEntity(codeModel), new FipeParallelumYearEntity(codeYear));
+    }
+
+    @Override
+    public FipeParallelumBrandEntity findByBrand(String brandName) {
+        return listBrands().stream()
+                .filter(b -> b.getName().equalsIgnoreCase(brandName))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public FipeParallelumModelEntity findByModel(String codeBrand, String modelName) {
+        return listModels(codeBrand).stream()
+                .filter(m -> m.getName().equalsIgnoreCase(modelName))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public FipeParallelumYearEntity findByYear(String codeBrand, String codeModel, Integer modelYear, String fuelType) {
+        String nameFilter = modelYear.toString().concat(" ").concat(fuelType);
+        return listYear(codeBrand, codeModel).stream()
+                .filter(y -> y.getName().equalsIgnoreCase(nameFilter))
+                .findFirst()
+                .orElse(null);
     }
 }

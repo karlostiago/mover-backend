@@ -4,8 +4,10 @@ import com.ctsousa.mover.core.api.VehicleApi;
 import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.domain.Vehicle;
 import com.ctsousa.mover.enumeration.FuelType;
+import com.ctsousa.mover.enumeration.Situation;
 import com.ctsousa.mover.request.VehicleRequest;
 import com.ctsousa.mover.response.FuelTypeResponse;
+import com.ctsousa.mover.response.SituationResponse;
 import com.ctsousa.mover.response.VehicleResponse;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ModelService;
@@ -80,8 +82,14 @@ public class VehicleResource implements VehicleApi {
     }
 
     @Override
-    public ResponseEntity<List<FuelTypeResponse>> findFuelType() {
+    public ResponseEntity<List<FuelTypeResponse>> findAllFuelType() {
         List<FuelType> types = List.of(FuelType.values());
         return ResponseEntity.ok(toCollection(types, FuelTypeResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<List<SituationResponse>> findAllSituation() {
+        List<Situation> situations = List.of(Situation.IN_FLEET, Situation.SOLD, Situation.TOTAL_LOSS);
+        return ResponseEntity.ok(toCollection(situations, SituationResponse.class));
     }
 }

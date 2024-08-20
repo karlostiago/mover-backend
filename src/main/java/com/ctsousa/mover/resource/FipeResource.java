@@ -18,8 +18,8 @@ public class FipeResource implements FipeApi {
     }
 
     @Override
-    public ResponseEntity<FipeValueResponse> calculated(String brand, String model, Integer modelYear) {
-        FipeValueResponse response = fipeService.calculated(brand, model, modelYear);
+    public ResponseEntity<FipeValueResponse> calculated(String brand, String model, Integer modelYear, String fuelType) {
+        FipeValueResponse response = fipeService.calculated(brand, model, fuelType, modelYear);
         return ResponseEntity.ok(response);
     }
 }

@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 public interface FipeApi {
 
-    @GetMapping("/calculated/brand/{brand}/model/{model}/modelYear/{modelYear}")
-    ResponseEntity<FipeValueResponse> calculated(@PathVariable String brand, @PathVariable String model, @PathVariable Integer modelYear);
+    @GetMapping("/calculated/brand/{brand}/model/{model}/modelYear/{modelYear}/fuelType/{fuelType}")
+    ResponseEntity<FipeValueResponse> calculated(@PathVariable String brand, @PathVariable String model, @PathVariable Integer modelYear, @PathVariable String fuelType);
 }

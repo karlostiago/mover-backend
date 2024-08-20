@@ -4,6 +4,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -13,7 +14,9 @@ public abstract class FipeParallelumBaseService {
     protected final RestTemplate restTemplate = new RestTemplate();
 
     public HttpHeaders getHttpHeaders() {
-        return new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
     }
 
     public abstract String pathBase();

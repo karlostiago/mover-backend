@@ -8,7 +8,9 @@ public enum Situation {
 
     IN_PROGRESS(1,"EM PROGRESSO"),
     UNDER_ANALYSIS(2,"EM ANALIE"),
-    IN_FLEET(3,"EM FROTA");
+    IN_FLEET(3,"EM FROTA"),
+    SOLD(4, "VENDIDO"),
+    TOTAL_LOSS(5, "PERDA TOTAL");
 
     private final Integer code;
     private final String description;
