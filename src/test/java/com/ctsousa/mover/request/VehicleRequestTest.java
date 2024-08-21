@@ -1,5 +1,6 @@
 package com.ctsousa.mover.request;
 
+import com.ctsousa.mover.enumeration.Situation;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -26,7 +27,7 @@ public class VehicleRequestTest {
         Boolean expectedAuction = true;
         BigDecimal expectedFipeDepreciation = new BigDecimal("5000.00");
         String expectedColor = "Red";
-        Integer expectedCodeSituation = 1;
+        String expectedSituation = Situation.IN_ACQUISITION.getDescription();
 
         request.setBrandId(expectedBrandId);
         request.setModelId(expectedModelId);
@@ -42,7 +43,7 @@ public class VehicleRequestTest {
         request.setAuction(expectedAuction);
         request.setFipeDepreciation(expectedFipeDepreciation);
         request.setColor(expectedColor);
-        request.setCodeSituation(expectedCodeSituation);
+        request.setSituation(expectedSituation);
 
         assertEquals(expectedBrandId, request.getBrandId());
         assertEquals(expectedModelId, request.getModelId());
@@ -58,6 +59,6 @@ public class VehicleRequestTest {
         assertEquals(expectedAuction, request.getAuction());
         assertEquals(expectedFipeDepreciation, request.getFipeDepreciation());
         assertEquals(expectedColor, request.getColor());
-        assertEquals(expectedCodeSituation, request.getCodeSituation());
+        assertEquals(expectedSituation, request.getSituation());
     }
 }

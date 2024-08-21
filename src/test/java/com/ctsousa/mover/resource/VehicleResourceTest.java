@@ -4,6 +4,8 @@ import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.domain.Vehicle;
+import com.ctsousa.mover.enumeration.FuelType;
+import com.ctsousa.mover.enumeration.Situation;
 import com.ctsousa.mover.request.VehicleRequest;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ModelService;
@@ -197,8 +199,8 @@ public class VehicleResourceTest {
         request.setAuction(true);
         request.setFipeDepreciation(new BigDecimal("5000.00"));
         request.setColor("Red");
-        request.setCodeSituation(1);
-        request.setCodeFuelType(1);
+        request.setSituation(Situation.IN_PROGRESS.getDescription());
+        request.setFuelType(FuelType.GASOLINE.getDescription());
         return request;
     }
 }
