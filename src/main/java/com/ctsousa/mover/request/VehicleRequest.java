@@ -1,6 +1,7 @@
 package com.ctsousa.mover.request;
 
 import com.ctsousa.mover.core.annotation.NotEmpty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,9 +35,11 @@ public class VehicleRequest {
     @NotEmpty(message = "Campo valor adiquisição não pode ser vázio")
     private BigDecimal acquisitionValue;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @NotEmpty(message = "Campo data de aquisição não pode ser vázio")
     private LocalDate acquisitionDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate availabilityDate;
 
     @NotEmpty(message = "Campo quilometragem de aquisição não pode ser vázio")
@@ -55,4 +58,6 @@ public class VehicleRequest {
 
     @NotEmpty(message = "Campo tipo de combustivel não pode ser vázio")
     private String fuelType;
+
+    private Boolean active;
 }

@@ -46,6 +46,7 @@ public class Vehicle extends DomainModel<VehicleEntity> {
         entity.setAuction(this.getAuction());
         entity.setFipeDepreciation(this.getFipeDepreciation());
         entity.setColor(this.getColor().toUpperCase());
+        entity.setActive(this.getActive());
 
         Situation situation = Situation.toDescription(this.getSituation());
         entity.setSituation(situation.getDescription());

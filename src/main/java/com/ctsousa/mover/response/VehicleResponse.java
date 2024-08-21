@@ -1,5 +1,6 @@
 package com.ctsousa.mover.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +21,11 @@ public class VehicleResponse {
     private String renavam;
     private BigDecimal fipeValueAtAcquisition;
     private BigDecimal acquisitionValue;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate acquisitionDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate availabilityDate;
     private BigDecimal mileageAtAcquisition;
     private Boolean auction;
@@ -28,4 +33,5 @@ public class VehicleResponse {
     private String color;
     private String situation;
     private String fuelType;
+    private Boolean active;
 }

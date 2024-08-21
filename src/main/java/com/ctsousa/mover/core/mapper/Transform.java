@@ -273,7 +273,7 @@ public class Transform {
     }
 
     private static boolean isPrimitive(Object object) {
-        String [] types = { "string", "long", "integer", "byte", "float", "short", "boolean", "character" };
+        String [] types = { "string", "long", "integer", "byte", "float", "short", "boolean", "character", "localdate", "bigdecimal" };
         String clazz = object.toString().toLowerCase();
         for (String type : types) {
             if (clazz.contains(type)) return true;

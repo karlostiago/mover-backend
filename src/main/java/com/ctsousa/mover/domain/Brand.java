@@ -13,10 +13,8 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 public class Brand extends DomainModel<BrandEntity> {
-    private Long id;
     private String name;
     private Symbol symbol;
-    private Boolean active;
 
     public void setName(String name) {
         if (StringUtils.isBlank(name)) throw new NotificationException("Informe uma descrição.");
