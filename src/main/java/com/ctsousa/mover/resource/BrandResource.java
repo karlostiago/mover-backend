@@ -8,6 +8,7 @@ import com.ctsousa.mover.domain.Brand;
 import com.ctsousa.mover.domain.Symbol;
 import com.ctsousa.mover.request.BrandRequest;
 import com.ctsousa.mover.response.BrandResponse;
+import com.ctsousa.mover.scheduler.ModelScheduler;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.SymbolService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ public class BrandResource extends BaseResource<BrandResponse, BrandRequest, Bra
     public ResponseEntity<BrandResponse> add(BrandRequest request) {
         Brand brand = toMapper(request, Brand.class);
         BrandEntity entity = brandService.save(brand.toEntity());
+        ModelScheduler.buffers.add(entity.getName());
         return ResponseEntity.ok(toMapper(entity, BrandResponse.class));
     }
 

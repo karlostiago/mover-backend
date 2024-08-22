@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
+import static com.ctsousa.mover.core.util.DateUtil.toLocalDateWithGMT;
+
 @RestController
 @RequestMapping("/fipe")
 public class FipeResource implements FipeApi {
@@ -20,8 +22,9 @@ public class FipeResource implements FipeApi {
     }
 
     @Override
-    public ResponseEntity<FipeValueResponse> calculated(String brand, String model, Integer modelYear, String fuelType, LocalDate monthYearReference) {
-        FipeValueResponse response = fipeService.calculated(brand, model, fuelType, modelYear, monthYearReference);
+    public ResponseEntity<FipeValueResponse> calculated(String brand, String model, Integer modelYear, String fuelType, String monthYearReference) {
+        LocalDate reference = toLocalDateWithGMT(monthYearReference);
+        FipeValueResponse response = fipeService.calculated(brand, model, fuelType, modelYear, reference);
         return ResponseEntity.ok(response);
     }
 }

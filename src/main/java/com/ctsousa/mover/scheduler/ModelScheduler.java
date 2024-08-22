@@ -13,11 +13,18 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static com.ctsousa.mover.core.util.StringUtil.removeLastPoint;
 
 @Slf4j
 @Component
 public class ModelScheduler implements Scheduler{
+
+    public static final Queue<String> buffers = new ConcurrentLinkedQueue<>();
 
     private final BrandService brandService;
     private final ModelService modelService;
@@ -30,40 +37,49 @@ public class ModelScheduler implements Scheduler{
     }
 
     @Override
-    @Scheduled(cron = "0 5 6 1 * *") // executa 1 vez por mes as 06h05 horas da manha
+    @Scheduled(cron = "0/10 * * * * *") // executa a cada 10 segundos
     public void process() {
-        log.info("Iniciado processamento de insert de modelos periodo :: {} ", LocalDateTime.now());
-        List<BrandEntity> entities = brandService.findAll();
-        List<FipeParallelumBrandEntity> fipeParallelumBrandEntities = gateway.listBrands();
 
-        for (BrandEntity entity : entities) {
-            for (FipeParallelumBrandEntity fipeBrandEntity : fipeParallelumBrandEntities) {
-                String brandNameSystem = entity.getName().toUpperCase();
-                String brandNameApi = fipeBrandEntity.getName().toUpperCase();
-                if (brandNameApi.contains(brandNameSystem)) {
-                    findModel(entity, fipeBrandEntity.getCode());
-                    break;
+        if (buffers.isEmpty()) return;
+
+        log.info("Iniciado processamento de insert de modelos periodo :: {} ", LocalDateTime.now());
+        while (!buffers.isEmpty()) {
+            String brandName = buffers.poll();
+            BrandEntity brandEntity = brandService.filterByName(brandName)
+                    .stream()
+                    .findFirst().orElse(null);
+
+            if (brandEntity != null) {
+                FipeParallelumBrandEntity fipeBrandEntity = gateway.findByBrand(brandEntity.getName());
+                if (fipeBrandEntity != null) {
+                    List<ModelEntity> entities = findModel(brandEntity,fipeBrandEntity.getCode());
+                    save(entities);
                 }
             }
         }
         log.info("Finalizado processamento de insert de modelos periodo :: {} ", LocalDateTime.now());
     }
 
-    private void findModel(BrandEntity brandEntity, String codeBrand) {
+    private List<ModelEntity> findModel(BrandEntity brandEntity, String codeBrand) {
+        List<ModelEntity> entities = new ArrayList<>();
         List<FipeParallelumModelEntity> fipeParallelumModelEntities = gateway.listModels(codeBrand);
         for (FipeParallelumModelEntity fipeParallelumModel : fipeParallelumModelEntities) {
             ModelEntity entity = new ModelEntity();
-            entity.setName(fipeParallelumModel.getName().toUpperCase());
+            entity.setName(removeLastPoint(fipeParallelumModel.getName().toUpperCase()));
             entity.setBrand(brandEntity);
-            saveModel(entity);
+            entities.add(entity);
         }
+        return entities;
     }
 
-    private void saveModel(ModelEntity entity) {
-        try {
-            modelService.save(entity);
-        } catch (NotificationException e) {
-            // nao precisa lancar erro
+    private void save(List<ModelEntity> entities) {
+        log.info("Total de modelos encontrados {} ", entities.size());
+        for (ModelEntity entity : entities) {
+            try {
+                modelService.save(entity);
+            } catch (NotificationException e) {
+                // nao precisa lancar erro
+            }
         }
     }
 }

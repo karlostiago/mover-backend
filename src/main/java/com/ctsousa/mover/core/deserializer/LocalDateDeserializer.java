@@ -1,4 +1,4 @@
-package com.ctsousa.mover.deserializer;
+package com.ctsousa.mover.core.deserializer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

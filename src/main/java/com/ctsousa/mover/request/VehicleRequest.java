@@ -1,8 +1,7 @@
 package com.ctsousa.mover.request;
 
 import com.ctsousa.mover.core.annotation.NotEmpty;
-import com.ctsousa.mover.deserializer.LocalDateDeserializer;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ctsousa.mover.core.deserializer.LocalDateDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
