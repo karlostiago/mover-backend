@@ -51,8 +51,8 @@ public class ModelResourceTest {
         mockMvc.perform(get("/models")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("FASTBACK".toUpperCase()))
-                .andExpect(jsonPath("$[1].name").value("MOBI LIKE".toUpperCase()));
+                .andExpect(jsonPath("$[0].name").value("FASTBACK"))
+                .andExpect(jsonPath("$[1].name").value("MOBI LIKE"));
 
         verify(modelService, times(1)).findAll();
     }
@@ -88,7 +88,7 @@ public class ModelResourceTest {
         mockMvc.perform(delete("/models/{id}", id))
                 .andExpect(status().isOk());
 
-        verify(modelService, times(1)).findById(id);
+        verify(modelService, times(1)).existsById(id);
         verify(modelService, times(1)).deleteById(id);
     }
 

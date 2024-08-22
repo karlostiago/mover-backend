@@ -124,7 +124,7 @@ public class VehicleResourceTest {
         mockMvc.perform(delete("/vehicles/{id}", id))
                 .andExpect(status().isOk());
 
-        verify(vehicleService, times(1)).findById(id);
+        verify(vehicleService, times(1)).existsById(id);
         verify(vehicleService, times(1)).deleteById(id);
     }
 

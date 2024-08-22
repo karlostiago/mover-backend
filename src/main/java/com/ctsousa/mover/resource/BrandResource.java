@@ -1,5 +1,6 @@
 package com.ctsousa.mover.resource;
 
+import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.api.BrandApi;
 import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.entity.SymbolEntity;
@@ -9,6 +10,7 @@ import com.ctsousa.mover.request.BrandRequest;
 import com.ctsousa.mover.response.BrandResponse;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.SymbolService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,14 +24,15 @@ import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
 @RequestMapping("/brands")
-public class BrandResource implements BrandApi {
+public class BrandResource extends BaseResource<BrandResponse, BrandRequest, BrandEntity> implements BrandApi {
 
-    private final BrandService brandService;
+    @Autowired
+    private BrandService brandService;
 
     private final SymbolService symbolService;
 
     public BrandResource(BrandService brandService, SymbolService symbolService) {
-        this.brandService = brandService;
+        super(brandService);
         this.symbolService = symbolService;
     }
 
@@ -44,23 +47,6 @@ public class BrandResource implements BrandApi {
         Brand brand = toMapper(request, Brand.class);
         BrandEntity entity = brandService.save(brand.toEntity());
         return ResponseEntity.ok(toMapper(entity, BrandResponse.class));
-    }
-
-    @Override
-    public ResponseEntity<List<BrandResponse>> findAll() {
-        List<BrandEntity> entities = brandService.findAll();
-        return ResponseEntity.ok(toCollection(entities, BrandResponse.class));
-    }
-
-    @Override
-    public ResponseEntity<BrandResponse> findById(Long id) {
-        BrandEntity entity = brandService.findById(id);
-        return ResponseEntity.ok(toMapper(entity, BrandResponse.class));
-    }
-
-    @Override
-    public void delete(Long id) {
-        brandService.deleteById(id);
     }
 
     @Override
@@ -80,5 +66,10 @@ public class BrandResource implements BrandApi {
         SymbolEntity entity = symbol.toEntity();
         symbolService.save(entity);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public Class<?> responseClass() {
+        return BrandResponse.class;
     }
 }

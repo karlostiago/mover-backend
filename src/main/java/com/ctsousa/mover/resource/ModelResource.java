@@ -1,11 +1,13 @@
 package com.ctsousa.mover.resource;
 
+import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.api.ModelApi;
 import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.domain.Model;
 import com.ctsousa.mover.request.ModelRequest;
 import com.ctsousa.mover.response.ModelResponse;
 import com.ctsousa.mover.service.ModelService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,12 +19,13 @@ import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
 @RequestMapping("/models")
-public class ModelResource implements ModelApi {
+public class ModelResource extends BaseResource<ModelResponse, ModelRequest, ModelEntity> implements ModelApi {
 
-    private final ModelService modelService;
+    @Autowired
+    private ModelService modelService;
 
     public ModelResource(ModelService modelService) {
-        this.modelService = modelService;
+        super(modelService);
     }
 
     @Override
@@ -30,23 +33,6 @@ public class ModelResource implements ModelApi {
         Model model = toMapper(request, Model.class);
         ModelEntity entity = modelService.save(model.toEntity());
         return ResponseEntity.ok(toMapper(entity, ModelResponse.class));
-    }
-
-    @Override
-    public ResponseEntity<List<ModelResponse>> findAll() {
-        return ResponseEntity.ok(toCollection(modelService.findAll(), ModelResponse.class));
-    }
-
-    @Override
-    public ResponseEntity<ModelResponse> findById(Long id) {
-        ModelEntity entity = modelService.findById(id);
-        return ResponseEntity.ok(toMapper(entity, ModelResponse.class));
-    }
-
-    @Override
-    public void delete(Long id) {
-        ModelEntity entity = modelService.findById(id);
-        modelService.deleteById(entity.getId());
     }
 
     @Override
@@ -68,5 +54,10 @@ public class ModelResource implements ModelApi {
     public ResponseEntity<List<ModelResponse>> findByBrandId(Long brandId) {
         List<ModelEntity> entities = modelService.findByBrandId(brandId);
         return ResponseEntity.ok(toCollection(entities, ModelResponse.class));
+    }
+
+    @Override
+    public Class<?> responseClass() {
+        return ModelResponse.class;
     }
 }

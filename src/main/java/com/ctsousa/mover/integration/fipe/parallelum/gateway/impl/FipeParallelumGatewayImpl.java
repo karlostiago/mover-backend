@@ -1,6 +1,5 @@
 package com.ctsousa.mover.integration.fipe.parallelum.gateway.impl;
 
-import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumBrandEntity;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumFipeEntity;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumModelEntity;
@@ -53,7 +52,7 @@ public class FipeParallelumGatewayImpl implements FipeParallelumGateway {
     @Override
     public FipeParallelumBrandEntity findByBrand(String brandName) {
         return listBrands().stream()
-                .filter(b -> b.getName().equalsIgnoreCase(brandName))
+                .filter(b -> b.getName().toUpperCase().contains(brandName))
                 .findFirst()
                 .orElse(null);
     }

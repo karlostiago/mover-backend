@@ -1,9 +1,7 @@
 package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.entity.SymbolEntity;
-import com.ctsousa.mover.mapper.SymbolMapper;
 import com.ctsousa.mover.repository.SymbolRepository;
-import com.ctsousa.mover.response.SymbolResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +24,6 @@ public class SymbolResourceTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private SymbolMapper mapper;
-
-    @MockBean
     private SymbolRepository symbolRepository;
 
     @InjectMocks
@@ -40,20 +35,13 @@ public class SymbolResourceTest {
         SymbolEntity symbol2 = new SymbolEntity("Symbol2", "açlsdçaldj====");
         List<SymbolEntity> symbols = Arrays.asList(symbol1, symbol2);
 
-        SymbolResponse response1 = new SymbolMapper().toResponse(symbol1);
-        SymbolResponse response2 = new SymbolMapper().toResponse(symbol2);
-
-        List<SymbolResponse> responses = Arrays.asList(response1, response2);
-
         when(symbolRepository.findAll()).thenReturn(symbols);
-        when(mapper.toCollections(symbols)).thenReturn(responses);
 
         mockMvc.perform(get("/symbols"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].description").value("Symbol1".toUpperCase()))
-                .andExpect(jsonPath("$[1].description").value("Symbol2".toUpperCase()));
+                .andExpect(jsonPath("$[0].description").value("Symbol1"))
+                .andExpect(jsonPath("$[1].description").value("Symbol2"));
 
         verify(symbolRepository, times(1)).findAll();
-        verify(mapper, times(1)).toCollections(symbols);
     }
 }
