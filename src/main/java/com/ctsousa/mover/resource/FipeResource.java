@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/fipe")
 public class FipeResource implements FipeApi {
@@ -18,8 +20,8 @@ public class FipeResource implements FipeApi {
     }
 
     @Override
-    public ResponseEntity<FipeValueResponse> calculated(String brand, String model, Integer modelYear, String fuelType) {
-        FipeValueResponse response = fipeService.calculated(brand, model, fuelType, modelYear);
+    public ResponseEntity<FipeValueResponse> calculated(String brand, String model, Integer modelYear, String fuelType, LocalDate monthYearReference) {
+        FipeValueResponse response = fipeService.calculated(brand, model, fuelType, modelYear, monthYearReference);
         return ResponseEntity.ok(response);
     }
 }

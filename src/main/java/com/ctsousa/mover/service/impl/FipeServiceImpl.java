@@ -1,13 +1,12 @@
 package com.ctsousa.mover.service.impl;
 
-import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumBrandEntity;
-import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumFipeEntity;
-import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumModelEntity;
-import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumYearEntity;
+import com.ctsousa.mover.integration.fipe.parallelum.entity.*;
 import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
 import com.ctsousa.mover.response.FipeValueResponse;
 import com.ctsousa.mover.service.FipeService;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
 
 @Component
 public class FipeServiceImpl implements FipeService {
@@ -19,12 +18,13 @@ public class FipeServiceImpl implements FipeService {
     }
 
     @Override
-    public FipeValueResponse calculated(String brand, String model, String fuelType, Integer modelYear) {
+    public FipeValueResponse calculated(String brand, String model, String fuelType, Integer modelYear, LocalDate reference) {
         try {
             FipeParallelumBrandEntity brandEntity = gateway.findByBrand(brand);
             FipeParallelumModelEntity modelEntity = gateway.findByModel(brandEntity.getCode(), model);
             FipeParallelumYearEntity yearEntity = gateway.findByYear(brandEntity.getCode(), modelEntity.getCode(), modelYear, fuelType);
-            FipeParallelumFipeEntity fipeEntity = gateway.findByFipe(brandEntity.getCode(), modelEntity.getCode(), yearEntity.getCode());
+            FipeParallelumReferenceEntity referenceEntity = gateway.findReferenceByMonthAndYear(reference);
+            FipeParallelumFipeEntity fipeEntity = gateway.findByFipe(brandEntity.getCode(), modelEntity.getCode(), yearEntity.getCode(), referenceEntity.getCode());
             return new FipeValueResponse(fipeEntity.getPrice());
         } catch (Exception e) {
             return new FipeValueResponse("0.00");
