@@ -23,7 +23,7 @@ public class FipeParallelumFipeServiceImpl extends FipeParallelumBaseService imp
         codeYear = yearEntity.getCode();
         codeReference = referenceEntity.getCode();
 
-        log.info("Carregando fipe, da marca {} do modelo {} e ano {} da api fipe parallelum ", brandEntity.getName(), modelEntity.getName(), yearEntity.getName());
+        log.info("Carregando fipe, da código da marca {} do código do modelo {} e código do ano {} da api fipe parallelum ", codeBrand, codeModel, codeYear);
 
         return requestProcess(pathBase(), FipeParallelumFipeEntity.class);
     }

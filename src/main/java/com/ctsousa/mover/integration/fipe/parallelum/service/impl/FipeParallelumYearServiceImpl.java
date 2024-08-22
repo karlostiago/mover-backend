@@ -23,7 +23,7 @@ public class FipeParallelumYearServiceImpl extends FipeParallelumBaseService imp
         codeBrand = brandEntity.getCode();
         codeModel = modelEntity.getCode();
 
-        log.info("Carregando os anos, da marca {} e modelo {} da api fipe parallelum ", brandEntity.getName(), modelEntity.getName());
+        log.info("Carregando os anos, da código da marca {} e código do modelo {} da api fipe parallelum ", codeBrand, codeModel);
         ParameterizedTypeReference<List<FipeParallelumYearEntity>> responseType = new ParameterizedTypeReference<>() {
         };
 

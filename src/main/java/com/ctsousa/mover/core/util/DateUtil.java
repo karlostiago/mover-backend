@@ -8,7 +8,9 @@ public final class DateUtil {
 
     private static final Map<String, Integer> catalogOfMonths = new HashMap<>();
 
-    private DateUtil() { }
+    private DateUtil() {
+
+    }
 
     static {
         catalogOfMonths.put("JAN", 1);
@@ -28,8 +30,8 @@ public final class DateUtil {
     public static LocalDate toLocalDateWithGMT(String dateStr) {
         String date = dateStr.substring(0, dateStr.indexOf("GMT") - 1).trim();
         String [] splitDate = date.split(" ");
-        int day = Integer.parseInt(splitDate[2].toUpperCase());
-        int month = catalogOfMonths.get(splitDate[1]);
+        int day = Integer.parseInt(splitDate[2]);
+        int month = catalogOfMonths.get(splitDate[1].toUpperCase());
         int year = Integer.parseInt(splitDate[3]);
 
         return LocalDate.of(year, month, day);

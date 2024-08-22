@@ -20,7 +20,7 @@ public class FipeParallelumModelServiceImpl extends FipeParallelumBaseService im
     public List<FipeParallelumModelEntity> findBy(FipeParallelumBrandEntity brandEntity) {
         code = brandEntity.getCode();
 
-        log.info("Carregando os modelos, da marca {} da api fipe parallelum ", brandEntity.getName());
+        log.info("Carregando os modelos, da código da marca {} da api fipe parallelum ", code);
 
         ParameterizedTypeReference<List<FipeParallelumModelEntity>> responseType = new ParameterizedTypeReference<>() {
         };
