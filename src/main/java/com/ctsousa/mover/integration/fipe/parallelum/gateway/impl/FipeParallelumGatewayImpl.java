@@ -1,5 +1,6 @@
 package com.ctsousa.mover.integration.fipe.parallelum.gateway.impl;
 
+import com.ctsousa.mover.core.util.StringUtil;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.*;
 import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
 import com.ctsousa.mover.integration.fipe.parallelum.service.*;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static com.ctsousa.mover.core.util.StringUtil.removeLastPoint;
 
 @Component
 public class FipeParallelumGatewayImpl implements FipeParallelumGateway {
@@ -63,7 +66,7 @@ public class FipeParallelumGatewayImpl implements FipeParallelumGateway {
     @Override
     public FipeParallelumModelEntity findByModel(String codeBrand, String modelName) {
         return listModels(codeBrand).stream()
-                .filter(m -> m.getName().equalsIgnoreCase(modelName))
+                .filter(m -> removeLastPoint(m.getName()).equalsIgnoreCase(modelName))
                 .findFirst()
                 .orElse(null);
     }
