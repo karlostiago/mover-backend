@@ -1,33 +1,88 @@
 package com.ctsousa.mover.service.impl;
 
+import com.ctsousa.mover.core.entity.FipeEntity;
+import com.ctsousa.mover.core.util.HashUtil;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.*;
 import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
+import com.ctsousa.mover.repository.FipeRepository;
 import com.ctsousa.mover.response.FipeValueResponse;
 import com.ctsousa.mover.service.FipeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
+import static com.ctsousa.mover.core.util.NumberUtil.toBigDecimal;
+import static com.ctsousa.mover.core.util.StringUtil.removeLastPoint;
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
+import static com.ctsousa.mover.integration.fipe.parallelum.util.DateUtil.toMonthPtBr;
+
+@Slf4j
 @Component
 public class FipeServiceImpl implements FipeService {
 
     private final FipeParallelumGateway gateway;
+    private final FipeRepository fipeRepository;
 
-    public FipeServiceImpl(FipeParallelumGateway gateway) {
+    private String hash;
+
+    public FipeServiceImpl(FipeParallelumGateway gateway, FipeRepository fipeRepository) {
         this.gateway = gateway;
+        this.fipeRepository = fipeRepository;
     }
 
     @Override
     public FipeValueResponse calculated(String brand, String model, String fuelType, Integer modelYear, LocalDate reference) {
+        String context = buildHash(brand, model, fuelType, modelYear, reference);
+        hash = HashUtil.buildSHA256(context);
+        FipeEntity entity = fipeRepository.findByHash(hash);
+
+        if (entity == null) {
+            return byIntegration(brand, model, fuelType, modelYear, reference);
+        }
+
+        return new FipeValueResponse(entity.getPrice(), entity.getCode());
+    }
+
+    private FipeValueResponse byIntegration(String brand, String model, String fuelType, Integer modelYear, LocalDate reference) {
         try {
             FipeParallelumBrandEntity brandEntity = gateway.findByBrand(brand);
             FipeParallelumModelEntity modelEntity = gateway.findByModel(brandEntity.getCode(), model);
             FipeParallelumYearEntity yearEntity = gateway.findByYear(brandEntity.getCode(), modelEntity.getCode(), modelYear, fuelType);
             FipeParallelumReferenceEntity referenceEntity = gateway.findReferenceByMonthAndYear(reference);
             FipeParallelumFipeEntity fipeEntity = gateway.findByFipe(brandEntity.getCode(), modelEntity.getCode(), yearEntity.getCode(), referenceEntity.getCode());
-            return new FipeValueResponse(fipeEntity.getPrice());
+            saveFipe(fipeEntity);
+            return new FipeValueResponse(fipeEntity.getPrice(), fipeEntity.getCodeFipe());
         } catch (Exception e) {
-            return new FipeValueResponse("0.00");
+            return new FipeValueResponse("0.00", null);
         }
+    }
+
+    private void saveFipe(FipeParallelumFipeEntity fipeEntity) {
+        try {
+            FipeEntity entity = new FipeEntity();
+            entity.setModel(removeLastPoint(toUppercase(fipeEntity.getModel())));
+            entity.setBrand(toUppercase(fipeEntity.getBrand()));
+            entity.setCode(fipeEntity.getCodeFipe());
+            entity.setModelYear(fipeEntity.getModelYear());
+            entity.setReferenceMonth(toUppercase(fipeEntity.getReferenceMonth().split(" ")[0]));
+            entity.setReferenceYear(Integer.parseInt(fipeEntity.getReferenceMonth().split(" ")[2]));
+            entity.setPrice(toBigDecimal(fipeEntity.getPrice()));
+            entity.setFuel(toUppercase(fipeEntity.getFuel()));
+            entity.setHash(hash);
+            fipeRepository.save(entity);
+        } catch (Exception e) {
+            log.error("Erro ao salvar informacoes da fipe ::: {}", e.getMessage());
+        }
+    }
+
+    private static String getMonthYearOfReference(LocalDate reference) {
+        String month = toMonthPtBr(reference);
+        int year = reference.getYear();
+        return month + "/" + year;
+    }
+
+    private String buildHash(String brand, String model, String fuelType, Integer modelYear, LocalDate reference) {
+        return brand.concat(model).concat(fuelType).concat(modelYear.toString()).concat(getMonthYearOfReference(reference));
     }
 }

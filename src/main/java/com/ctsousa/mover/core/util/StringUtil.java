@@ -11,4 +11,8 @@ public final class StringUtil {
         }
         return value;
     }
+
+    public static String toUppercase(String value) {
+        return value.toUpperCase();
+    }
 }

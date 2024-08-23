@@ -8,8 +8,15 @@ import java.math.BigDecimal;
 @Getter
 public class FipeValueResponse {
     private final BigDecimal value;
+    private final String code;
 
-    public FipeValueResponse(String value) {
+    public FipeValueResponse(String value, String code) {
         this.value = NumberUtil.toBigDecimal(value);
+        this.code = code;
+    }
+
+    public FipeValueResponse(BigDecimal value, String code) {
+        this.value = value;
+        this.code = code;
     }
 }
