@@ -1,15 +1,21 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.FipeEntity;
+import com.ctsousa.mover.core.entity.VehicleEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.util.HashUtil;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.*;
 import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
 import com.ctsousa.mover.repository.FipeRepository;
 import com.ctsousa.mover.response.FipeValueResponse;
+import com.ctsousa.mover.response.SummaryFipeResponse;
 import com.ctsousa.mover.service.FipeService;
+import com.ctsousa.mover.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 
 import static com.ctsousa.mover.core.util.NumberUtil.toBigDecimal;
@@ -23,12 +29,31 @@ public class FipeServiceImpl implements FipeService {
 
     private final FipeParallelumGateway gateway;
     private final FipeRepository fipeRepository;
+    private final VehicleService vehicleService;
 
     private String hash;
 
-    public FipeServiceImpl(FipeParallelumGateway gateway, FipeRepository fipeRepository) {
+    public FipeServiceImpl(FipeParallelumGateway gateway, FipeRepository fipeRepository, VehicleService vehicleService) {
         this.gateway = gateway;
         this.fipeRepository = fipeRepository;
+        this.vehicleService = vehicleService;
+    }
+
+    @Override
+    public SummaryFipeResponse findByVehicle(Long vehicleId) {
+        VehicleEntity vehicleEntity = vehicleService.findById(vehicleId);
+
+        FipeEntity fipeAcquisition = fipeRepository.findByVehicleAndReference(vehicleId, vehicleEntity.getAcquisitionDate());
+        FipeEntity fipeMonthCurrent = fipeRepository.findByVehicleAndReference(vehicleId, LocalDate.now());
+
+        if (fipeAcquisition == null || fipeMonthCurrent == null) {
+            throw new NotificationException("Fipe não encontrada para o veículo com placa :: " + vehicleEntity.getLicensePlate());
+        }
+
+        String referenceAcquisition = fipeAcquisition.getReferenceMonth() + " / " + fipeAcquisition.getReferenceYear();
+        String referenceMonthCurrent = fipeMonthCurrent.getReferenceMonth() + " / " + fipeMonthCurrent.getReferenceYear();
+
+        return calculatedSummaryFipe(new SummaryFipeResponse(fipeAcquisition.getPrice(), referenceAcquisition, fipeMonthCurrent.getPrice(), referenceMonthCurrent));
     }
 
     @Override
@@ -84,5 +109,15 @@ public class FipeServiceImpl implements FipeService {
 
     private String buildHash(String brand, String model, String fuelType, Integer modelYear, LocalDate reference) {
         return brand.concat(model).concat(fuelType).concat(modelYear.toString()).concat(getMonthYearOfReference(reference));
+    }
+
+    private SummaryFipeResponse calculatedSummaryFipe(SummaryFipeResponse summaryFipeResponse) {
+        summaryFipeResponse.setDepreciatedValue(summaryFipeResponse.getValueAcquisition().subtract(summaryFipeResponse.getValueMonthCurrent()));
+        summaryFipeResponse.setPercentageDepreciated(summaryFipeResponse.getValueAcquisition()
+                .subtract(summaryFipeResponse.getValueMonthCurrent())
+                .divide(summaryFipeResponse.getValueAcquisition(), 4, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100D))
+                .doubleValue());
+        return summaryFipeResponse;
     }
 }

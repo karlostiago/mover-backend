@@ -1,5 +1,6 @@
 package com.ctsousa.mover.request;
 
+import com.ctsousa.mover.core.annotation.DateFormat;
 import com.ctsousa.mover.core.annotation.NotEmpty;
 import com.ctsousa.mover.core.deserializer.LocalDateDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -36,10 +37,12 @@ public class VehicleRequest {
     @NotEmpty(message = "Campo valor adiquisição não pode ser vázio")
     private BigDecimal acquisitionValue;
 
+    @DateFormat(message = "Formato de data do campo data aquisição inválida")
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @NotEmpty(message = "Campo data de aquisição não pode ser vázio")
     private LocalDate acquisitionDate;
 
+    @DateFormat(message = "Formato de data do campo data disponibilidade inválida")
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate availabilityDate;
 

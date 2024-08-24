@@ -10,6 +10,7 @@ import com.ctsousa.mover.request.VehicleRequest;
 import com.ctsousa.mover.response.FuelTypeResponse;
 import com.ctsousa.mover.response.SituationResponse;
 import com.ctsousa.mover.response.VehicleResponse;
+import com.ctsousa.mover.scheduler.FipeInsertCurrentDateScheduler;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ModelService;
 import com.ctsousa.mover.service.VehicleService;
@@ -45,6 +46,7 @@ public class VehicleResource extends BaseResource<VehicleResponse, VehicleReques
         entity.setBrand(brandService.findById(domain.getBrand().getId()));
         entity.setModel(modelService.findById(domain.getModel().getId()));
         entity = vehicleService.save(entity);
+        FipeInsertCurrentDateScheduler.buffers.add(entity);
         return ResponseEntity.ok(toMapper(entity, VehicleResponse.class));
     }
 

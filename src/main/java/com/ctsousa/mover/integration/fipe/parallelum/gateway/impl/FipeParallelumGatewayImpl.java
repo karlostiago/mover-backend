@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static com.ctsousa.mover.core.util.StringUtil.removeLastPoint;
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
 @Component
 public class FipeParallelumGatewayImpl implements FipeParallelumGateway {
@@ -75,7 +76,7 @@ public class FipeParallelumGatewayImpl implements FipeParallelumGateway {
     public FipeParallelumYearEntity findByYear(String codeBrand, String codeModel, Integer modelYear, String fuelType) {
         String nameFilter = modelYear.toString().concat(" ").concat(fuelType);
         return listYear(codeBrand, codeModel).stream()
-                .filter(y -> y.getName().equalsIgnoreCase(nameFilter))
+                .filter(y -> toUppercase(y.getName()).equalsIgnoreCase(nameFilter))
                 .findFirst()
                 .orElse(null);
     }
