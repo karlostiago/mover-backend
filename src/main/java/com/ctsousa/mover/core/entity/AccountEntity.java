@@ -21,9 +21,12 @@ public class AccountEntity extends AbstractEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "icon")
+    @Column(name = "icon", columnDefinition = "LONGTEXT")
     private String icon;
 
     @Column(name = "initial_balance", nullable = false)
     private BigDecimal InitialBalance;
+
+    @Column(name = "caution", nullable = false)
+    private Boolean caution;
 }
