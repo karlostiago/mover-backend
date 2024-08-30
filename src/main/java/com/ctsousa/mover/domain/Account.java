@@ -3,6 +3,9 @@ package com.ctsousa.mover.domain;
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.util.HashUtil;
+import com.ctsousa.mover.core.util.StringUtil;
+import com.ctsousa.mover.enumeration.BankIcon;
 import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,12 +13,15 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
+
 @Getter
 @Setter
 public class Account extends DomainModel<AccountEntity> {
 
     private String name;
-    private String icon;
+    private Integer codeIcon;
+    private String accountNumber;
     private BigDecimal InitialBalance;
     private Boolean caution;
 
@@ -25,9 +31,23 @@ public class Account extends DomainModel<AccountEntity> {
         entity.setId(this.getId());
         entity.setCaution(this.getCaution());
         entity.setActive(this.getActive());
-        entity.setName(this.getName());
-        entity.setIcon(this.getIcon());
+        entity.setName(toUppercase(this.getName()));
+        entity.setAccountNumber(this.getAccountNumber());
         entity.setInitialBalance(this.getInitialBalance());
+
+        BankIcon icon = BankIcon.toCode(this.getCodeIcon());
+        entity.setIcon(icon.name());
+
+        String active = this.getActive() ? "SIM" : "NAO";
+        String caution = this.getCaution() ? "SIM" : "NAO";
+        String context = this.getName()
+                .concat(this.getCodeIcon().toString())
+                .concat(this.getAccountNumber())
+                .concat(this.getInitialBalance().toString())
+                .concat(active)
+                .concat(caution);
+        entity.setHash(HashUtil.buildSHA256(context));
+
         return entity;
     }
 }

@@ -36,8 +36,9 @@ public enum BankIcon {
     BANK_DIGIO(29,"Digio", "https://img.logo.dev/digio.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
     BANK_WILL(30,"Will bank", "https://img.logo.dev/bancowill.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
     BANK_MERCADO_PAGO(31,"Mercado pago", "https://img.logo.dev/mercadopago.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
-    BANK_BANQI(32,"Banco BanQi", "https://img.logo.dev/banqi.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
-    BANK_BARI(33,"Banco Bari", "https://img.logo.dev/bari.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png");
+    BANK_BANQI(32,"Banco banQi", "https://img.logo.dev/banqi.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
+    BANK_BARI(33,"Banco bari", "https://img.logo.dev/bari.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
+    BANK_GENERIC(34,"Banco genérico ", "https://img.logo.dev/bit.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png");
 
     private final Integer code;
     private final String bankName;
@@ -54,5 +55,12 @@ public enum BankIcon {
             if (bankIcon.code.equals(code)) return bankIcon;
         }
         throw new NotificationException("Código para o ícone selecionado não suportada :: " + code);
+    }
+
+    public static BankIcon toName(String name) {
+        for (BankIcon bankIcon : BankIcon.values()) {
+            if (bankIcon.name().equals(name)) return bankIcon;
+        }
+        throw new NotificationException("Código para o ícone selecionado não suportada :: " + name);
     }
 }

@@ -10,7 +10,8 @@ import java.math.BigDecimal;
 public class AccountRequest {
     private Long id;
     private String name;
-    private String icon;
+    private String accountNumber;
+    private Integer codeIcon;
     private BigDecimal InitialBalance;
     private Boolean caution;
     private Boolean active;
