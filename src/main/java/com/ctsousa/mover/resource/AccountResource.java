@@ -8,6 +8,7 @@ import com.ctsousa.mover.enumeration.BankIcon;
 import com.ctsousa.mover.request.AccountRequest;
 import com.ctsousa.mover.response.AccountResponse;
 import com.ctsousa.mover.response.BankIconResponse;
+import com.ctsousa.mover.response.BrandResponse;
 import com.ctsousa.mover.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +51,12 @@ public class AccountResource extends BaseResource<AccountResponse, AccountReques
     public ResponseEntity<List<BankIconResponse>> findAllIcons() {
         List<BankIcon> icons = List.of(BankIcon.values());
         return ResponseEntity.ok(toCollection(icons, BankIconResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<List<AccountResponse>> filterBy(String search) {
+        List<AccountEntity> entities = accountService.filterBy(search);
+        return ResponseEntity.ok(toCollection(entities, AccountResponse.class));
     }
 
     @Override

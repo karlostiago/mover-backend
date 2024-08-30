@@ -13,6 +13,6 @@ public final class StringUtil {
     }
 
     public static String toUppercase(String value) {
-        return value.toUpperCase();
+        return value.toUpperCase().trim();
     }
 }

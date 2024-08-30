@@ -42,12 +42,12 @@ public enum BankIcon {
 
     private final Integer code;
     private final String bankName;
-    private final String urlImage;
+    private final String image;
 
-    BankIcon(Integer code, String bankName, String urlImage) {
+    BankIcon(Integer code, String bankName, String image) {
         this.code = code;
         this.bankName = bankName;
-        this.urlImage = urlImage;
+        this.image = image;
     }
 
     public static BankIcon toCode(Integer code) {

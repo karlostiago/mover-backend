@@ -11,14 +11,18 @@ import java.math.BigDecimal;
 public class AccountResponse {
     private Long id;
     private String name;
-    private String accountNumber;
+    private String number;
     private String icon;
+    private String imageIcon;
+    private Integer codeIcon;
     private BigDecimal InitialBalance;
     private Boolean caution;
     private Boolean active;
 
-    public void setIcon(String icon) {
-        this.icon = BankIcon.toName(icon)
-                .getUrlImage();
+    public void setIcon(String nameIcon) {
+        BankIcon icon = BankIcon.toName(nameIcon);
+        this.icon = icon.name();
+        this.imageIcon = icon.getImage();
+        this.codeIcon = icon.getCode();
     }
 }

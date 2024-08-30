@@ -21,7 +21,7 @@ public class Account extends DomainModel<AccountEntity> {
 
     private String name;
     private Integer codeIcon;
-    private String accountNumber;
+    private String number;
     private BigDecimal InitialBalance;
     private Boolean caution;
 
@@ -32,7 +32,7 @@ public class Account extends DomainModel<AccountEntity> {
         entity.setCaution(this.getCaution());
         entity.setActive(this.getActive());
         entity.setName(toUppercase(this.getName()));
-        entity.setAccountNumber(this.getAccountNumber());
+        entity.setNumber(this.getNumber());
         entity.setInitialBalance(this.getInitialBalance());
 
         BankIcon icon = BankIcon.toCode(this.getCodeIcon());
@@ -42,7 +42,7 @@ public class Account extends DomainModel<AccountEntity> {
         String caution = this.getCaution() ? "SIM" : "NAO";
         String context = this.getName()
                 .concat(this.getCodeIcon().toString())
-                .concat(this.getAccountNumber())
+                .concat(this.getNumber())
                 .concat(this.getInitialBalance().toString())
                 .concat(active)
                 .concat(caution);

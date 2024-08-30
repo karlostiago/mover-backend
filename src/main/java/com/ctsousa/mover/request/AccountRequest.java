@@ -1,5 +1,6 @@
 package com.ctsousa.mover.request;
 
+import com.ctsousa.mover.core.annotation.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,10 +10,20 @@ import java.math.BigDecimal;
 @Setter
 public class AccountRequest {
     private Long id;
+
+    @NotEmpty(message = "Campo descrição da conta não pode ser vázio")
     private String name;
-    private String accountNumber;
+
+    @NotEmpty(message = "Campo número da conta não pode ser vázio")
+    private String number;
+
+    @NotEmpty(message = "Campo ícone não pode ser vázio")
     private Integer codeIcon;
+
+    @NotEmpty(message = "Campo saldo inicial não pode ser vázio")
     private BigDecimal InitialBalance;
+
     private Boolean caution;
+
     private Boolean active;
 }

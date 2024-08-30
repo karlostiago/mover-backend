@@ -9,5 +9,5 @@ public class BankIconResponse {
 
     private Integer code;
     private String bankName;
-    private String urlImage;
+    private String image;
 }

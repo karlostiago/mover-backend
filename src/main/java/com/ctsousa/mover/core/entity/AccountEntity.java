@@ -24,8 +24,8 @@ public class AccountEntity extends AbstractEntity {
     @Column(name = "icon", columnDefinition = "LONGTEXT")
     private String icon;
 
-    @Column(name = "account_number", nullable = false)
-    private String accountNumber;
+    @Column(name = "number", nullable = false)
+    private String number;
 
     @Column(name = "initial_balance", nullable = false)
     private BigDecimal InitialBalance;
