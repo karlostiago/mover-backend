@@ -27,7 +27,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
     @Override
     @Transactional(readOnly = true)
     public UserEntity login(String cpf, String password) {
-        String formattedCpf = CpfValidator.formatCpf(cpf);
+        String formattedCpf = CpfValidator.validateAndFormatCpf(cpf);
         ClientEntity client = clientRepository.existsCpfRegisteredInApplication(formattedCpf);
 
         if (client == null) {

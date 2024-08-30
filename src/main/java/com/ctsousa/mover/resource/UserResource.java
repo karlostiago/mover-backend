@@ -27,7 +27,7 @@ public class UserResource implements UserApi {
 
     @Override
     public ResponseEntity<UserResponse> login(String cpf, String password) {
-        String formattedCpf = CpfValidator.formatCpf(cpf);
+        String formattedCpf = CpfValidator.validateAndFormatCpf(cpf);
 
         UserEntity user = userService.login(formattedCpf, password);
         UserResponse response  = userMapper.toResponse(user);

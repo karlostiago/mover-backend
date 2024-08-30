@@ -14,6 +14,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.ctsousa.mover.core.validation.CpfValidator.validateAndFormatCpf;
+
 @Component
 public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> implements ClientService {
 
@@ -28,22 +30,18 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
 
     @Override
     public ClientEntity existsCpfRegistered(String cpf) {
-        if (StringUtils.isBlank(cpf)) {
-            throw new NotificationException("CPF não fornecido corretamente");
-        }
-        String formattedCpf = CpfValidator.formatCpf(cpf);
 
-        if (!CpfValidator.isValid(formattedCpf)) {
-            throw new NotificationException("CPF inválido");
-        }
-
+        String formattedCpf = validateAndFormatCpf(cpf);
         ClientEntity client = clientRepository.existsCpfRegisteredInApplication(formattedCpf);
         if (client == null) {
-            throw new NotificationNotFoundException("CPF não encontrado no sistema");
+            throw new NotificationNotFoundException("Dados do cliente não encontrados.");
         }
 
         return client;
     }
+
+
+
 
     @Override
     @Transactional
