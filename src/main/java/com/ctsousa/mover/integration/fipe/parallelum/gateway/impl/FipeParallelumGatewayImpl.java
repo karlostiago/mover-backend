@@ -1,6 +1,5 @@
 package com.ctsousa.mover.integration.fipe.parallelum.gateway.impl;
 
-import com.ctsousa.mover.core.util.StringUtil;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.*;
 import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
 import com.ctsousa.mover.integration.fipe.parallelum.service.*;

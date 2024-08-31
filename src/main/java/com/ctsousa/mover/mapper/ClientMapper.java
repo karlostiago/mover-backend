@@ -30,10 +30,10 @@ public class ClientMapper implements MapperToDomain<Client, ClientRequest>, Mapp
         ClientResponse response = new ClientResponse();
         response.setId(entity.getId());
         response.setRg(entity.getRg());
-        response.setCep(entity.getCep());
+//        response.setCep(entity.getCep());
         response.setState(entity.getState());
         response.setName(entity.getName());
-        response.setCpf(entity.getCpf());
+        response.setCpf(entity.getCpfCnpj());
         response.setEmail(entity.getEmail());
         response.setNumber(entity.getNumber());
         if (entity.getUser() != null) {
@@ -53,13 +53,13 @@ public class ClientMapper implements MapperToDomain<Client, ClientRequest>, Mapp
         Client client = new Client();
         client.setId(request.getId());
         client.setName(request.getName());
-        client.setCpf(request.getCpf());
+//        client.setCpf(request.getCpf());
         client.setEmail(request.getEmail());
         client.setNumber(request.getNumber());
         client.setRg(request.getRg());
         client.setBirthDate(request.getBirthDate());
-        client.setCep(request.getCep());
-        client.setState(request.getState());
+//        client.setCep(request.getCep());
+//        client.setState(request.getState());
 
         if (request.getUser() != null) {
             User user = userMapper.toDomain(request.getUser());

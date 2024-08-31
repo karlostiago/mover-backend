@@ -1,7 +1,10 @@
 package com.ctsousa.mover.enumeration;
 
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.util.StringUtil;
 import lombok.Getter;
+
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
 @Getter
 public enum BrazilianStates {
@@ -50,7 +53,7 @@ public enum BrazilianStates {
 
     public static BrazilianStates toName(String name) {
         for (BrazilianStates state : BrazilianStates.values()) {
-            if (state.name().equals(name)) return state;
+            if (state.name().equals(toUppercase(name))) return state;
         }
         throw new NotificationException("Código estado brasileiro, selecionado não suportado :: " + name);
     }

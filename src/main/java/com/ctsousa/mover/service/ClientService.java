@@ -8,4 +8,5 @@ public interface ClientService extends BaseService<ClientEntity, Long> {
     ClientEntity registerClient(ClientEntity client, String password);
     ClientEntity updateClient(Long clientId, ClientEntity clientUpdates);
 
+    ClientEntity findByAddress(Integer postalCode);
 }

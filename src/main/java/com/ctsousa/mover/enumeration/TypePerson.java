@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public enum TypePerson {
-    NATURAL_PERSON(1, "PESSOA FÍSICA"),
-    LEGAL_PERSON(2, "PESSOA JÚRIDICA");
+    NATURAL_PERSON(1, "PESSOA FÍSICA");
+//    LEGAL_PERSON(2, "PESSOA JÚRIDICA");
 
     private final Integer code;
     private final String description;
