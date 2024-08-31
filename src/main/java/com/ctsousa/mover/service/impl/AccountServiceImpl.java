@@ -37,6 +37,7 @@ public class AccountServiceImpl extends BaseServiceImpl<AccountEntity, Long> imp
 
     @Override
     public List<AccountEntity> filterBy(String search) {
+        if (search == null || search.isEmpty()) return accountRepository.findAll();
         return accountRepository.findBy(search);
     }
 }
