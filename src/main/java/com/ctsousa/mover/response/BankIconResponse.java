@@ -8,6 +8,7 @@ import lombok.Setter;
 public class BankIconResponse {
 
     private Integer code;
+    private String prefix;
     private String bankName;
     private String image;
 }
