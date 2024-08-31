@@ -3,15 +3,21 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.ClientApi;
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.domain.Client;
+import com.ctsousa.mover.enumeration.BankIcon;
+import com.ctsousa.mover.enumeration.BrazilianStates;
+import com.ctsousa.mover.enumeration.TypePerson;
 import com.ctsousa.mover.mapper.ClientMapper;
 import com.ctsousa.mover.mapper.UserMapper;
 import com.ctsousa.mover.request.ClientRequest;
-import com.ctsousa.mover.response.ClientResponse;
+import com.ctsousa.mover.response.*;
 import com.ctsousa.mover.service.ClientService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
+import static com.ctsousa.mover.core.mapper.Transform.toCollection;
 import static com.ctsousa.mover.core.validation.PasswordValidator.defaultPasswordMover;
 
 @RestController
@@ -55,5 +61,17 @@ public class ClientResource implements ClientApi {
 
         ClientResponse response = clientMapper.toResponse(updatedClient);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<List<BrazilianStatesResponse>> findAllBrazilianStates() {
+        List<BrazilianStates> states = List.of(BrazilianStates.values());
+        return ResponseEntity.ok(toCollection(states, BrazilianStatesResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<List<TypePersonResponse>> findAllTypePerson() {
+        List<TypePerson> types = List.of(TypePerson.values());
+        return ResponseEntity.ok(toCollection(types, TypePersonResponse.class));
     }
 }

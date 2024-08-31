@@ -4,7 +4,7 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import lombok.Getter;
 
 @Getter
-public enum BrazilState {
+public enum BrazilianStates {
     AC(1, "ACRE"),
     AL(2, "ALAGOAS"),
     AP(3, "AMAPÁ"),
@@ -36,20 +36,20 @@ public enum BrazilState {
     private final Integer code;
     private final String description;
 
-    BrazilState(Integer code, String description) {
+    BrazilianStates(Integer code, String description) {
         this.code = code;
         this.description = description;
     }
 
-    public static BrazilState toCode(Integer code) {
-        for (BrazilState state : BrazilState.values()) {
+    public static BrazilianStates toCode(Integer code) {
+        for (BrazilianStates state : BrazilianStates.values()) {
             if (state.code.equals(code)) return state;
         }
         throw new NotificationException("Código estado brasileiro, selecionado não suportado :: " + code);
     }
 
-    public static BrazilState toName(String name) {
-        for (BrazilState state : BrazilState.values()) {
+    public static BrazilianStates toName(String name) {
+        for (BrazilianStates state : BrazilianStates.values()) {
             if (state.name().equals(name)) return state;
         }
         throw new NotificationException("Código estado brasileiro, selecionado não suportado :: " + name);
