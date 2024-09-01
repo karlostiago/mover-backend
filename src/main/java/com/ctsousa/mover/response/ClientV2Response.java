@@ -31,10 +31,13 @@ public class ClientV2Response {
     private String cellPhone;
     private String state;
     private String typePerson;
+    private Boolean active;
+    private String uf;
     private UserResponse user;
 
     public void setState(String brazilianStateName) {
         BrazilianStates state = BrazilianStates.toName(brazilianStateName);
         this.brazilianStateCode = state.getCode();
+        this.uf = state.name();
     }
 }

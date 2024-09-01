@@ -55,7 +55,7 @@ public class ClientMapper implements MapperToDomain<Client, ClientRequest>, Mapp
         client.setName(request.getName());
 //        client.setCpf(request.getCpf());
         client.setEmail(request.getEmail());
-        client.setNumber(request.getNumber());
+//        client.setNumber(request.getNumber());
         client.setRg(request.getRg());
         client.setBirthDate(request.getBirthDate());
 //        client.setCep(request.getCep());

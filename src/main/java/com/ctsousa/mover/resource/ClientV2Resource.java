@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.ClientV2Api;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.ClientEntity;
+import com.ctsousa.mover.domain.Client;
 import com.ctsousa.mover.enumeration.BrazilianStates;
 import com.ctsousa.mover.enumeration.TypePerson;
 import com.ctsousa.mover.request.ClientV2Request;
@@ -33,11 +34,13 @@ public class ClientV2Resource extends BaseResource<ClientV2Response, ClientV2Req
 
     @Override
     public ResponseEntity<ClientV2Response> add(ClientV2Request request) {
-        return null;
+        Client domain = toMapper(request, Client.class);
+        ClientEntity entity = clientService.save(domain.toEntity());
+        return ResponseEntity.ok(toMapper(entity, ClientV2Response.class));
     }
 
     @Override
-    public ResponseEntity<ClientV2Response> update(Long id, ClientV2Request requestBody) {
+    public ResponseEntity<ClientV2Response> update(Long id, ClientV2Request request) {
         return null;
     }
 

@@ -1,13 +1,17 @@
 package com.ctsousa.mover.domain;
 
-import com.ctsousa.mover.core.annotation.NotEmpty;
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
+import com.ctsousa.mover.core.util.StringUtil;
+import com.ctsousa.mover.enumeration.BrazilianStates;
+import com.ctsousa.mover.enumeration.TypePerson;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
 @Getter
 @Setter
@@ -16,7 +20,7 @@ public class Client implements MapperToEntity<ClientEntity> {
     private String name;
     private String rg;
     private String cpfCnpj;
-    private String number;
+    private String homeNumber;
     private String motherName;
     private Integer brazilianStateCode;
     private String neighborhood;
@@ -33,20 +37,33 @@ public class Client implements MapperToEntity<ClientEntity> {
 
     @Override
     public ClientEntity toEntity() {
+        BrazilianStates state = BrazilianStates.toCode(brazilianStateCode);
+        TypePerson typePerson = TypePerson.toCode(typePersonCode);
+
         ClientEntity entity = new ClientEntity();
-        entity.setId(this.id);
-        entity.setName(this.name);
-        entity.setRg(this.rg);
+        entity.setId(this.getId());
+        entity.setName(toUppercase(this.getName()));
+        entity.setRg(this.getRg());
         entity.setCpfCnpj(this.getCpfCnpj());
-        entity.setBirthDate(this.birthDate);
-        entity.setEmail(this.email);
-        entity.setNumber(this.number);
-//        entity.setState(this.state);
-//        entity.setCep(this.cep);
+        entity.setNumber(this.getHomeNumber());
+        entity.setMotherName(toUppercase(this.getMotherName()));
+        entity.setState(toUppercase(state.getDescription()));
+        entity.setNeighborhood(toUppercase(this.getNeighborhood()));
+        entity.setCity(toUppercase(this.getCity()));
+        entity.setComplement(toUppercase(this.getComplement()));
+        entity.setPublicPlace(toUppercase(this.getPublicPlace()));
+        entity.setTypePerson(typePerson);
+        entity.setBirthDate(this.getBirthDate());
+        entity.setPostalCode(this.getPostalCode());
+        entity.setEmail(toUppercase(this.getEmail()));
+        entity.setTelephone(this.getTelephone());
+        entity.setCellPhone(this.getCellPhone());
+
         if (this.user != null) {
             UserEntity userEntity = this.user.toEntity();
             entity.setUser(userEntity);
         }
+
         return entity;
     }
 }
