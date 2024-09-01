@@ -15,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.ctsousa.mover.core.mapper.Transform.toCollection;
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
@@ -49,7 +51,9 @@ public class AccountResource extends BaseResource<AccountResponse, AccountReques
 
     @Override
     public ResponseEntity<List<BankIconResponse>> findAllIcons() {
-        List<BankIcon> icons = List.of(BankIcon.values());
+        List<BankIcon> icons = Stream.of(BankIcon.values())
+                .sorted(Comparator.comparing(BankIcon::getBankName))
+                .toList();
         return ResponseEntity.ok(toCollection(icons, BankIconResponse.class));
     }
 

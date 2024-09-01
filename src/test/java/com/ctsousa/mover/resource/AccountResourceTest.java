@@ -70,8 +70,8 @@ public class AccountResourceTest {
         mockMvc.perform(get("/accounts/icons")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].bankName").value("BANCO DO BRASIL"))
-                .andExpect(jsonPath("$[1].bankName").value("CAIXA ECONÔMICA"));
+                .andExpect(jsonPath("$[0].bankName").value("AGI Bank"))
+                .andExpect(jsonPath("$[1].bankName").value("B2B"));
     }
 
     @Test

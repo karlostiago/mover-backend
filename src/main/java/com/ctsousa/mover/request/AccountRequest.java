@@ -20,7 +20,6 @@ public class AccountRequest {
     @NotEmpty(message = "Campo ícone não pode ser vázio")
     private Integer codeIcon;
 
-    @NotEmpty(message = "Campo saldo inicial não pode ser vázio")
     private BigDecimal InitialBalance;
 
     private Boolean caution;
