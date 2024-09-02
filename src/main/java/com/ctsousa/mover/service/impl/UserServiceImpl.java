@@ -28,7 +28,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
     @Transactional(readOnly = true)
     public UserEntity login(String cpf, String password) {
         String formattedCpf = CpfValidator.formatCpf(cpf);
-        ClientEntity client = null;//clientRepository.existsCpfCnpjRegisteredInApplication(formattedCpf);
+        ClientEntity client = clientRepository.findByCpfCnpj(formattedCpf);
 
         if (client == null) {
             throw new NotificationException("CPF ou senha inválidos");

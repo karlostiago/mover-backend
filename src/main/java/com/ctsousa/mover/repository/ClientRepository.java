@@ -20,6 +20,7 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Long> {
 
     boolean existsByEmail(String email);
 
+    @Query("SELECT c FROM ClientEntity c left join fetch c.user where c.cpfCnpj = :cpfCnpj")
     ClientEntity findByCpfCnpj(String cpfCnpj);
 
     @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM ClientEntity c WHERE (c.email = :email OR c.cpfCnpj = :cpfCnpj) AND c.id NOT IN (:id)")
