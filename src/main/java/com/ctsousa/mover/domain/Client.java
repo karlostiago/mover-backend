@@ -2,8 +2,9 @@ package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
-import com.ctsousa.mover.core.util.StringUtil;
+import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.enumeration.BrazilianStates;
 import com.ctsousa.mover.enumeration.TypePerson;
 import lombok.Getter;
@@ -20,7 +21,7 @@ public class Client implements MapperToEntity<ClientEntity> {
     private String name;
     private String rg;
     private String cpfCnpj;
-    private String homeNumber;
+    private String number;
     private String motherName;
     private Integer brazilianStateCode;
     private String neighborhood;
@@ -33,10 +34,15 @@ public class Client implements MapperToEntity<ClientEntity> {
     private String email;
     private String telephone;
     private String cellPhone;
+    private Boolean active;
     private User user;
 
     @Override
     public ClientEntity toEntity() {
+        if (!CpfValidator.isValid(this.getCpfCnpj())) {
+            throw new NotificationException("Por gentileza informe um CPF válido.");
+        }
+
         BrazilianStates state = BrazilianStates.toCode(brazilianStateCode);
         TypePerson typePerson = TypePerson.toCode(typePersonCode);
 
@@ -45,7 +51,7 @@ public class Client implements MapperToEntity<ClientEntity> {
         entity.setName(toUppercase(this.getName()));
         entity.setRg(this.getRg());
         entity.setCpfCnpj(this.getCpfCnpj());
-        entity.setNumber(this.getHomeNumber());
+        entity.setNumber(this.getNumber());
         entity.setMotherName(toUppercase(this.getMotherName()));
         entity.setState(toUppercase(state.getDescription()));
         entity.setNeighborhood(toUppercase(this.getNeighborhood()));
@@ -58,6 +64,7 @@ public class Client implements MapperToEntity<ClientEntity> {
         entity.setEmail(toUppercase(this.getEmail()));
         entity.setTelephone(this.getTelephone());
         entity.setCellPhone(this.getCellPhone());
+        entity.setActive(this.getActive());
 
         if (this.user != null) {
             UserEntity userEntity = this.user.toEntity();

@@ -53,7 +53,10 @@ public enum BrazilianStates {
 
     public static BrazilianStates toName(String name) {
         for (BrazilianStates state : BrazilianStates.values()) {
-            if (toUppercase(state.getDescription()).equals(toUppercase(name))) return state;
+            if (toUppercase(state.getDescription()).equals(toUppercase(name))
+                    || toUppercase(state.name()).equals(toUppercase(name))) {
+                return state;
+            }
         }
         throw new NotificationException("Código estado brasileiro, selecionado não suportado :: " + name);
     }

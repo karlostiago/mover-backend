@@ -41,7 +41,11 @@ public class ClientV2Resource extends BaseResource<ClientV2Response, ClientV2Req
 
     @Override
     public ResponseEntity<ClientV2Response> update(Long id, ClientV2Request request) {
-        return null;
+        clientService.existsById(id);
+        Client domain = toMapper(request, Client.class);
+        ClientEntity entity = domain.toEntity();
+        clientService.save(entity);
+        return ResponseEntity.ok(toMapper(entity, ClientV2Response.class));
     }
 
     @Override
@@ -61,6 +65,12 @@ public class ClientV2Resource extends BaseResource<ClientV2Response, ClientV2Req
         ClientEntity entity = clientService.findByAddress(postalCode);
         if (entity == null) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(toMapper(entity, ClientV2Response.class));
+    }
+
+    @Override
+    public ResponseEntity<List<ClientV2Response>> filterBy(String search) {
+        List<ClientEntity> entities = clientService.filterBy(search);
+        return ResponseEntity.ok(toCollection(entities, ClientV2Response.class));
     }
 
     @Override

@@ -35,7 +35,7 @@ public enum BankIcon {
     BANK_PICPAY(28,"","Picpay", "https://img.logo.dev/picpay.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
     BANK_DIGIO(29,"","Digio", "https://img.logo.dev/digio.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
     BANK_WILL(30,"","Will Bank", "https://img.logo.dev/bancowill.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
-    BANK_MERCADO_PAGO(31,"","Mercado pago", "https://img.logo.dev/mercadopago.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
+    BANK_MERCADO_PAGO(31,"","Mercado Pago", "https://img.logo.dev/mercadopago.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
     BANK_BANQI(32,"Banco","BanQi", "https://img.logo.dev/banqi.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
     BANK_BARI(33,"Banco", "Bari", "https://img.logo.dev/bari.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png"),
     BANK_GENERIC(34,"Banco","Genérico ", "https://img.logo.dev/bit.com.br?token=pk_Ld5EdtnrTYGgDMZ4-w9MGg&size=128&format=png");

@@ -5,7 +5,6 @@ import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.notification.NotificationNotFoundException;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
-import com.ctsousa.mover.core.util.StringUtil;
 import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.enumeration.BrazilianStates;
 import com.ctsousa.mover.integration.viacep.entity.ViaCepEntity;
@@ -17,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
@@ -32,6 +33,12 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
         this.clientRepository = clientRepository;
         this.userRepository = userRepository;
         this.viaCepGateway = viaCepGateway;
+    }
+
+    @Override
+    public List<ClientEntity> filterBy(String search) {
+        if (search == null || search.isEmpty()) return clientRepository.findAll();
+        return clientRepository.findBy(toUppercase(search));
     }
 
     @Override

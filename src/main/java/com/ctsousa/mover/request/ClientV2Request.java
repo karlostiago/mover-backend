@@ -25,7 +25,7 @@ public class ClientV2Request {
     private String cpfCnpj;
 
     @NotEmpty(message = "Campo número não pode ser vázio")
-    private String homeNumber;
+    private String number;
 
     @NotEmpty(message = "Campo nome da mãe não pode ser vázio")
     private String motherName;
@@ -62,6 +62,8 @@ public class ClientV2Request {
 
     @NotEmpty(message = "Campo telefone celular não pode ser vázio")
     private String cellPhone;
+
+    private Boolean active;
 
     private UserRequest user;
 }
