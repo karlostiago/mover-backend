@@ -1,6 +1,10 @@
 package com.ctsousa.mover.core.util;
 
+import java.text.Normalizer;
+
 public final class StringUtil {
+    private static final String RG_REMOVER_CHARACTER_SPECIAL = "[^\\p{ASCII}]";
+
     private StringUtil() { }
 
     public static String removeLastPoint(String value) {
@@ -13,6 +17,9 @@ public final class StringUtil {
     }
 
     public static String toUppercase(String value) {
-        return value.toUpperCase();
+        if (value == null || value.isEmpty()) return null;
+        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD);
+        String cleaned = normalized.replaceAll(RG_REMOVER_CHARACTER_SPECIAL, "");
+        return cleaned.toUpperCase().trim();
     }
 }

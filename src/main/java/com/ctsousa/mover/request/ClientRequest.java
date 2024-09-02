@@ -5,8 +5,12 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/***
+ * Essa classe devera ser excluida e mergeada com a ClientV2Request
+ */
 @Getter
 @Setter
+@Deprecated(forRemoval = true)
 public class ClientRequest {
     private Long id;
     private String name;

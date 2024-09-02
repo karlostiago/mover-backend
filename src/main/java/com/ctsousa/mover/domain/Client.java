@@ -2,93 +2,87 @@ package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
+import com.ctsousa.mover.core.validation.CpfValidator;
+import com.ctsousa.mover.enumeration.BrazilianStates;
+import com.ctsousa.mover.enumeration.TypePerson;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
 @Getter
 @Setter
 public class Client implements MapperToEntity<ClientEntity> {
-
     private Long id;
-
     private String name;
-
     private String rg;
-
-    private String cpf;
-
-    private LocalDate birthDate;
-
-    private String email;
-
+    private String cpfCnpj;
     private String number;
-
-    private String state;
-
-    private String cep;
-
+    private String motherName;
+    private Integer brazilianStateCode;
+    private String neighborhood;
+    private String city;
+    private String complement;
+    private String publicPlace;
+    private Integer typePersonCode;
+    private LocalDate birthDate;
+    private String postalCode;
+    private String email;
+    private String telephone;
+    private String cellPhone;
+    private Boolean active;
     private User user;
-
-    public void setName(String name) {
-        if (StringUtils.isBlank(name)) throw new RuntimeException("Name is blank");
-        this.name = name.toUpperCase();
-    }
-
-    public void setRg(String rg) {
-        if (StringUtils.isBlank(rg)) throw new RuntimeException("RG is blank");
-        this.rg = rg;
-    }
-
-    public void setCpf(String cpf) {
-        if (StringUtils.isBlank(cpf)) throw new RuntimeException("CPF is blank");
-        this.cpf = cpf;
-    }
-
-    public void setBirthDate(LocalDate birthDate) {
-        if (birthDate == null) throw new RuntimeException("Birth date is null");
-        this.birthDate = birthDate;
-    }
-
-    public void setEmail(String email) {
-        if (StringUtils.isBlank(email)) throw new RuntimeException("Email is blank");
-        this.email = email.toUpperCase();
-    }
-
-    public void setNumber(String number) {
-        if (StringUtils.isBlank(number)) throw new RuntimeException("Number is blank");
-        this.number = number;
-    }
-
-    public void setState(String state) {
-        if (StringUtils.isBlank(state)) throw new RuntimeException("State is blank");
-        this.state = state;
-    }
-
-    public void setCep(String cep) {
-        if (StringUtils.isBlank(cep)) throw new RuntimeException("CEP is blank");
-        this.cep = cep;
-    }
 
     @Override
     public ClientEntity toEntity() {
+        if (!CpfValidator.isValid(this.getCpfCnpj())) {
+            throw new NotificationException("Por gentileza informe um CPF válido.");
+        }
+
+        if (this.getCellPhone().length() != 11) {
+            throw new NotificationException("Por gentileza informar um número de celular válido.");
+        }
+
+        if (this.getTelephone() != null && this.getTelephone().length() != 10) {
+            throw new NotificationException("Por gentileza informar um número de telefone fixo válido.");
+        }
+
+        if (!this.getEmail().contains("@")) {
+            throw new NotificationException("Por gentileza informe um e-mail válido.");
+        }
+
+        BrazilianStates state = BrazilianStates.toCode(brazilianStateCode);
+        TypePerson typePerson = TypePerson.toCode(typePersonCode);
+
         ClientEntity entity = new ClientEntity();
-        entity.setId(this.id);
-        entity.setName(this.name);
-        entity.setRg(this.rg);
-        entity.setCpf(this.cpf);
-        entity.setBirthDate(this.birthDate);
-        entity.setEmail(this.email);
-        entity.setNumber(this.number);
-        entity.setState(this.state);
-        entity.setCep(this.cep);
+        entity.setId(this.getId());
+        entity.setName(toUppercase(this.getName()));
+        entity.setRg(this.getRg());
+        entity.setCpfCnpj(this.getCpfCnpj());
+        entity.setNumber(this.getNumber());
+        entity.setMotherName(toUppercase(this.getMotherName()));
+        entity.setState(toUppercase(state.getDescription()));
+        entity.setNeighborhood(toUppercase(this.getNeighborhood()));
+        entity.setCity(toUppercase(this.getCity()));
+        entity.setComplement(toUppercase(this.getComplement()));
+        entity.setPublicPlace(toUppercase(this.getPublicPlace()));
+        entity.setTypePerson(typePerson);
+        entity.setBirthDate(this.getBirthDate());
+        entity.setPostalCode(this.getPostalCode());
+        entity.setEmail(toUppercase(this.getEmail()));
+        entity.setTelephone(this.getTelephone());
+        entity.setCellPhone(this.getCellPhone());
+        entity.setActive(this.getActive());
+
         if (this.user != null) {
             UserEntity userEntity = this.user.toEntity();
             entity.setUser(userEntity);
         }
+
         return entity;
     }
 }

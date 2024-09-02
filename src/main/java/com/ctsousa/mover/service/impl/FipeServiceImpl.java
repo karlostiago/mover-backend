@@ -47,7 +47,7 @@ public class FipeServiceImpl implements FipeService {
         FipeEntity fipeMonthCurrent = fipeRepository.findByVehicleAndReference(vehicleId, LocalDate.now());
 
         if (fipeAcquisition == null || fipeMonthCurrent == null) {
-            throw new NotificationException("Fipe não encontrada para o veículo com placa :: " + vehicleEntity.getLicensePlate());
+            return new SummaryFipeResponse(BigDecimal.ZERO, null, BigDecimal.ZERO, null);
         }
 
         String referenceAcquisition = fipeAcquisition.getReferenceMonth() + " / " + fipeAcquisition.getReferenceYear();

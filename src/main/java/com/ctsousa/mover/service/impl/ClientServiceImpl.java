@@ -4,8 +4,12 @@ import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.notification.NotificationNotFoundException;
+import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.core.validation.CpfValidator;
+import com.ctsousa.mover.enumeration.BrazilianStates;
+import com.ctsousa.mover.integration.viacep.entity.ViaCepEntity;
+import com.ctsousa.mover.integration.viacep.gateway.ViaCepGateway;
 import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.UserRepository;
 import com.ctsousa.mover.service.ClientService;
@@ -14,47 +18,89 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.ctsousa.mover.core.validation.CpfValidator.validateAndFormatCpf;
+import java.util.List;
+
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
 @Component
 public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> implements ClientService {
 
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
+    private final ViaCepGateway viaCepGateway;
 
-    public ClientServiceImpl(JpaRepository<ClientEntity, Long> repository, ClientRepository clientRepository, UserRepository userRepository) {
+    public ClientServiceImpl(JpaRepository<ClientEntity, Long> repository, ClientRepository clientRepository, UserRepository userRepository, ViaCepGateway viaCepGateway) {
         super(repository);
         this.clientRepository = clientRepository;
         this.userRepository = userRepository;
+        this.viaCepGateway = viaCepGateway;
+    }
+
+    @Override
+    public ClientEntity save(ClientEntity entity) {
+        if (entity.isNew()) {
+            if (clientRepository.existsByEmail(entity.getEmail())) {
+                throw new NotificationException("Já existe um cliente com o e-mail informado.");
+            }
+            if (clientRepository.existsByCpfCnpj(entity.getCpfCnpj())) {
+                throw new NotificationException("Já existe um cliente com o CPF ou CNPJ informado.");
+            }
+        }
+        else {
+            if (clientRepository.existsByEmailAndCpfCnpjNotId(entity.getEmail(), entity.getCpfCnpj(), entity.getId())) {
+                throw new NotificationException("Não foi possível atualizar, pois já tem um cliente, com email ou cpf informado.", Severity.WARNING);
+            }
+        }
+        return super.save(entity);
+    }
+
+    @Override
+    public List<ClientEntity> filterBy(String search) {
+        if (search == null || search.isEmpty()) return clientRepository.findAll();
+        return clientRepository.findBy(toUppercase(search));
+    }
+
+    @Override
+    public ClientEntity findByAddress(Integer postalCode) {
+        ViaCepEntity viaCepEntity = viaCepGateway.findByPostalCode(postalCode);
+
+        if (viaCepEntity.isErro()) {
+            return null;
+        }
+
+        ClientEntity entity = new ClientEntity();
+        entity.setPublicPlace(toUppercase(viaCepEntity.getLogradouro()));
+        entity.setNeighborhood(toUppercase(viaCepEntity.getBairro()));
+        entity.setCity(toUppercase(viaCepEntity.getLocalidade()));
+
+        BrazilianStates state = BrazilianStates.toName(viaCepEntity.getUf());
+        entity.setState(state.name());
+
+        return entity;
     }
 
     @Override
     public ClientEntity existsCpfRegistered(String cpf) {
+        if (StringUtils.isBlank(cpf)) {
+            throw new NotificationException("CPF não fornecido corretamente");
+        }
+        String formattedCpf = CpfValidator.validateAndFormatCpf(cpf);
 
-        String formattedCpf = validateAndFormatCpf(cpf);
-        ClientEntity client = clientRepository.existsCpfRegisteredInApplication(formattedCpf);
+        if (!CpfValidator.isValid(formattedCpf)) {
+            throw new NotificationException("CPF inválido");
+        }
+
+        ClientEntity client = clientRepository.findByCpfCnpj(formattedCpf);
         if (client == null) {
-            throw new NotificationNotFoundException("Dados do cliente não encontrados.");
+            throw new NotificationNotFoundException("CPF não encontrado no sistema");
         }
 
         return client;
     }
 
-
-
-
     @Override
     @Transactional
     public ClientEntity registerClient(ClientEntity client, String password) {
-
-        if(clientRepository.existsClientEntityByEmail(client.getEmail())) {
-            throw new NotificationException("Já existe um cliente registrado com esse email");
-        }
-
-        if (clientRepository.existsCpfRegisteredInApplication(client.getCpf()) != null) {
-            throw new NotificationException("Já existe um cliente registrado com esse CPF");
-        }
-
         if (userRepository.existsUserEntityByEmail(client.getEmail())) {
             throw new NotificationException("Já existe um usuário registrado com esse email");
         }
@@ -63,70 +109,49 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
             throw new NotificationException("Já existe um usuário registrado com esse login");
         }
 
-        ClientEntity savedClient = clientRepository.save(client);
-        createUserForClient(savedClient, password);
-
-        return savedClient;
+        return createUserForClient(client, password);
     }
 
     @Override
     @Transactional
-    public ClientEntity updateClient(Long clientId, ClientEntity clientUpdates) {
+    public ClientEntity updateClient(Long clientId, ClientEntity clientUpdated) {
         ClientEntity existingClient = clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotificationNotFoundException("Cliente não encontrado"));
 
-        if (!existingClient.getCpf().equals(clientUpdates.getCpf()) &&
-                clientRepository.existsCpfRegisteredInApplication(clientUpdates.getCpf()) != null) {
-            throw new NotificationException("Já existe um cliente registrado com esse CPF");
+        if (clientRepository.existsByEmailAndCpfCnpjNotId(existingClient.getEmail(), existingClient.getCpfCnpj(), existingClient.getId())) {
+            throw new NotificationException("Já existe um cliente registrado com esse CPF ou EMAIL");
         }
 
-        if (!existingClient.getEmail().equals(clientUpdates.getEmail()) &&
-                userRepository.existsUserEntityByEmail(clientUpdates.getEmail())) {
+        if (!existingClient.getEmail().equals(clientUpdated.getEmail()) &&
+                userRepository.existsUserEntityByEmail(clientUpdated.getEmail())) {
             throw new NotificationException("Já existe um usuário registrado com esse email");
         }
 
-        if (!existingClient.getEmail().equals(clientUpdates.getEmail()) &&
-                clientRepository.existsClientEntityByEmail(clientUpdates.getEmail())) {
-            throw new NotificationException("Já existe um cliente registrado com esse email");
-        }
-
-        if (!existingClient.getUser().getLogin().equals(clientUpdates.getUser().getLogin()) &&
-                userRepository.existsUserEntityByLogin(clientUpdates.getUser().getLogin())) {
+        if (!existingClient.getUser().getLogin().equals(clientUpdated.getUser().getLogin()) &&
+                userRepository.existsUserEntityByLogin(clientUpdated.getUser().getLogin())) {
             throw new NotificationException("Já existe um usuário registrado com esse login");
         }
 
-        existingClient.setName(clientUpdates.getName());
-        existingClient.setRg(clientUpdates.getRg());
-        existingClient.setCpf(clientUpdates.getCpf());
-        existingClient.setBirthDate(clientUpdates.getBirthDate());
-        existingClient.setEmail(clientUpdates.getEmail());
-        existingClient.setMotherName(clientUpdates.getMotherName());
-        existingClient.setPublicPlace(clientUpdates.getPublicPlace());
-        existingClient.setNumber(clientUpdates.getNumber());
-        existingClient.setComplement(clientUpdates.getComplement());
-        existingClient.setDistrict(clientUpdates.getDistrict());
-        existingClient.setState(clientUpdates.getState());
-        existingClient.setCep(clientUpdates.getCep());
-        existingClient.setAttachment(clientUpdates.getAttachment());
-
-        UserEntity existingUser = existingClient.getUser();
+        clientUpdated.setId(clientId);
+        UserEntity existingUser = clientUpdated.getUser();
 
         if (existingUser != null) {
-            existingUser.setName(clientUpdates.getUser().getName());
-            existingUser.setEmail(clientUpdates.getUser().getEmail());
-            if (StringUtils.isNotBlank(clientUpdates.getUser().getPassword())) {
-                existingUser.setPassword(clientUpdates.getUser().getPassword());
+            existingUser.setName(clientUpdated.getUser().getName());
+            existingUser.setEmail(clientUpdated.getUser().getEmail());
+            if (StringUtils.isNotBlank(clientUpdated.getUser().getPassword())) {
+                existingUser.setPassword(clientUpdated.getUser().getPassword());
             }
         }
 
-        return clientRepository.save(existingClient);
+        return clientRepository.save(clientUpdated);
     }
 
 
-    private void createUserForClient(ClientEntity savedClient, String password) {
-        UserEntity user = createUserFromClient(savedClient, password);
-        savedClient.setUser(user);
+    private ClientEntity createUserForClient(ClientEntity client, String password) {
+        UserEntity user = createUserFromClient(client, password);
+        client.setUser(user);
         userRepository.save(user);
+        return clientRepository.save(client);
     }
 
     private UserEntity createUserFromClient(ClientEntity client, String password) {
