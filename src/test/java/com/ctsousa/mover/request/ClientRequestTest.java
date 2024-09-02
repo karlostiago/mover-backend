@@ -17,30 +17,30 @@ public class ClientRequestTest {
         String expectedRg = "rg";
         String expectedEmail = "email";
         String expectedNumber = "number";
-        String expectedState = "state";
+        Integer expectedState = 1;
         String expectedCep = "cep";
         LocalDate expectedBirthDate = LocalDate.of(2024, 8, 17);
         UserRequest expectedUser = new UserRequest();
 
         request.setId(expectedId);
         request.setName(expectedName);
-        request.setCpf(expectedCpf);
+        request.setCpfCnpj(expectedCpf);
         request.setRg(expectedRg);
         request.setEmail(expectedEmail);
         request.setNumber(expectedNumber);
-        request.setState(expectedState);
-        request.setCep(expectedCep);
+        request.setBrazilianStateCode(1);
+        request.setPostalCode(expectedCep);
         request.setBirthDate(expectedBirthDate);
         request.setUser(expectedUser);
 
         assertEquals(expectedId, request.getId());
         assertEquals(expectedName, request.getName());
-        assertEquals(expectedCpf, request.getCpf());
+        assertEquals(expectedCpf, request.getCpfCnpj());
         assertEquals(expectedRg, request.getRg());
         assertEquals(expectedEmail, request.getEmail());
         assertEquals(expectedNumber, request.getNumber());
-        assertEquals(expectedState, request.getState());
-        assertEquals(expectedCep, request.getCep());
+        assertEquals(expectedState, request.getBrazilianStateCode().intValue());
+        assertEquals(expectedCep, request.getPostalCode());
         assertEquals(expectedBirthDate, request.getBirthDate());
         assertEquals(expectedUser, request.getUser());
     }

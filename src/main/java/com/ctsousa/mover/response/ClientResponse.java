@@ -38,6 +38,7 @@ public class ClientResponse {
     public void setState(String brazilianStateName) {
         BrazilianStates state = BrazilianStates.toName(brazilianStateName);
         this.brazilianStateCode = state.getCode();
+        this.state = state.getDescription();
         this.uf = state.name();
     }
 }

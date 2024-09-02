@@ -13,7 +13,7 @@ public class ClientResponseTest {
         Long expectedId = 1L;
         String expectedName = "Client Name";
         String expectedRg = "123456789";
-        String expectedState = "State";
+        String expectedState = "CE";
         String expectedCep = "12345-678";
         String expectedCpf = "98765432100";
         String expectedEmail = "client@example.com";
@@ -30,8 +30,8 @@ public class ClientResponseTest {
         response.setName(expectedName);
         response.setRg(expectedRg);
         response.setState(expectedState);
-        response.setCep(expectedCep);
-        response.setCpf(expectedCpf);
+        response.setPostalCode(expectedCep);
+        response.setCpfCnpj(expectedCpf);
         response.setEmail(expectedEmail);
         response.setNumber(expectedNumber);
         response.setUser(expectedUser);
@@ -39,9 +39,9 @@ public class ClientResponseTest {
         assertEquals(expectedId, response.getId());
         assertEquals(expectedName, response.getName());
         assertEquals(expectedRg, response.getRg());
-        assertEquals(expectedState, response.getState());
-        assertEquals(expectedCep, response.getCep());
-        assertEquals(expectedCpf, response.getCpf());
+        assertEquals(expectedState, response.getUf());
+        assertEquals(expectedCep, response.getPostalCode());
+        assertEquals(expectedCpf, response.getCpfCnpj());
         assertEquals(expectedEmail, response.getEmail());
         assertEquals(expectedNumber, response.getNumber());
 
