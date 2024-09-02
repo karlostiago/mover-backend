@@ -20,12 +20,12 @@ public class CpfValidator {
     public static String validateAndFormatCpf(String cpf) {
 
         if (StringUtils.isBlank(cpf)) {
-            throw new NotificationException("Ops! Mensagem:\nDados do cliente não encontrados.");
+            throw new NotificationException("Dados do cliente não encontrados.");
         }
         cpf = removeFormatting(cpf);
 
         if (!isCpf(cpf)) {
-            throw new NotificationException("Ops! Mensagem:\nFormato do CPF incorreto.");
+            throw new NotificationException("Formato do CPF incorreto.");
         }
 
         return cpf;
