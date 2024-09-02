@@ -20,6 +20,7 @@ import java.util.List;
 
 import static com.ctsousa.mover.core.mapper.Transform.toCollection;
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
+import static com.ctsousa.mover.core.validation.PasswordValidator.defaultPasswordMover;
 
 @RestController
 @RequestMapping("/v2/clients")
@@ -71,6 +72,20 @@ public class ClientV2Resource extends BaseResource<ClientV2Response, ClientV2Req
     public ResponseEntity<List<ClientV2Response>> filterBy(String search) {
         List<ClientEntity> entities = clientService.filterBy(search);
         return ResponseEntity.ok(toCollection(entities, ClientV2Response.class));
+    }
+
+    @Override
+    public ResponseEntity<ClientV2Response> existingCpfRegister(String cpf) {
+        ClientEntity entity = clientService.existsCpfRegistered(cpf);
+        return ResponseEntity.ok(toMapper(entity, ClientV2Response.class));
+    }
+
+    @Override
+    public ResponseEntity<ClientV2Response> registerClientAndUser(ClientV2Request request) {
+        Client domain = toMapper(request, Client.class);
+        String password = domain.getUser() != null ? domain.getUser().getPassword() : defaultPasswordMover();
+        ClientEntity entity = clientService.registerClient(domain.toEntity(), password);
+        return ResponseEntity.ok(toMapper(entity, ClientV2Response.class));
     }
 
     @Override

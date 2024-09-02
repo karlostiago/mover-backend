@@ -5,6 +5,7 @@ import com.ctsousa.mover.response.ClientResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Deprecated(forRemoval = true)
 public interface ClientApi {
 
     @GetMapping("/existing-cpf/{cpf}")

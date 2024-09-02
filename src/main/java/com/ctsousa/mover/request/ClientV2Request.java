@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
 import java.time.LocalDate;
 
 @Getter

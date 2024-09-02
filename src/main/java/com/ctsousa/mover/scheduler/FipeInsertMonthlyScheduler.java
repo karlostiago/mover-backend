@@ -25,7 +25,7 @@ public class FipeInsertMonthlyScheduler extends FipeBaseScheduler implements Sch
     }
 
     @Override
-    @Scheduled(cron = "5 6 1 * * *") // Executa uma vez por mês no dia 1 as 6h da manhã
+    @Scheduled(cron = "5 6 1 * * *") // Executa uma vez por mês no dia 1 as 06h05 da manhã
     public void process() {
         List<VehicleEntity> entities = vehicleService.findAll();
 

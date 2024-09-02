@@ -43,6 +43,18 @@ public class Client implements MapperToEntity<ClientEntity> {
             throw new NotificationException("Por gentileza informe um CPF válido.");
         }
 
+        if (this.getCellPhone().length() != 11) {
+            throw new NotificationException("Por gentileza informar um número de celular válido.");
+        }
+
+        if (this.getTelephone() != null && this.getTelephone().length() != 10) {
+            throw new NotificationException("Por gentileza informar um número de telefone fixo válido.");
+        }
+
+        if (!this.getEmail().contains("@")) {
+            throw new NotificationException("Por gentileza informe um e-mail válido.");
+        }
+
         BrazilianStates state = BrazilianStates.toCode(brazilianStateCode);
         TypePerson typePerson = TypePerson.toCode(typePersonCode);
 
