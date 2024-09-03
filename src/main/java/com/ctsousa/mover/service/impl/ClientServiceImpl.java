@@ -84,18 +84,19 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
 
     @Override
     public ClientEntity existsCpfRegistered(String cpf) {
+
         if (StringUtils.isBlank(cpf)) {
             throw new NotificationException("CPF não fornecido corretamente");
         }
         String formattedCpf = CpfValidator.validateAndFormatCpf(cpf);
 
         if (!CpfValidator.isValid(formattedCpf)) {
-            throw new NotificationException("CPF inválido");
+            throw new NotificationException("CPF inválido.");
         }
 
         ClientEntity client = clientRepository.findByCpfCnpj(formattedCpf);
         if (client == null) {
-            throw new NotificationNotFoundException("CPF não encontrado no sistema");
+            throw new NotificationNotFoundException("Dados do cliente não encontrados.");
         }
 
         return client;
