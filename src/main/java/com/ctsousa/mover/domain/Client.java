@@ -5,6 +5,7 @@ import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
 import com.ctsousa.mover.core.validation.CpfValidator;
+import com.ctsousa.mover.core.validation.EmailValidator;
 import com.ctsousa.mover.enumeration.BrazilianStates;
 import com.ctsousa.mover.enumeration.TypePerson;
 import lombok.Getter;
@@ -51,9 +52,7 @@ public class Client implements MapperToEntity<ClientEntity> {
             throw new NotificationException("Por gentileza informar um número de telefone fixo válido.");
         }
 
-        if (!this.getEmail().contains("@")) {
-            throw new NotificationException("Por gentileza informe um e-mail válido.");
-        }
+        EmailValidator.valid(this.getEmail());
 
         BrazilianStates state = BrazilianStates.toCode(brazilianStateCode);
         TypePerson typePerson = TypePerson.toCode(typePersonCode);

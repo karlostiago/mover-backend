@@ -14,6 +14,7 @@ import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.UserRepository;
 import com.ctsousa.mover.service.ClientService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,13 +27,13 @@ import static com.ctsousa.mover.core.validation.PasswordValidator.defaultPasswor
 @Component
 public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> implements ClientService {
 
-    private final ClientRepository clientRepository;
+    @Autowired
+    private ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final ViaCepGateway viaCepGateway;
 
-    public ClientServiceImpl(JpaRepository<ClientEntity, Long> repository, ClientRepository clientRepository, UserRepository userRepository, ViaCepGateway viaCepGateway) {
-        super(repository);
-        this.clientRepository = clientRepository;
+    public ClientServiceImpl(ClientRepository clientRepository, UserRepository userRepository, ViaCepGateway viaCepGateway) {
+        super(clientRepository);
         this.userRepository = userRepository;
         this.viaCepGateway = viaCepGateway;
     }
