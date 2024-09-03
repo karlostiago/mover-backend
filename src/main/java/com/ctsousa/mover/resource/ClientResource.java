@@ -4,6 +4,7 @@ import com.ctsousa.mover.core.api.ClientApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.domain.Client;
+import com.ctsousa.mover.domain.User;
 import com.ctsousa.mover.enumeration.BrazilianStates;
 import com.ctsousa.mover.enumeration.TypePerson;
 import com.ctsousa.mover.request.ClientRequest;
@@ -37,14 +38,15 @@ public class ClientResource extends BaseResource<ClientResponse, ClientRequest, 
     public ResponseEntity<ClientResponse> add(ClientRequest request) {
         Client domain = toMapper(request, Client.class);
         ClientEntity entity = clientService.save(domain.toEntity());
+
         return ResponseEntity.ok(toMapper(entity, ClientResponse.class));
     }
 
     @Override
     public ResponseEntity<ClientResponse> update(Long id, ClientRequest request) {
         clientService.existsById(id);
-        Client domain = toMapper(request, Client.class);
-        ClientEntity entity = domain.toEntity();
+        Client clientDomain = toMapper(request, Client.class);
+        ClientEntity entity = clientDomain.toEntity();
         clientService.save(entity);
         return ResponseEntity.ok(toMapper(entity, ClientResponse.class));
     }

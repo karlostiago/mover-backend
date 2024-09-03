@@ -65,7 +65,7 @@ public class ClientEntity extends AbstractEntity {
     @Column(name = "cell_phone", nullable = false)
     private String cellPhone;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private UserEntity user;
 }

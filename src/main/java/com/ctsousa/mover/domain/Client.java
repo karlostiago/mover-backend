@@ -80,6 +80,10 @@ public class Client implements MapperToEntity<ClientEntity> {
 
         if (this.user != null) {
             UserEntity userEntity = this.user.toEntity();
+            userEntity.setName(entity.getName());
+            userEntity.setEmail(entity.getEmail());
+            userEntity.setLogin(entity.getEmail());
+            userEntity.setActive(this.getActive());
             entity.setUser(userEntity);
         }
 

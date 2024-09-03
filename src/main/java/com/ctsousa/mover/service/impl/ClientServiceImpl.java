@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
+import static com.ctsousa.mover.core.validation.PasswordValidator.defaultPasswordMover;
 
 @Component
 public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> implements ClientService {
@@ -51,7 +52,9 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
                 throw new NotificationException("Não foi possível atualizar, pois já tem um cliente, com email ou cpf informado.", Severity.WARNING);
             }
         }
-        return super.save(entity);
+        ClientEntity savedEntity = super.save(entity);
+        associateClientWithUser(savedEntity, null);
+        return savedEntity;
     }
 
     @Override
@@ -109,58 +112,32 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
             throw new NotificationException("Já existe um usuário registrado com esse login");
         }
 
-        return createUserForClient(client, password);
+        associateClientWithUser(client, password);
+
+        return client;
     }
 
-    @Override
-    @Transactional
-    public ClientEntity updateClient(Long clientId, ClientEntity clientUpdated) {
-        ClientEntity existingClient = clientRepository.findById(clientId)
-                .orElseThrow(() -> new NotificationNotFoundException("Cliente não encontrado"));
-
-        if (clientRepository.existsByEmailAndCpfCnpjNotId(existingClient.getEmail(), existingClient.getCpfCnpj(), existingClient.getId())) {
-            throw new NotificationException("Já existe um cliente registrado com esse CPF ou EMAIL");
+    private void associateClientWithUser(ClientEntity client, String password) {
+        UserEntity user = client.getUser();
+        if (user == null) {
+            user = createUser(client, password);
+            client.setUser(user);
         }
-
-        if (!existingClient.getEmail().equals(clientUpdated.getEmail()) &&
-                userRepository.existsUserEntityByEmail(clientUpdated.getEmail())) {
-            throw new NotificationException("Já existe um usuário registrado com esse email");
+        else {
+            user.setPassword(password == null ? user.getPassword() : password);
+            client.setUser(user);
         }
-
-        if (!existingClient.getUser().getLogin().equals(clientUpdated.getUser().getLogin()) &&
-                userRepository.existsUserEntityByLogin(clientUpdated.getUser().getLogin())) {
-            throw new NotificationException("Já existe um usuário registrado com esse login");
-        }
-
-        clientUpdated.setId(clientId);
-        UserEntity existingUser = clientUpdated.getUser();
-
-        if (existingUser != null) {
-            existingUser.setName(clientUpdated.getUser().getName());
-            existingUser.setEmail(clientUpdated.getUser().getEmail());
-            if (StringUtils.isNotBlank(clientUpdated.getUser().getPassword())) {
-                existingUser.setPassword(clientUpdated.getUser().getPassword());
-            }
-        }
-
-        return clientRepository.save(clientUpdated);
-    }
-
-
-    private ClientEntity createUserForClient(ClientEntity client, String password) {
-        UserEntity user = createUserFromClient(client, password);
-        client.setUser(user);
         userRepository.save(user);
-        return clientRepository.save(client);
+        clientRepository.save(client);
     }
 
-    private UserEntity createUserFromClient(ClientEntity client, String password) {
+    private UserEntity createUser(ClientEntity client, String password) {
         UserEntity user = new UserEntity();
         user.setName(client.getName());
-        user.setEmail(client.getEmail().toLowerCase());
-        user.setLogin(client.getEmail().toLowerCase());
+        user.setEmail(toUppercase(client.getEmail()));
+        user.setLogin(toUppercase(client.getEmail()));
         user.setClientId(client.getId());
-        user.setPassword(password);
+        user.setPassword(password == null ? defaultPasswordMover() : password);
         return user;
     }
 }
