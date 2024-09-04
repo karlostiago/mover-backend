@@ -48,7 +48,7 @@ public class Client implements MapperToEntity<ClientEntity> {
             throw new NotificationException("Por gentileza informar um número de celular válido.");
         }
 
-        if (this.getTelephone() != null && this.getTelephone().length() != 10) {
+        if (this.getTelephone() != null && !this.getTelephone().isEmpty() && this.getTelephone().length() != 10) {
             throw new NotificationException("Por gentileza informar um número de telefone fixo válido.");
         }
 
