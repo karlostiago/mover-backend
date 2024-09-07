@@ -7,8 +7,8 @@ import java.util.List;
 
 public interface ClientService extends BaseService<ClientEntity, Long> {
     ClientEntity existsCpfRegistered(String cpf);
+
     ClientEntity registerClient(ClientEntity client, String password);
-    ClientEntity updateClient(Long clientId, ClientEntity clientUpdates);
 
     ClientEntity findByAddress(Integer postalCode);
 
