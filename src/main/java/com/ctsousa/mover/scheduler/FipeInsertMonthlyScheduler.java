@@ -42,7 +42,7 @@ public class FipeInsertMonthlyScheduler extends FipeBaseScheduler implements Sch
                 String context = buildHash(brandName, modelName, fuelType, modelYear, reference);
                 hash = HashUtil.buildSHA256(context);
 
-                if (fipeRepository.existsByHash(hash)) return;
+                if (fipeRepository.existsByHash(hash)) continue;
 
                 FipeParallelumFipeEntity fipeEntity = findByFipeIntegration(brandName, modelName, fuelType, modelYear, reference);
 

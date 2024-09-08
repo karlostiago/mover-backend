@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,7 +64,8 @@ public class Transform {
 
             boolean mapped = directMapping(sourceFields, targetField, source, target)
                     || mapperByAssociation(sourceFields, targetField, source, target)
-                    || mapperByInvertAssociation(sourceFields, targetField, source, target);
+                    || mapperByInvertAssociation(sourceFields, targetField, source, target)
+                    || mapperByListAssociation(sourceFields, targetField, source, target);
 
             if (!mapped) mapperByComplexAssociation(sourceFields, targetField, source, target);
         }
@@ -172,6 +174,41 @@ public class Transform {
                 targetField.setAccessible(false);
             }
         }
+        return mapped;
+    }
+
+    private static <S, T> Boolean mapperByListAssociation(Field[] sourceFields, Field targetField, S source, T target) {
+        boolean mapped = false;
+
+        if (List.class.isAssignableFrom(targetField.getType())) {
+            for (Field sourceField : sourceFields) {
+                try {
+                    if (targetField.getName().equalsIgnoreCase(sourceField.getName())) {
+                        sourceField.setAccessible(true);
+                        List<?> sourceList = (List<?>) sourceField.get(source);
+
+                        if (sourceList != null) {
+                            ParameterizedType listType = (ParameterizedType) targetField.getGenericType();
+                            Class<?> targetListClass = (Class<?>) listType.getActualTypeArguments()[0];
+                            List<Object> targetList = new ArrayList<>();
+                            for (Object sourceItem : sourceList) {
+                                Object targetItem = toMapper(sourceItem, targetListClass);
+                                targetList.add(targetItem);
+                            }
+                            targetField.setAccessible(true);
+                            targetField.set(target, targetList);
+                            mapped = true;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                } finally {
+                    sourceField.setAccessible(false);
+                    targetField.setAccessible(false);
+                }
+            }
+        }
+
         return mapped;
     }
 

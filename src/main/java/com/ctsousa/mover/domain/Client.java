@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
@@ -37,6 +39,7 @@ public class Client implements MapperToEntity<ClientEntity> {
     private String cellPhone;
     private Boolean active;
     private User user;
+    private List<Contact> contacts = new ArrayList<>();
 
     @Override
     public ClientEntity toEntity() {
@@ -76,6 +79,11 @@ public class Client implements MapperToEntity<ClientEntity> {
         entity.setTelephone(this.getTelephone());
         entity.setCellPhone(this.getCellPhone());
         entity.setActive(this.getActive());
+
+        contacts.forEach(c -> {
+            c.setClient(entity);
+            entity.getContacts().add(c.toEntity());
+        });
 
         if (this.user != null) {
             UserEntity userEntity = this.user.toEntity();

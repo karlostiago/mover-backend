@@ -2,7 +2,6 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.FipeEntity;
 import com.ctsousa.mover.core.entity.VehicleEntity;
-import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.util.HashUtil;
 import com.ctsousa.mover.integration.fipe.parallelum.entity.*;
 import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
@@ -112,9 +111,9 @@ public class FipeServiceImpl implements FipeService {
     }
 
     private SummaryFipeResponse calculatedSummaryFipe(SummaryFipeResponse summaryFipeResponse) {
-        summaryFipeResponse.setDepreciatedValue(summaryFipeResponse.getValueAcquisition().subtract(summaryFipeResponse.getValueMonthCurrent()));
-        summaryFipeResponse.setPercentageDepreciated(summaryFipeResponse.getValueAcquisition()
-                .subtract(summaryFipeResponse.getValueMonthCurrent())
+        summaryFipeResponse.setDepreciatedValue(summaryFipeResponse.getValueMonthCurrent().subtract(summaryFipeResponse.getValueAcquisition()));
+        summaryFipeResponse.setPercentageDepreciated(summaryFipeResponse.getValueMonthCurrent()
+                .subtract(summaryFipeResponse.getValueAcquisition())
                 .divide(summaryFipeResponse.getValueAcquisition(), 4, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100D))
                 .doubleValue());

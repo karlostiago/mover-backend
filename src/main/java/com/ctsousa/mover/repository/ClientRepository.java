@@ -28,6 +28,6 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Long> {
 
     @NonNull
     @Override
-    @Query("SELECT c FROM ClientEntity c LEFT JOIN FETCH c.user WHERE c.id = :id")
+    @Query("SELECT c FROM ClientEntity c JOIN FETCH c.contacts LEFT JOIN FETCH c.user WHERE c.id = :id")
     Optional<ClientEntity> findById(@NonNull @Param("id") Long id);
 }

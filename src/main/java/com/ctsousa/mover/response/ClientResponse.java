@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -34,6 +35,7 @@ public class ClientResponse {
     private Boolean active;
     private String uf;
     private UserResponse user;
+    private List<ContactResponse> contacts;
 
     public void setState(String brazilianStateName) {
         BrazilianStates state = BrazilianStates.toName(brazilianStateName);
