@@ -48,7 +48,7 @@ public class Transform {
             try {
                 list.add(toMapper(source, targetClass, ignoreAttrs));
             } catch (Exception e) {
-                log.error(e.getMessage());
+                // log.error(e.getMessage());
             }
         }
 
@@ -93,7 +93,7 @@ public class Transform {
                     }
                 }
             } catch (Exception e) {
-                log.error(e.getMessage());
+                // log.error(e.getMessage());
             } finally {
                 targetField.setAccessible(false);
                 field.setAccessible(false);
@@ -136,7 +136,7 @@ public class Transform {
                     }
                 }
             } catch (Exception e) {
-                log.error(e.getMessage());
+                // log.error(e.getMessage());
             } finally {
                 field.setAccessible(false);
                 targetField.setAccessible(false);
@@ -168,7 +168,7 @@ public class Transform {
                     }
                 }
             } catch (Exception e) {
-                log.error(e.getMessage());
+                // log.error(e.getMessage());
             } finally {
                 field.setAccessible(false);
                 targetField.setAccessible(false);
@@ -201,7 +201,7 @@ public class Transform {
                         }
                     }
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    // log.error(e.getMessage());
                 } finally {
                     sourceField.setAccessible(false);
                     targetField.setAccessible(false);
