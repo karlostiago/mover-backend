@@ -6,7 +6,6 @@ import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumFipeEn
 import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
 import com.ctsousa.mover.repository.FipeRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

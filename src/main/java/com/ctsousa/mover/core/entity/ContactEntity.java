@@ -14,16 +14,16 @@ import lombok.Setter;
 @Table(name = "tb_contact")
 public class ContactEntity extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id", nullable = false)
     private ClientEntity client;
-
-    @Column(name = "description", nullable = false)
-    private String description;
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "phone", nullable = false)
-    private String phone;
+    @Column(name = "telephone", nullable = false)
+    private String telephone;
+
+    @Column(name = "degreeKinship", nullable = false)
+    private String degreeKinship;
 }
