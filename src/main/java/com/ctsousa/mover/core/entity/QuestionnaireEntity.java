@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_questionare")
-public class Questionnaire extends AbstractEntity {
+public class QuestionnaireEntity extends AbstractEntity {
 
     @Column(nullable = false,
             name = "description"
@@ -32,5 +32,5 @@ public class Questionnaire extends AbstractEntity {
                cascade = CascadeType.ALL,
                orphanRemoval = true
     )
-    private List<Question> questions = new ArrayList<>();
+    private List<QuestionEntity> questionEntities = new ArrayList<>();
 }

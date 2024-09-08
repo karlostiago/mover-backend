@@ -13,15 +13,15 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class InspectionQuestion extends AbstractEntity{
+public class InspectionQuestionEntity extends AbstractEntity{
 
     @ManyToOne
     @JoinColumn(name = "inspection_id")
-    private Inspection inspection;
+    private InspectionEntity inspection;
 
     @ManyToOne
     @JoinColumn(name = "question_id")
-    private Question question;
+    private QuestionEntity questionEntity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "response_enum", nullable = false)

@@ -11,16 +11,16 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tb_question")
-public class Question extends AbstractEntity {
+@Table(name = "tb_photo")
+public class PhotoEntity extends AbstractEntity {
 
-    @Column(nullable = false,name = "description")
-    private String description;
+    @Column(nullable = false, name = "image")
+    private String image;
 
-    @Column(nullable = false,name = "mandatory")
-    private boolean mandatory;
+    @Column(nullable = false, name = "required")
+    private boolean required;
 
     @ManyToOne
     @JoinColumn(name = "questionnaire_id")
-    private Questionnaire questionnaire;
+    private QuestionnaireEntity questionnaire;
 }
