@@ -21,7 +21,7 @@ public class InspectionQuestionEntity extends AbstractEntity{
 
     @ManyToOne
     @JoinColumn(name = "question_id")
-    private QuestionEntity questionEntity;
+    private QuestionEntity question;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "response_enum", nullable = false)

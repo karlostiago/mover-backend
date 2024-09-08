@@ -32,5 +32,5 @@ public class QuestionnaireEntity extends AbstractEntity {
                cascade = CascadeType.ALL,
                orphanRemoval = true
     )
-    private List<QuestionEntity> questionEntities = new ArrayList<>();
+    private List<QuestionEntity> questions = new ArrayList<>();
 }
