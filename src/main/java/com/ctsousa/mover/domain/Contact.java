@@ -2,6 +2,7 @@ package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.entity.ContactEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,11 @@ public class Contact implements MapperToEntity<ContactEntity> {
 
     @Override
     public ContactEntity toEntity() {
+
+        if (this.getTelephone() != null && !this.getTelephone().isEmpty() && this.getTelephone().length() < 10) {
+            throw new NotificationException("Por gentileza informar um número de telefone válido para contato de referência.");
+        }
+
         ContactEntity entity = new ContactEntity();
         entity.setId(this.getId());
         entity.setName(toUppercase(this.getName()));

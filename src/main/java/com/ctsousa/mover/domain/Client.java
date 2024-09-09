@@ -44,7 +44,7 @@ public class Client implements MapperToEntity<ClientEntity> {
     @Override
     public ClientEntity toEntity() {
         if (!CpfValidator.isValid(this.getCpfCnpj())) {
-            throw new NotificationException("Por gentileza informe um CPF válido.");
+            throw new NotificationException("CPF inválido.");
         }
 
         if (this.getCellPhone().length() != 11) {
@@ -80,10 +80,12 @@ public class Client implements MapperToEntity<ClientEntity> {
         entity.setCellPhone(this.getCellPhone());
         entity.setActive(this.getActive());
 
-        contacts.forEach(c -> {
-            c.setClient(entity);
-            entity.getContacts().add(c.toEntity());
-        });
+        if (!contacts.isEmpty()) {
+            contacts.forEach(c -> {
+                c.setClient(entity);
+                entity.getContacts().add(c.toEntity());
+            });
+        }
 
         if (this.user != null) {
             UserEntity userEntity = this.user.toEntity();
