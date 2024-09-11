@@ -11,13 +11,13 @@ import java.math.BigDecimal;
 public class AccountRequest {
     private Long id;
 
-    @NotEmpty(message = "Campo descrição da conta não pode ser vázio")
+    @NotEmpty(message = "Descrição da conta não pode ser vázio")
     private String name;
 
-    @NotEmpty(message = "Campo número da conta não pode ser vázio")
+    @NotEmpty(message = "Número da conta não pode ser vázio")
     private String number;
 
-    @NotEmpty(message = "Campo ícone não pode ser vázio")
+    @NotEmpty(message = "Ícone não pode ser vázio")
     private Integer codeIcon;
 
     private BigDecimal InitialBalance;
