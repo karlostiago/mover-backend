@@ -55,6 +55,10 @@ public class Client implements MapperToEntity<ClientEntity> {
             throw new NotificationException("Por gentileza informar um número de telefone fixo válido.");
         }
 
+        if (this.getPostalCode().length() != 8) {
+            throw new NotificationException("Cep inválido.");
+        }
+
         EmailValidator.valid(this.getEmail());
 
         BrazilianStates state = BrazilianStates.toCode(brazilianStateCode);
