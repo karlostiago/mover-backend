@@ -24,11 +24,11 @@ public final class EmailValidator {
     }
 
     public static void valid(String email) {
-        if (email == null) throw new NotificationException("Email inválido.");
+        if (email == null) throw new NotificationException("E-mail inválido.");
 
         Matcher matcher = pattern.matcher(email);
         if (!matcher.matches()) {
-            throw new NotificationException("Email inválido.");
+            throw new NotificationException("E-mail inválido.");
         }
     }
 }
