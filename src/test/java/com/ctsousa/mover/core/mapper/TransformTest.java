@@ -7,6 +7,7 @@ import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.domain.Brand;
 import com.ctsousa.mover.domain.Model;
 import com.ctsousa.mover.domain.Symbol;
+import com.ctsousa.mover.domain.SymbolTest;
 import com.ctsousa.mover.enumeration.Situation;
 import com.ctsousa.mover.request.BrandRequest;
 import com.ctsousa.mover.request.ModelRequest;
@@ -38,7 +39,7 @@ public class TransformTest {
             new SymbolEntity("Symbol2", "base64/da653126eq854we69s==2/")
         );
 
-        List<Symbol> domains = Transform.toCollection(entities, Symbol.class);
+        List<SymbolTest> domains = Transform.toCollection(entities, SymbolTest.class);
 
         Assertions.assertEquals(2, domains.size());
     }

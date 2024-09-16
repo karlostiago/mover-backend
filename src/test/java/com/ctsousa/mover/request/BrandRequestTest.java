@@ -1,6 +1,7 @@
 package com.ctsousa.mover.request;
 
 import com.ctsousa.mover.domain.Symbol;
+import com.ctsousa.mover.domain.SymbolTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

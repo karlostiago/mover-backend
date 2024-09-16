@@ -3,6 +3,7 @@ package com.ctsousa.mover.request;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -33,6 +34,11 @@ public class ClientRequestTest {
         request.setBirthDate(expectedBirthDate);
         request.setUser(expectedUser);
 
+        ContactRequest contactRequest = new ContactRequest();
+        contactRequest.setClientId(1L);
+        request.setContacts(new ArrayList<>());
+        request.getContacts().add(contactRequest);
+
         assertEquals(expectedId, request.getId());
         assertEquals(expectedName, request.getName());
         assertEquals(expectedCpf, request.getCpfCnpj());
@@ -43,5 +49,6 @@ public class ClientRequestTest {
         assertEquals(expectedCep, request.getPostalCode());
         assertEquals(expectedBirthDate, request.getBirthDate());
         assertEquals(expectedUser, request.getUser());
+        assertEquals(1, request.getContacts().size());
     }
 }

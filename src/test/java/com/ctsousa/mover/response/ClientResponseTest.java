@@ -2,6 +2,8 @@ package com.ctsousa.mover.response;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -26,6 +28,10 @@ public class ClientResponseTest {
         expectedUser.setLogin("userlogin");
         expectedUser.setClientId(3L);
 
+        ContactResponse contactResponse = new ContactResponse();
+        contactResponse.setClientId(1L);
+        contactResponse.setId(1L);
+
         response.setId(expectedId);
         response.setName(expectedName);
         response.setRg(expectedRg);
@@ -35,6 +41,8 @@ public class ClientResponseTest {
         response.setEmail(expectedEmail);
         response.setNumber(expectedNumber);
         response.setUser(expectedUser);
+        response.setContacts(new ArrayList<>());
+        response.getContacts().add(contactResponse);
 
         assertEquals(expectedId, response.getId());
         assertEquals(expectedName, response.getName());
@@ -44,6 +52,7 @@ public class ClientResponseTest {
         assertEquals(expectedCpf, response.getCpfCnpj());
         assertEquals(expectedEmail, response.getEmail());
         assertEquals(expectedNumber, response.getNumber());
+        assertEquals(1, response.getContacts().size());
 
         UserResponse actualUser = response.getUser();
 
