@@ -1,6 +1,9 @@
 package com.ctsousa.mover.core.util;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,5 +38,24 @@ public final class DateUtil {
         int year = Integer.parseInt(splitDate[3]);
 
         return LocalDate.of(year, month, day);
+    }
+
+    public static String toDateFromBr(String dateStr) {
+        String pattern = "dd/MM/yyyy";
+        if (isValidDateFormmatDate(dateStr, pattern)) return dateStr;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateStr);
+        LocalDate localDate = zonedDateTime.toLocalDate();
+        return localDate.format(formatter);
+    }
+
+    private static boolean isValidDateFormmatDate(String dateStr, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        try {
+            LocalDate.parse(dateStr, formatter);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
     }
 }

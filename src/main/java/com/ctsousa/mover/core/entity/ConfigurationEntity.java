@@ -1,14 +1,10 @@
 package com.ctsousa.mover.core.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -18,9 +14,12 @@ import java.math.BigDecimal;
 @Table(name = "tb_configuration")
 public class ConfigurationEntity extends AbstractEntity {
 
-    @Column(name = "fipe_devaluation", nullable = false)
-    private BigDecimal fipeDevaluation;
+    @Column(name = "`key`", nullable = false)
+    private String key;
 
-    @Column(name = "fipe_auction_devaluation", nullable = false)
-    private BigDecimal fipeAuctionDevaluation;
+    @Column(name = "`value`", nullable = false)
+    private String value;
+
+    @Column(name = "type_value", nullable = false)
+    private String typeValue;
 }
