@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static com.ctsousa.mover.core.util.DateUtil.toDateFromBr;
+
 @Component
 public class ConfigurationServiceImpl extends BaseServiceImpl<ConfigurationEntity, Long> implements ConfigurationService {
 
@@ -36,10 +38,20 @@ public class ConfigurationServiceImpl extends BaseServiceImpl<ConfigurationEntit
         }
 
         if (TypeValueConfiguration.DATE.name().equalsIgnoreCase(entity.getTypeValue())) {
-            entity.setValue(DateUtil.toDateFromBr(entity.getValue()));
+            try {
+                entity.setValue(toDateFromBr(entity.getValue()));
+            } catch (NotificationException e) {
+                throw new NotificationException("Valor inválido");
+            }
         }
 
         return super.save(entity);
+    }
+
+    @Override
+    public boolean verifyKeySystem(String key) {
+        List<String> keys = List.of("DESVALORIZACAO_FIPE", "DESVALORIZACAO_FIPE_LEILAO");
+        return keys.contains(key);
     }
 
     @Override

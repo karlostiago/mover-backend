@@ -1,28 +1,19 @@
 package com.ctsousa.mover.core.validation;
 
 import com.ctsousa.mover.core.annotation.DateFormat;
+import com.ctsousa.mover.core.util.DateUtil;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.LocalDate;
 
-public class DateFormatValidator implements ConstraintValidator<DateFormat, Object> {
+import static com.ctsousa.mover.core.util.DateUtil.isValidDate;
 
-    private int minYear;
-    private int maxYear;
-    private int minMonth;
-    private int maxMonth;
-    private int minDay;
-    private int maxDay;
+public class DateFormatValidator implements ConstraintValidator<DateFormat, Object> {
 
     @Override
     public void initialize(DateFormat constraintAnnotation) {
-        this.maxYear = LocalDate.now().getYear();
-        this.minYear = 1900;
-        this.minMonth = 1;
-        this.maxMonth = 12;
-        this.minDay = 1;
-        this.maxDay = 31;
+
     }
 
     @Override
@@ -32,24 +23,9 @@ public class DateFormatValidator implements ConstraintValidator<DateFormat, Obje
         boolean valid = false;
 
         if (object instanceof LocalDate localDate) {
-            valid =  isValidYear(localDate) && isValidMonth(localDate) && isValidDay(localDate);
+            valid = isValidDate(localDate);
         }
 
         return valid;
-    }
-
-    private boolean isValidYear(LocalDate localDate) {
-        int year = localDate.getYear();
-        return  year >= this.minYear && year <= this.maxYear;
-    }
-
-    private boolean isValidMonth(LocalDate localDate) {
-        int month = localDate.getMonth().getValue();
-        return month >= minMonth && month <= maxMonth;
-    }
-
-    private boolean isValidDay(LocalDate localDate) {
-        int day = localDate.getDayOfMonth();
-        return day >= minDay && day <= maxDay;
     }
 }

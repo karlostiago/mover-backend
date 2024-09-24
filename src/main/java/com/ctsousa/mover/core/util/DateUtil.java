@@ -1,5 +1,7 @@
 package com.ctsousa.mover.core.util;
 
+import com.ctsousa.mover.core.exception.notification.NotificationException;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,6 +12,13 @@ import java.util.Map;
 public final class DateUtil {
 
     private static final Map<String, Integer> catalogOfMonths = new HashMap<>();
+
+    private static final int minYear;
+    private static final int maxYear;
+    private static final int minMonth;
+    private static final int maxMonth;
+    private static final int minDay;
+    private static final int maxDay;
 
     private DateUtil() {
 
@@ -28,6 +37,13 @@ public final class DateUtil {
         catalogOfMonths.put("OCT", 10);
         catalogOfMonths.put("NOV", 11);
         catalogOfMonths.put("DEC", 12);
+
+        maxYear = LocalDate.now().getYear();
+        minYear = 1900;
+        minMonth = 1;
+        maxMonth = 12;
+        minDay = 1;
+        maxDay = 31;
     }
 
     public static LocalDate toLocalDateWithGMT(String dateStr) {
@@ -42,14 +58,23 @@ public final class DateUtil {
 
     public static String toDateFromBr(String dateStr) {
         String pattern = "dd/MM/yyyy";
-        if (isValidDateFormmatDate(dateStr, pattern)) return dateStr;
+        if (isValidDateFormmatter(dateStr, pattern)) return dateStr;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateStr);
         LocalDate localDate = zonedDateTime.toLocalDate();
+
+        if (!isValidDate(localDate)) {
+            throw new NotificationException("Data inválida.");
+        }
+        
         return localDate.format(formatter);
     }
 
-    private static boolean isValidDateFormmatDate(String dateStr, String pattern) {
+    public static boolean isValidDate(LocalDate localDate) {
+        return isValidYear(localDate) && isValidMonth(localDate) && isValidDay(localDate);
+    }
+
+    private static boolean isValidDateFormmatter(String dateStr, String pattern) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         try {
             LocalDate.parse(dateStr, formatter);
@@ -57,5 +82,20 @@ public final class DateUtil {
         } catch (DateTimeParseException e) {
             return false;
         }
+    }
+
+    private static boolean isValidYear(LocalDate localDate) {
+        int year = localDate.getYear();
+        return  year >= minYear && year <= maxYear;
+    }
+
+    private static boolean isValidMonth(LocalDate localDate) {
+        int month = localDate.getMonth().getValue();
+        return month >= minMonth && month <= maxMonth;
+    }
+
+    private static boolean isValidDay(LocalDate localDate) {
+        int day = localDate.getDayOfMonth();
+        return day >= minDay && day <= maxDay;
     }
 }

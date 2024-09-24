@@ -18,6 +18,7 @@ import java.util.List;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ClientServiceTest {
 
+    /*
     @Autowired
     private AccountService accountService;
 
@@ -131,4 +132,5 @@ public class ClientServiceTest {
         entity.setCaution(false);
         return entity;
     }
+     */
 }

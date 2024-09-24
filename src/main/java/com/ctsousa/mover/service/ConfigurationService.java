@@ -11,4 +11,6 @@ public interface ConfigurationService extends BaseService<ConfigurationEntity, L
 
     @Override
     ConfigurationEntity findById(Long aLong);
+
+    boolean verifyKeySystem(final String key);
 }

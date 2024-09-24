@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.ConfigurationApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.ConfigurationEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.domain.Configuration;
 import com.ctsousa.mover.enumeration.TypeValueConfiguration;
 import com.ctsousa.mover.request.ConfigurationRequest;
@@ -41,11 +42,24 @@ public class ConfigurationResource extends BaseResource<ConfigurationResponse, C
 
     @Override
     public ResponseEntity<ConfigurationResponse> update(Long id, ConfigurationRequest request) {
-        configurationService.existsById(id);
+        ConfigurationEntity entity = configurationService.findById(id);
         Configuration configuration = toMapper(request, Configuration.class);
-        ConfigurationEntity entity = configuration.toEntity();
-        configurationService.save(entity);
+        boolean verifiedKey = configurationService.verifyKeySystem(entity.getKey());
+        if (verifiedKey) {
+            if (!configuration.getKey().equalsIgnoreCase(entity.getKey())) {
+                throw new NotificationException("Essa chave é essencial para o sistema e não pode ser removida ou atualizada.");
+            }
+        }
+        configurationService.save(configuration.toEntity());
         return ResponseEntity.ok(toMapper(entity, ConfigurationResponse.class));
+    }
+
+    @Override
+    public void delete(Long id) {
+        ConfigurationEntity entity = configurationService.findById(id);
+        boolean verifiedKey = configurationService.verifyKeySystem(entity.getKey());
+        if (verifiedKey) throw new NotificationException("Essa chave é essencial para o sistema e não pode ser removida ou atualizada.");
+        super.delete(id);
     }
 
     @Override
