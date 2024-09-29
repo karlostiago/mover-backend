@@ -47,7 +47,7 @@ public class ConfigurationResource extends BaseResource<ConfigurationResponse, C
         boolean verifiedKey = configurationService.verifyKeySystem(entity.getKey());
         if (verifiedKey) {
             if (!configuration.getKey().equalsIgnoreCase(entity.getKey())) {
-                throw new NotificationException("Essa chave é essencial para o sistema e não pode ser removida ou atualizada.");
+                throw new NotificationException("Essa Configuração é essencial para o sistema e não pode ser atualizada.");
             }
         }
         configurationService.save(configuration.toEntity());
@@ -58,7 +58,7 @@ public class ConfigurationResource extends BaseResource<ConfigurationResponse, C
     public void delete(Long id) {
         ConfigurationEntity entity = configurationService.findById(id);
         boolean verifiedKey = configurationService.verifyKeySystem(entity.getKey());
-        if (verifiedKey) throw new NotificationException("Essa chave é essencial para o sistema e não pode ser removida ou atualizada.");
+        if (verifiedKey) throw new NotificationException("Essa Configuração é essencial para o sistema e não pode ser removida.");
         super.delete(id);
     }
 
