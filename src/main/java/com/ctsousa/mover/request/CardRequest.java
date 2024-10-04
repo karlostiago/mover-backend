@@ -11,18 +11,26 @@ import java.math.BigDecimal;
 public class CardRequest {
     private Long id;
 
-    @NotEmpty(message = "Descrição da conta não pode ser vázio")
+    @NotEmpty(message = "Nome não pode ser vázio")
     private String name;
 
-    @NotEmpty(message = "Número da conta não pode ser vázio")
-    private String number;
+    @NotEmpty(message = "Limite não pode ser vázio")
+    private BigDecimal limit;
+
+    @NotEmpty(message = "Dia do fechamento não pode ser vázio")
+    private Integer closingDay;
+
+    @NotEmpty(message = "Dia de vencimento não pode ser vázio")
+    private Integer dueDate;
 
     @NotEmpty(message = "Ícone não pode ser vázio")
     private Integer codeIcon;
 
-    private BigDecimal InitialBalance;
+    @NotEmpty(message = "Tipo não pode ser vázio")
+    private String type;
 
-    private Boolean caution;
+    @NotEmpty(message = "Conta não pode ser vázio")
+    private Long accountId;
 
     private Boolean active;
 }

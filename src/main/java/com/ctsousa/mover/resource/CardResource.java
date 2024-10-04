@@ -22,7 +22,7 @@ import static com.ctsousa.mover.core.mapper.Transform.toCollection;
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/cards")
 public class CardResource extends BaseResource<CardResponse, CardRequest, CardEntity> implements CardApi {
 
     @Autowired

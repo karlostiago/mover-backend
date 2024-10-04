@@ -11,12 +11,12 @@ import java.math.BigDecimal;
 public class CardResponse {
     private Long id;
     private String name;
-    private String number;
     private String icon;
     private String imageIcon;
     private Integer codeIcon;
-    private BigDecimal InitialBalance;
-    private Boolean caution;
+    private BigDecimal limit;
+    private Integer dueDate;
+    private Integer closingDay;
     private Boolean active;
 
     public void setIcon(String nameIcon) {

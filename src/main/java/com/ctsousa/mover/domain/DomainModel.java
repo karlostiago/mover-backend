@@ -10,4 +10,8 @@ import lombok.Setter;
 public abstract class DomainModel<T extends AbstractEntity> implements MapperToEntity<T> {
     protected Long id;
     protected Boolean active;
+
+    public void setId(Long id) {
+        this.id = id == 0 ? null : id;
+    }
 }

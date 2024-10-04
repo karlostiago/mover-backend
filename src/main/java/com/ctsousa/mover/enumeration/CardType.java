@@ -2,6 +2,8 @@ package com.ctsousa.mover.enumeration;
 
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
+
 public enum CardType {
 
     CREDIT(1, "CRÉDITO"),
@@ -17,7 +19,8 @@ public enum CardType {
 
     public static CardType toDescription(String description) {
         for (CardType cardType : CardType.values()) {
-            if (cardType.description.equals(description)) return cardType;
+            if (cardType.description.equals(description)
+                    || toUppercase(cardType.name()).equals(toUppercase(description))) return cardType;
         }
         throw new NotificationException("Tipo cartão não suportada :: " + description);
     }

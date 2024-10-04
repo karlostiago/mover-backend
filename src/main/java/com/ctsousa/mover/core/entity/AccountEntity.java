@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "tb_account")
 public class AccountEntity extends AbstractEntity {
@@ -35,4 +34,10 @@ public class AccountEntity extends AbstractEntity {
 
     @Column(name = "caution", nullable = false)
     private Boolean caution;
+
+    public AccountEntity() { }
+
+    public AccountEntity(Long id) {
+        super(id);
+    }
 }

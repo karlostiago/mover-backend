@@ -15,7 +15,7 @@ public class AccountResponse {
     private String icon;
     private String imageIcon;
     private Integer codeIcon;
-    private BigDecimal InitialBalance;
+    private BigDecimal initialBalance;
     private Boolean caution;
     private Boolean active;
 
