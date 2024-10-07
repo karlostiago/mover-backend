@@ -42,8 +42,8 @@ public class CardResource extends BaseResource<CardResponse, CardRequest, CardEn
     @Override
     public ResponseEntity<CardResponse> update(Long id, CardRequest request) {
         cardService.existsById(id);
-        Card account = toMapper(request, Card.class);
-        CardEntity entity = account.toEntity();
+        Card card = toMapper(request, Card.class);
+        CardEntity entity = card.toEntity();
         cardService.save(entity);
         return ResponseEntity.ok(toMapper(entity, CardResponse.class));
     }

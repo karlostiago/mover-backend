@@ -27,7 +27,7 @@ public class CardRequest {
     private Integer codeIcon;
 
     @NotEmpty(message = "Tipo não pode ser vázio")
-    private String type;
+    private String cardType;
 
     @NotEmpty(message = "Conta não pode ser vázio")
     private Long accountId;

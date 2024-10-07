@@ -2,7 +2,6 @@ package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.CardEntity;
-import com.ctsousa.mover.core.util.StringUtil;
 import com.ctsousa.mover.enumeration.BankIcon;
 import com.ctsousa.mover.enumeration.CardType;
 import lombok.Getter;
@@ -21,7 +20,7 @@ public class Card extends DomainModel<CardEntity> {
     private Integer closingDay;
     private Integer dueDate;
     private Integer codeIcon;
-    private String type;
+    private String cardType;
     private Long accountId;
 
     @Override
@@ -37,7 +36,7 @@ public class Card extends DomainModel<CardEntity> {
         entity.setAccount(account);
 
         entity.setIcon(BankIcon.toCode(this.getCodeIcon()).name());
-        entity.setCardType(CardType.toDescription(this.getType()));
+        entity.setCardType(CardType.toDescription(this.getCardType()));
 
         return entity;
     }
