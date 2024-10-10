@@ -23,8 +23,9 @@ public class InspectionEntity extends AbstractEntity {
     @Column(nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false, name = "contract")
-    private String contract;
+    @ManyToOne
+    @JoinColumn(name = "contract_id", nullable = false)
+    private ContractEntity contract;
 
     @Column(nullable = false, name = "mileage")
     private BigDecimal mileage;
