@@ -77,7 +77,7 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
     private MessageHeaders createHeaders(InspectionEntity inspection) {
         Map<String, Object> headersMap = new HashMap<>();
         headersMap.put("contractId", inspection.getContract().getId());
-        headersMap.put("emailAnalyst", "jarmison6@gmail.com");
+        headersMap.put("emailAnalyst", "teste@gmail.com");
         headersMap.put("photos", inspection.getPhotos());
 
         return new MessageHeaders(headersMap);
