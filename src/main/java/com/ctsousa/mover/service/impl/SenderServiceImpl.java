@@ -1,17 +1,14 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.InspectionPhotoEntity;
-import com.ctsousa.mover.core.entity.PhotoEntity;
 import com.ctsousa.mover.core.entity.SenderEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
-import com.ctsousa.mover.core.util.ImageUtil;
 import com.ctsousa.mover.repository.SenderRepository;
 import com.ctsousa.mover.service.SenderService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.util.ByteArrayDataSource;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +20,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
+import static com.ctsousa.mover.core.util.ImageUtil.addPhotoAttachment;
+import static com.ctsousa.mover.core.util.ImageUtil.isPhotoValid;
 
 @Component
 public class SenderServiceImpl extends BaseServiceImpl<SenderEntity, Long> implements SenderService  {
@@ -93,15 +92,22 @@ public class SenderServiceImpl extends BaseServiceImpl<SenderEntity, Long> imple
             helper.setText(emailBody, true);
 
             for (InspectionPhotoEntity photo : photos) {
-                byte[] photoBytes = ImageUtil.decodeBase64ToImage(photo.getPhotoEntity().getImage());
-                helper.addAttachment("inspecao_" + photo.getId() + ".jpg", new ByteArrayDataSource(photoBytes, "image/jpeg"));
+                if (isPhotoValid(photo)) {
+                    addPhotoAttachment(helper, photo);
+                } else {
+                    logger.warn("A foto com ID {} é inválida ou não contém dados.", photo != null ? photo.getId() : "null");
+                }
             }
 
             javaMailSender.send(mimeMessage);
+            logger.info("E-mail enviado com sucesso para {}.", emailAnalyst);
         } catch (MessagingException e) {
+            logger.error("Falha ao enviar o e-mail: {}", e.getMessage());
             throw new NotificationException("Falha ao enviar o e-mail com as fotos para análise.", Severity.ERROR);
+
+        } catch (Exception e) {
+            logger.error("Erro inesperado: {}", e.getMessage());
+            throw new NotificationException("Erro inesperado ao enviar o e-mail.", Severity.ERROR);
         }
     }
-
-
 }

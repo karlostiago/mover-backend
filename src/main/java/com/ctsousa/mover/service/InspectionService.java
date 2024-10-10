@@ -1,15 +1,14 @@
 package com.ctsousa.mover.service;
 
 import com.ctsousa.mover.core.entity.InspectionEntity;
-import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.enumeration.InspectionStatus;
-
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.util.List;
 
 public interface InspectionService {
 
-    InspectionEntity getInspectionByContractId(Long contractId) throws NotificationException;
-
-    InspectionEntity startInspection(Long id);
+    void startInspection(Long id, List<MultipartFile> photos ) throws IOException;
 
     InspectionEntity approveInspection(Long id);
 

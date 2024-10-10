@@ -1,10 +1,8 @@
 package com.ctsousa.mover.core.statemachine;
 
-import com.ctsousa.mover.core.entity.InspectionEntity;
 import com.ctsousa.mover.core.entity.InspectionPhotoEntity;
 import com.ctsousa.mover.enumeration.InspectionEvents;
 import com.ctsousa.mover.enumeration.InspectionStatus;
-import com.ctsousa.mover.service.InspectionService;
 import com.ctsousa.mover.service.SenderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +23,9 @@ public class InspectionStateMachine extends StateMachineConfigurerAdapter<Inspec
     private static final Logger logger = LoggerFactory.getLogger(InspectionStateMachine.class);
 
     private final SenderService senderService;
-    private final InspectionService inspectionService;
 
-    public InspectionStateMachine(SenderService senderService, InspectionService inspectionService) {
+    public InspectionStateMachine(SenderService senderService) {
         this.senderService = senderService;
-        this.inspectionService = inspectionService;
     }
 
     @Override
@@ -49,14 +45,12 @@ public class InspectionStateMachine extends StateMachineConfigurerAdapter<Inspec
                 .target(InspectionStatus.APPROVED)
                 .event(InspectionEvents.APPROVE_INSPECTION)
                 .action(approvedAction())
-
                 .and()
                 .withExternal()
                 .source(InspectionStatus.UNDER_REVIEW)
                 .target(InspectionStatus.REJECTED)
                 .event(InspectionEvents.REJECT_INSPECTION)
                 .action(rejectedAction())
-
                 .and()
                 .withExternal()
                 .source(InspectionStatus.UNDER_REVIEW)
@@ -79,13 +73,11 @@ public class InspectionStateMachine extends StateMachineConfigurerAdapter<Inspec
         };
     }
 
-
     @Bean
     public Action<InspectionStatus, InspectionEvents> approvedAction() {
         return context -> {
             logger.info("A inspeção foi aprovada.");
             Long contractId = (Long) context.getMessageHeader("contractId");
-
         };
     }
 
@@ -94,7 +86,6 @@ public class InspectionStateMachine extends StateMachineConfigurerAdapter<Inspec
         return context -> {
             logger.info("A inspeção foi rejeitada.");
             Long contractId = (Long) context.getMessageHeader("contractId");
-
         };
     }
 
@@ -102,15 +93,15 @@ public class InspectionStateMachine extends StateMachineConfigurerAdapter<Inspec
     public Action<InspectionStatus, InspectionEvents> underReviewAction() {
         return context -> {
             logger.info("A inspeção está em análise. Enviando fotos para o e-mail do analista.");
+
             Long contractId = (Long) context.getMessageHeader("contractId");
             String emailAnalyst = (String) context.getMessageHeader("emailAnalyst");
+            List<InspectionPhotoEntity> photos = (List<InspectionPhotoEntity>) context.getMessageHeader("photos");
 
-            InspectionEntity inspection = inspectionService.getInspectionByContractId(contractId);
-            if (inspection != null) {
-                List<InspectionPhotoEntity> photos = inspection.getPhotos();
+            if (photos != null) {
                 senderService.sendPhotosForAnalysis(emailAnalyst, contractId, photos);
             } else {
-                logger.warn("Nenhuma inspeção encontrada para o contrato ID: {}", contractId);
+                logger.warn("Nenhuma foto encontrada para o contrato ID: {}", contractId);
             }
         };
     }

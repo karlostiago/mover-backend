@@ -4,8 +4,11 @@ import com.ctsousa.mover.service.InspectionService;
 import com.ctsousa.mover.core.entity.InspectionEntity;
 import com.ctsousa.mover.enumeration.InspectionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
 @RestController
 @RequestMapping("/inspections")
@@ -19,11 +22,14 @@ public class InspectionResource {
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<?> startInspection(@PathVariable Long id) {
-        InspectionEntity inspection = inspectionService.startInspection(id);
-        return ResponseEntity.ok(inspection);
+    public ResponseEntity<String> startInspection(@PathVariable Long id, @RequestParam("photos") List<MultipartFile> photos) {
+        try {
+            inspectionService.startInspection(id, photos);
+            return ResponseEntity.ok("Inspeção efetuada com sucesso e fotos enviadas para o analista da Mover Frota.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Não conseguimos iniciar a auto inspeção.");
+        }
     }
-
     @PostMapping("/{id}/approve")
     public ResponseEntity<?> approveInspection(@PathVariable Long id) {
         InspectionEntity inspection = inspectionService.approveInspection(id);
