@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -13,7 +12,6 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "tb_account")
 public class AccountEntity extends AbstractEntity {
@@ -35,4 +33,10 @@ public class AccountEntity extends AbstractEntity {
 
     @Column(name = "caution", nullable = false)
     private Boolean caution;
+
+    public AccountEntity() { }
+
+    public AccountEntity(Long id) {
+        super(id);
+    }
 }

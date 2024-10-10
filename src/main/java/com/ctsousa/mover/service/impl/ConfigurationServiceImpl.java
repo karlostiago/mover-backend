@@ -40,7 +40,7 @@ public class ConfigurationServiceImpl extends BaseServiceImpl<ConfigurationEntit
         if (TypeValueConfiguration.DATE.name().equalsIgnoreCase(entity.getTypeValue())) {
             try {
                 entity.setValue(toDateFromBr(entity.getValue()));
-            } catch (NotificationException e) {
+            } catch (Exception e) {
                 throw new NotificationException("Valor inválido");
             }
         }

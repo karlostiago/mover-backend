@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -29,14 +28,14 @@ public class CardEntity extends AbstractEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "available_limit", nullable = false)
-    private BigDecimal availableLimit;
+    @Column(name = "`limit`", nullable = false)
+    private BigDecimal limit;
 
-    @Column(name = "closing_date")
-    private LocalDate closingDate;
+    @Column(name = "closing_day")
+    private Integer closingDay;
 
     @Column(name = "due_date")
-    private LocalDate dueDate;
+    private Integer dueDate;
 
     @Column(name = "icon")
     private String icon;
