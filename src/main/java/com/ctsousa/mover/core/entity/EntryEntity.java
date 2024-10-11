@@ -41,7 +41,7 @@ public class EntryEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subcategory_id", nullable = false)
-    private SubcategoryEntity subcategory;
+    private SubCategoryEntity subcategory;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id", nullable = false)
