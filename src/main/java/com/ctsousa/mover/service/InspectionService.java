@@ -1,6 +1,5 @@
 package com.ctsousa.mover.service;
 
-import com.ctsousa.mover.core.entity.InspectionEntity;
 import com.ctsousa.mover.enumeration.InspectionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -10,9 +9,9 @@ public interface InspectionService {
 
     void startInspection(Long id, List<MultipartFile> photos ) throws IOException;
 
-    InspectionEntity approveInspection(Long id);
+    void rejectInspection(Long inspectionId, Long photoId);
 
-    InspectionEntity rejectInspection(Long id);
+    void approveInspection(Long inspectionId, Long photoId);
 
     InspectionStatus getInspectionStatus(Long id);
 

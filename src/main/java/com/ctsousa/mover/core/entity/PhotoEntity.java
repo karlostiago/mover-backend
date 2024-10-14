@@ -17,8 +17,8 @@ public class PhotoEntity extends AbstractEntity {
     @Column(nullable = false, name = "image")
     private String image;
 
-    @Column(nullable = false, name = "required")
-    private boolean required;
+    @Column(nullable = false,name = "mandatory")
+    private boolean mandatory;
 
     @ManyToOne
     @JoinColumn(name = "questionnaire_id")

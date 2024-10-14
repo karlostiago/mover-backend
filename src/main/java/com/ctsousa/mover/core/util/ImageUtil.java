@@ -5,11 +5,15 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.util.ByteArrayDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,31 +37,37 @@ public final class ImageUtil {
     }
 
     public static void addPhotoAttachment(MimeMessageHelper helper, InspectionPhotoEntity photo) throws MessagingException {
+        // Obtém a imagem em formato base64
         String base64Image = photo.getPhotoEntity().getImage();
 
+        // Verifica se a string está em formato base64; se não, converte
         if (!base64Image.startsWith("data:image/")) {
             base64Image = convertFileToBase64(base64Image);
         }
 
+        // Determina o tipo MIME da imagem
         String mimeType = determineMimeType(base64Image);
-
         if (mimeType == null) {
             logger.warn("Formato de imagem não suportado para a foto com ID {}.", photo.getId());
-            return;
+            return; // Retorna caso o formato não seja suportado
         }
 
-        base64Image = base64Image.replaceAll("^(data:image/(jpeg|jpg|png);base64,)?", "");
-        byte[] photoBytes = ImageUtil.decodeBase64ToImage(base64Image);
+        // Extrai os dados da imagem base64
+        String imageData = base64Image.split(",")[1]; // Remove o prefixo "data:image/png;base64," ou similar
+        byte[] imageBytes = Base64.getDecoder().decode(imageData); // Decodifica os bytes da imagem
 
-        if (photoBytes == null || photoBytes.length == 0) {
-            logger.warn("A foto com ID {} não pôde ser convertida para bytes.", photo.getId());
-            return;
-        }
-
-        Long photoId = photo.getId();
-        String attachmentName = photoId != null ? "foto_" + photoId : "foto_anonima";
-        helper.addAttachment(attachmentName + "." + mimeType.split("/")[1], new ByteArrayDataSource(photoBytes, mimeType));
+        // Adiciona o anexo à mensagem usando uma implementação de InputStreamSource que cria um novo InputStream
+        String filename = "photo_" + photo.getId() + "." + mimeType.split("/")[1]; // Define o nome do arquivo
+        helper.addAttachment(filename, new InputStreamSource() {
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return new ByteArrayInputStream(imageBytes);
+            }
+        }, mimeType);
     }
+
+
+
 
     public static String convertFileToBase64(String filePath) {
         try {

@@ -16,7 +16,7 @@ import lombok.Setter;
 @Table(name = "tb_inspection_photo")
 public class InspectionPhotoEntity extends AbstractEntity {
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "inspection_id")
     private InspectionEntity inspection;
 
@@ -24,7 +24,7 @@ public class InspectionPhotoEntity extends AbstractEntity {
     @Column(name = "inspection_status", nullable = false)
     private InspectionStatus inspectionStatus;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "photo_id")
     private PhotoEntity photoEntity;
 }
