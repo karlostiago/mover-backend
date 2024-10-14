@@ -21,8 +21,8 @@ import java.time.LocalDate;
 public class ContractEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "car_id", nullable = false)
-    private VehicleEntity car;
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    private VehicleEntity vehicle;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
@@ -34,17 +34,17 @@ public class ContractEntity extends AbstractEntity {
     @Column(name = "initial_date", nullable = false)
     private LocalDate initialDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "first_billing_date", nullable = false)
-    private LocalDate firstBillingDate;
+    @Column(name = "billing_start_date", nullable = false)
+    private LocalDate billingStartDate;
 
-    @Column(name = "rent_deposit", nullable = false)
-    private BigDecimal rentDeposit;
+    @Column(name = "deposit_amount", nullable = false)
+    private BigDecimal depositAmount;
 
-    @Column(name = "amount", nullable = false)
-    private BigDecimal amount;
+    @Column(name = "recurrence_value", nullable = false)
+    private BigDecimal recurrenceValue;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_frequency", nullable = false)
@@ -55,6 +55,6 @@ public class ContractEntity extends AbstractEntity {
     private Situation situation;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "billing_day", nullable = false)
-    private DayOfWeek billingDay;
+    @Column(name = "payment_day", nullable = false)
+    private DayOfWeek paymentDay;
 }
