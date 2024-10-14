@@ -33,7 +33,6 @@ public class InspectionResource {
         return ResponseEntity.ok("Inspeção com ID " + inspectionId + " rejeitada pelo analista.");
     }
 
-
     @GetMapping("/{id}/status")
     public ResponseEntity<InspectionStatus> getInspectionStatus(@PathVariable Long id) {
         InspectionStatus status = inspectionService.getInspectionStatus(id);
@@ -41,10 +40,10 @@ public class InspectionResource {
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<Void> startInspection(@PathVariable Long id,
-                                                @RequestParam("photos")
-                                                List<MultipartFile> photos) throws IOException {
+    public ResponseEntity<String> startInspection(@PathVariable Long id,
+                                                  @RequestParam("photos") List<MultipartFile> photos) throws IOException {
         inspectionService.startInspection(id, photos);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        String message = "Autoinspeção iniciada com sucesso.";
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 }

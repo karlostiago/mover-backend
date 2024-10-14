@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
-import static com.ctsousa.mover.core.util.ImageUtil.savePhoto;
 
 @Component
 public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Long> implements InspectionService {
@@ -53,7 +52,7 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
         inspection.setActive(true);
         inspection.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
 
-        String emailAnalyst = mailMover;
+        String emailAnalyst = this.mailMover;
         senderService.sendPhotosForAnalysis(emailAnalyst, inspection.getContract().getId(), inspection.getPhotos());
         inspectionRepository.save(inspection);
     }
@@ -62,18 +61,11 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
         List<InspectionPhotoEntity> photoEntities = new ArrayList<>();
 
         for (MultipartFile photo : photos) {
-            String photoUrl = savePhoto(photo);
-
-            PhotoEntity photoEntity = new PhotoEntity();
-            photoEntity.setImage(photoUrl);
-            photoEntity.setActive(true);
-            photoEntity = photoRepository.save(photoEntity);
-
+            PhotoEntity photoEntity = savePhoto(photo);
             InspectionPhotoEntity inspectionPhoto = new InspectionPhotoEntity();
             inspectionPhoto.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
             inspectionPhoto.setPhotoEntity(photoEntity);
             inspectionPhoto.setInspection(inspection);
-
             photoEntities.add(inspectionPhoto);
         }
 
@@ -126,5 +118,13 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
         InspectionEntity inspection = inspectionRepository.findById(id)
                 .orElseThrow(() -> new NotificationException("Inspeção não encontrada.", Severity.INFO));
         return inspection.getInspectionStatus();
+    }
+
+    public PhotoEntity savePhoto(MultipartFile photo) throws IOException {
+        String base64Image = Base64.getEncoder().encodeToString(photo.getBytes());
+        PhotoEntity newPhoto = new PhotoEntity();
+        newPhoto.setImage("data:image/jpeg;base64," + base64Image);
+
+        return photoRepository.save(newPhoto);
     }
 }

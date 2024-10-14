@@ -14,7 +14,7 @@ import lombok.Setter;
 @Table(name = "tb_photo")
 public class PhotoEntity extends AbstractEntity {
 
-    @Column(nullable = false, name = "image")
+    @Column(nullable = false, name = "image", columnDefinition = "LONGTEXT")
     private String image;
 
     @Column(nullable = false,name = "mandatory")
