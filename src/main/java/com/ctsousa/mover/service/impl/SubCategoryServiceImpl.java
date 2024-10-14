@@ -4,6 +4,7 @@ import com.ctsousa.mover.core.entity.SubCategoryEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
+import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.SubCategoryRepository;
 import com.ctsousa.mover.service.SubCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class SubCategoryServiceImpl extends BaseServiceImpl<SubCategoryEntity, L
             }
         } else if (!entity.isNew()) {
             if (repository.existsByDescriptionNotId(entity.getDescription(), entity.getId())) {
-                throw new NotificationException("Não foi possível atualizar, essa subcategoria já.", Severity.WARNING);
+                throw new NotificationException("Não foi possível atualizar, já existe uma subcategoria cadastrada com os dados informados.", Severity.WARNING);
             }
         }
 
@@ -40,6 +41,13 @@ public class SubCategoryServiceImpl extends BaseServiceImpl<SubCategoryEntity, L
     @Override
     public List<SubCategoryEntity> filterBy(String search) {
         if (search == null || search.isEmpty()) return repository.findAll();
+
+        TypeCategory typeCategory = TypeCategory.fromQuery(search);
+
+        if (typeCategory != null) {
+            return repository.findBy(typeCategory);
+        }
+
         return repository.findBy(search);
     }
 }

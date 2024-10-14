@@ -1,7 +1,12 @@
 package com.ctsousa.mover.enumeration;
 
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.util.StringUtil;
 import lombok.Getter;
+
+import java.lang.reflect.Type;
+
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
 @Getter
 public enum TypeCategory {
@@ -16,6 +21,13 @@ public enum TypeCategory {
     TypeCategory(int code, String description) {
         this.description = description;
         this.code = code;
+    }
+
+    public static TypeCategory fromQuery(String query) {
+        for (TypeCategory typeCategory : TypeCategory.values()) {
+            if (typeCategory.description.contains(toUppercase(query))) return typeCategory;
+        }
+        return null;
     }
 
     public static TypeCategory toDescription(String description) {

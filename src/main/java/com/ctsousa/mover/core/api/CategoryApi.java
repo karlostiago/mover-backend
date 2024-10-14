@@ -15,4 +15,7 @@ public interface CategoryApi {
 
     @GetMapping("/findBy")
     ResponseEntity<List<CategoryResponse>> findBy(@RequestParam("search") String search);
+
+    @GetMapping("/find-type-category")
+    ResponseEntity<List<CategoryResponse>> findByTypeCategory(@RequestParam("type") String type);
 }

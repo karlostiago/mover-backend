@@ -4,6 +4,7 @@ import com.ctsousa.mover.core.entity.CategoryEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
+import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.CategoryRepository;
 import com.ctsousa.mover.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,11 @@ public class CategoryServiceImpl extends BaseServiceImpl<CategoryEntity, Long> i
     public CategoryEntity save(CategoryEntity entity) {
         if (entity.isNew()) {
             if (repository.existsByDescription(entity.getDescription())) {
-                throw new NotificationException("Já existe uma categoria cadastrado com os dados informados.", Severity.WARNING);
+                throw new NotificationException("Já existe uma categoria cadastrada com os dados informados.", Severity.WARNING);
             }
         } else if (!entity.isNew()) {
             if (repository.existsByDescriptionNotId(entity.getDescription(), entity.getId())) {
-                throw new NotificationException("Não foi possível atualizar, essa categoria já.", Severity.WARNING);
+                throw new NotificationException("Não foi possível atualizar, já existe uma categoria cadastrada com os dados informados.", Severity.WARNING);
             }
         }
 
@@ -41,5 +42,10 @@ public class CategoryServiceImpl extends BaseServiceImpl<CategoryEntity, Long> i
     public List<CategoryEntity> filterBy(String search) {
         if (search == null || search.isEmpty()) return repository.findAll();
         return repository.findBy(search);
+    }
+
+    @Override
+    public List<CategoryEntity> filterBy(TypeCategory type) {
+        return repository.findByType(type);
     }
 }
