@@ -1,67 +1,59 @@
 package com.ctsousa.mover.core.util;
 
 import com.ctsousa.mover.core.entity.InspectionPhotoEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.exception.severity.Severity;
 import jakarta.mail.MessagingException;
-import jakarta.mail.util.ByteArrayDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.web.multipart.MultipartFile;
-
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Base64;
-import java.util.UUID;
 
 public final class ImageUtil {
     private static final Logger logger = LoggerFactory.getLogger(ImageUtil.class);
 
-    public static String encodeImageToBase64(Path imagePath) throws IOException {
-        byte[] imageBytes = Files.readAllBytes(imagePath);
-        return Base64.getEncoder().encodeToString(imageBytes);
-    }
-
-    public static byte[] decodeBase64ToImage(String base64Image) {
-        return Base64.getDecoder().decode(base64Image);
-    }
-
-    public static boolean isPhotoValid(InspectionPhotoEntity photo) {
-        return photo != null && photo.getPhotoEntity() != null && photo.getPhotoEntity().getImage() != null && !photo.getPhotoEntity().getImage().isEmpty();
-    }
-
     public static void addPhotoAttachment(MimeMessageHelper helper, InspectionPhotoEntity photo) throws MessagingException {
+
         String base64Image = photo.getPhotoEntity().getImage();
 
-        if (!base64Image.startsWith("data:image/")) {
-            base64Image = convertFileToBase64(base64Image);
+        if (base64Image == null || base64Image.isEmpty() || !base64Image.startsWith("data:image/")) {
+
+            base64Image = convertFileToBase64(photo.getPhotoEntity().getImage());
         }
 
         String mimeType = determineMimeType(base64Image);
-
         if (mimeType == null) {
             logger.warn("Formato de imagem não suportado para a foto com ID {}.", photo.getId());
             return;
         }
 
-        base64Image = base64Image.replaceAll("^(data:image/(jpeg|jpg|png);base64,)?", "");
-        byte[] photoBytes = ImageUtil.decodeBase64ToImage(base64Image);
+        String imageData = base64Image.split(",")[1];
+        byte[] imageBytes = Base64.getDecoder().decode(imageData);
 
-        if (photoBytes == null || photoBytes.length == 0) {
-            logger.warn("A foto com ID {} não pôde ser convertida para bytes.", photo.getId());
-            return;
-        }
-
-        Long photoId = photo.getId();
-        String attachmentName = photoId != null ? "foto_" + photoId : "foto_anonima";
-        helper.addAttachment(attachmentName + "." + mimeType.split("/")[1], new ByteArrayDataSource(photoBytes, mimeType));
+        String filename = "photo_" + photo.getId() + "." + mimeType.split("/")[1];
+        helper.addAttachment(filename, new InputStreamSource() {
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return new ByteArrayInputStream(imageBytes);
+            }
+        }, mimeType);
     }
 
     public static String convertFileToBase64(String filePath) {
         try {
             File file = new File(filePath);
+
+            if (!file.exists() || !file.isFile()) {
+                logger.error("Arquivo não encontrado ou não é um arquivo válido: {}", filePath);
+                throw new NotificationException("Arquivo não encontrado: " + filePath, Severity.ERROR);
+            }
+
             byte[] fileContent = Files.readAllBytes(file.toPath());
             String base64String = Base64.getEncoder().encodeToString(fileContent);
 
@@ -69,7 +61,7 @@ public final class ImageUtil {
             return "data:image/" + mimeType + ";base64," + base64String;
         } catch (IOException e) {
             logger.error("Erro ao ler o arquivo para conversão em Base64: {}", e.getMessage());
-            return null;
+            throw new NotificationException("Erro ao converter arquivo para Base64: " + e.getMessage(), Severity.ERROR);
         }
     }
 
@@ -78,12 +70,20 @@ public final class ImageUtil {
             return "jpeg";
         } else if (filePath.endsWith(".png")) {
             return "png";
+        } else if (filePath.endsWith(".gif")) {
+            return "gif";
+        } else if (filePath.endsWith(".webp")) {
+            return "webp";
         }
         logger.warn("Formato de imagem não suportado para o arquivo: {}", filePath);
         return "unknown";
     }
 
     public static String determineMimeType(String base64Image) {
+        if (base64Image == null || base64Image.isEmpty()) {
+            logger.warn("A imagem base64 está vazia ou nula.");
+            return null;
+        }
 
         base64Image = base64Image.trim();
 
@@ -93,20 +93,13 @@ public final class ImageUtil {
             return "image/jpeg";
         } else if (base64Image.startsWith("data:image/png;base64,")) {
             return "image/png";
+        } else if (base64Image.startsWith("data:image/gif;base64,")) {
+            return "image/gif";
+        } else if (base64Image.startsWith("data:image/webp;base64,")) {
+            return "image/webp";
         }
 
         logger.warn("Formato de imagem não suportado: {}", base64Image);
         return null;
-    }
-
-    public static String savePhoto(MultipartFile photo) throws IOException {
-        String fileName = UUID.randomUUID().toString() + "_" + photo.getOriginalFilename();
-        Path resourceDirectory = Paths.get("src", "main", "resources", "photos").toAbsolutePath().normalize();
-
-        Files.createDirectories(resourceDirectory);
-        Path filePath = resourceDirectory.resolve(fileName);
-
-        Files.write(filePath, photo.getBytes());
-        return filePath.toString();
     }
 }
