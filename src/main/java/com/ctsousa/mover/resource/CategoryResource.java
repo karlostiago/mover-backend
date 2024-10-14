@@ -68,6 +68,13 @@ public class CategoryResource extends BaseResource<CategoryResponse, CategoryReq
     }
 
     @Override
+    public ResponseEntity<List<CategoryResponse>> findByTypeCategory(String type) {
+        TypeCategory typeCategory = TypeCategory.toDescription(type);
+        List<CategoryEntity> entities = categoryService.filterBy(typeCategory);
+        return ResponseEntity.ok(toCollection(entities, CategoryResponse.class));
+    }
+
+    @Override
     public Class<?> responseClass() {
         return CategoryResponse.class;
     }

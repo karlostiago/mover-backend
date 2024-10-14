@@ -31,6 +31,7 @@ public class Card extends DomainModel<CardEntity> {
         entity.setLimit(this.getLimit());
         entity.setClosingDay(this.getClosingDay());
         entity.setDueDate(this.getDueDate());
+        entity.setActive(this.getActive());
 
         AccountEntity account = new AccountEntity(this.getAccountId());
         entity.setAccount(account);

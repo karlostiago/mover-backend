@@ -9,7 +9,8 @@ import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 public enum CardType {
 
     CREDIT(1, "CRÉDITO"),
-    DEBIT(2, "DÉBITO");
+    DEBIT(2, "DÉBITO"),
+    CREDIT_DEBIT(3, "CRÉDITO / DÉBITO");
 
     private final Integer code;
     private final String description;
