@@ -1,9 +1,11 @@
 package com.ctsousa.mover.enumeration;
 
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import lombok.Getter;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
+@Getter
 public enum DayOfWeek {
     SUNDAY(1, "DOMINGO"),
     MONDAY(2, "SEGUNDA-FEIRA"),

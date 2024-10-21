@@ -76,7 +76,7 @@ public class VehicleResource extends BaseResource<VehicleResponse, VehicleReques
 
     @Override
     public ResponseEntity<List<SituationResponse>> findAllSituation() {
-        List<Situation> situations = List.of(Situation.IN_FLEET, Situation.SOLD, Situation.TOTAL_LOSS, Situation.IN_ACQUISITION);
+        List<Situation> situations = List.of(Situation.IN_FLEET, Situation.SOLD, Situation.TOTAL_LOSS, Situation.IN_ACQUISITION, Situation.AVAILABLE);
         return ResponseEntity.ok(toCollection(situations, SituationResponse.class));
     }
 

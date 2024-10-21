@@ -4,8 +4,8 @@ import com.ctsousa.mover.enumeration.TypePerson;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,6 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "tb_client")
 public class ClientEntity extends AbstractEntity {
@@ -73,4 +72,10 @@ public class ClientEntity extends AbstractEntity {
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContactEntity> contacts = new ArrayList<>();
+
+    public ClientEntity() { }
+
+    public ClientEntity(Long id) {
+        super.setId(id);
+    }
 }

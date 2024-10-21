@@ -225,7 +225,7 @@ public class Transform {
                     break;
                 }
             } catch (Exception e) {
-                log.warn(e.getMessage());
+//                log.warn(e.getMessage());
             } finally {
                 field.setAccessible(false);
                 targetField.setAccessible(false);

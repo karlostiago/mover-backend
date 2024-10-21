@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SituationResponse {
+public class PaymentFrequencyResponse {
     private Integer code;
     private String description;
 }
