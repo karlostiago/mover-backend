@@ -29,4 +29,7 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Long> {
     @Override
     @Query("SELECT c FROM ClientEntity c LEFT JOIN FETCH c.contacts LEFT JOIN FETCH c.user WHERE c.id = :id")
     Optional<ClientEntity> findById(@NonNull @Param("id") Long id);
+
+    @Query(value = "SELECT c.* FROM tb_client c LEFT JOIN tb_contract ct ON ct.client_id = c.id WHERE ct.client_id IS NULL", nativeQuery = true)
+    List<ClientEntity> onlyAvailable();
 }

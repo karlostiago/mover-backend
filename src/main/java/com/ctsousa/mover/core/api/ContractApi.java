@@ -28,5 +28,5 @@ public interface ContractApi {
     ResponseEntity<ContractResponse> generatedSequence();
 
     @PutMapping("/{id}/close")
-    ResponseEntity<Void> close(@PathVariable Long id, @RequestBody ContractRequest contractRequest);
+    ResponseEntity<ContractResponse> close(@PathVariable Long id, @RequestBody ContractRequest contractRequest);
 }

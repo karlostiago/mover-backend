@@ -119,6 +119,11 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
         return client;
     }
 
+    @Override
+    public List<ClientEntity> onlyAvailable() {
+        return clientRepository.onlyAvailable();
+    }
+
     private void associateClientWithUser(ClientEntity client, String password) {
         UserEntity user = client.getUser();
         if (user == null) {

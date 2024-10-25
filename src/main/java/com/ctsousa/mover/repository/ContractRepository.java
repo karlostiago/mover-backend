@@ -32,8 +32,8 @@ public interface ContractRepository extends JpaRepository<ContractEntity, Long> 
 
 //    boolean existsByHash(String hash);
 //
-//    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM AccountEntity c WHERE c.number = :number AND c.name = :name AND c.id NOT IN (:id)")
-//    boolean existsByNumberAndNameNotId(@Param("number") String number, @Param("name") String name, @Param("id") Long id);
+    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM ContractEntity c WHERE c.number = :number AND c.id NOT IN (:id)")
+    boolean existsByNumberNotId(@Param("number") String number, @Param("id") Long id);
 //
 //    @Query("SELECT ac FROM ContractEntity c WHERE ac.name LIKE %:query% OR ac.number LIKE %:query%")
 //    List<ContractEntity> findBy(@Param("query") String query);

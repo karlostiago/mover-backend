@@ -12,8 +12,10 @@ import com.ctsousa.mover.response.ContractResponse;
 import com.ctsousa.mover.response.DayOfWeekResponse;
 import com.ctsousa.mover.response.PaymentFrequencyResponse;
 import com.ctsousa.mover.response.SituationResponse;
+import com.ctsousa.mover.service.ClientService;
 import com.ctsousa.mover.service.ContractGeneratedSequenceService;
 import com.ctsousa.mover.service.ContractService;
+import com.ctsousa.mover.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -87,8 +89,11 @@ public class ContractResource extends BaseResource<ContractResponse, ContractReq
     }
 
     @Override
-    public ResponseEntity<Void> close(Long id, ContractRequest request) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ContractResponse> close(Long id, ContractRequest request) {
+        contractService.existsById(id);
+        Contract contract = toMapper(request, Contract.class);
+        ContractEntity entity = contract.toEntity();
+        return ResponseEntity.ok(toMapper(contractService.close(entity), ContractResponse.class));
     }
 
     @Override
