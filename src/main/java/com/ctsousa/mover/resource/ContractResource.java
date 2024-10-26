@@ -61,8 +61,10 @@ public class ContractResource extends BaseResource<ContractResponse, ContractReq
 
     @Override
     public ResponseEntity<List<ContractResponse>> filterBy(String search) {
-//        List<AccountEntity> entities = contractService.filterBy(search);
-        return ResponseEntity.ok(toCollection(new ArrayList<>(), ContractResponse.class));
+        List<ContractEntity> entities = contractService.filterBy(search);
+        List<ContractResponse> response = toCollection(entities, ContractResponse.class);
+        updateResponse(response, entities);
+        return ResponseEntity.ok(response);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.ctsousa.mover.repository;
 
 import com.ctsousa.mover.core.entity.ContractEntity;
-import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.enumeration.Situation;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,11 +29,11 @@ public interface ContractRepository extends JpaRepository<ContractEntity, Long> 
     @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM ContractEntity c JOIN c.client cc WHERE c.situation = :situation AND cc.id = :clientId")
     boolean existsClientsInProgress(@Param("situation") Situation situation, @Param("clientId") Long clientId);
 
-//    boolean existsByHash(String hash);
-//
-    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM ContractEntity c WHERE c.number = :number AND c.id NOT IN (:id)")
-    boolean existsByNumberNotId(@Param("number") String number, @Param("id") Long id);
-//
-//    @Query("SELECT ac FROM ContractEntity c WHERE ac.name LIKE %:query% OR ac.number LIKE %:query%")
-//    List<ContractEntity> findBy(@Param("query") String query);
+    @Query("SELECT ct FROM ContractEntity ct " +
+            "INNER JOIN FETCH ct.vehicle v " +
+            "INNER JOIN FETCH v.brand b " +
+            "INNER JOIN FETCH v.model m " +
+            "INNER JOIN FETCH ct.client c " +
+            "WHERE c.name LIKE %:query% OR ct.number LIKE %:query% OR v.licensePlate LIKE %:query% OR b.name LIKE %:query% OR m.name LIKE %:query%")
+    List<ContractEntity> findBy(@Param("query") String query);
 }

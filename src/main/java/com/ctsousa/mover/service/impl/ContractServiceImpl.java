@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Component
 public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> implements ContractService {
@@ -111,9 +112,9 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
         }
     }
 
-    //    @Override
-//    public List<ContractEntity> filterBy(String search) {
-//        if (search == null || search.isEmpty()) return repository.findAll();
-//        return repository.findBy(search);
-//    }
+    @Override
+    public List<ContractEntity> filterBy(String search) {
+        if (search == null || search.isEmpty()) return repository.findAll();
+        return repository.findBy(search);
+    }
 }
