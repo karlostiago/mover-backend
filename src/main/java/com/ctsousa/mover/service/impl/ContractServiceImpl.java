@@ -2,21 +2,19 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.entity.ContractEntity;
-import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.enumeration.Situation;
 import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.ContractRepository;
-import com.ctsousa.mover.repository.VehicleRepository;
 import com.ctsousa.mover.service.ClientService;
 import com.ctsousa.mover.service.ContractService;
-import com.ctsousa.mover.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,17 +26,11 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
 
     private final ClientRepository clientRepository;
 
-    private final VehicleRepository vehicleRepository;
-
-    private final VehicleService vehicleService;
-
     private final ClientService clientService;
 
-    public ContractServiceImpl(ContractRepository repository, ClientRepository clientRepository, VehicleRepository vehicleRepository, VehicleService vehicleService, ClientService clientService) {
+    public ContractServiceImpl(ContractRepository repository, ClientRepository clientRepository, ClientService clientService) {
         super(repository);
         this.clientRepository = clientRepository;
-        this.vehicleRepository = vehicleRepository;
-        this.vehicleService = vehicleService;
         this.clientService = clientService;
     }
 
@@ -50,7 +42,6 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
             if (repository.existsByNumber(entity.getNumber())) {
                 throw new NotificationException("Ocorreu um erro ao salvar o contrato. Numeração em duplicidade!", Severity.ERROR);
             }
-            vehicleRepository.updateSituation(entity.getVehicle().getId(), Situation.IN_FLEET.getDescription());
         } else {
             if (Situation.CLOSED.equals(entity.getSituation())) {
                 return close(entity);
@@ -61,11 +52,6 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
 
     @Override
     public ContractEntity close(ContractEntity entity) {
-        entity.setVehicle(vehicleService.findById(entity.getVehicle().getId()));
-        VehicleEntity vehicleEntity = entity.getVehicle();
-        vehicleEntity.setSituation(Situation.AVAILABLE.getDescription());
-        vehicleRepository.save(vehicleEntity);
-
         entity.setClient(clientService.findById(entity.getClient().getId()));
         ClientEntity clientEntity = entity.getClient();
         clientEntity.setActive(Boolean.FALSE);
@@ -83,18 +69,13 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
         avaliableToClient(entity.getClient());
         canTerminate(entity);
         billingStartDate(entity);
-        initialDate(entity);
-    }
-
-    private void initialDate(ContractEntity entity) {
-        if (entity.getInitialDate().isBefore(LocalDate.now())) {
-            throw new NotificationException("Data inicial não pode ser anterior a data atual.");
-        }
+        depositAmount(entity);
+        recurrenceValue(entity);
     }
 
     private void billingStartDate(ContractEntity entity) {
-        if (entity.getBillingStartDate().isBefore(LocalDate.now())) {
-            throw new NotificationException("Data inicio de cobrança não pode ser anterior a data atual.");
+        if (entity.getBillingStartDate().isBefore(entity.getInitialDate())) {
+            throw new NotificationException("Data inicio de cobrança não pode ser anterior a data inicial.");
         }
     }
 
@@ -109,6 +90,24 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
             if (entity.getReason() == null || entity.getReason().isEmpty()) {
                 throw new NotificationException("É necessário informar um motivo para o encerramento de contrato.");
             }
+        }
+    }
+
+    private void depositAmount(ContractEntity entity) {
+        if (entity.getDepositAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new NotificationException("Valor caução não pode ser menor que zero.");
+        }
+        if (entity.getDepositAmount().compareTo(BigDecimal.ZERO) == 0) {
+            throw new NotificationException("Valor caução não pode ser zero.");
+        }
+    }
+
+    private void recurrenceValue(ContractEntity entity) {
+        if (entity.getRecurrenceValue().compareTo(BigDecimal.ZERO) < 0) {
+            throw new NotificationException("Valor recorrência não pode ser menor que zero.");
+        }
+        if (entity.getRecurrenceValue().compareTo(BigDecimal.ZERO) == 0) {
+            throw new NotificationException("Valor recorrência não pode ser zero.");
         }
     }
 

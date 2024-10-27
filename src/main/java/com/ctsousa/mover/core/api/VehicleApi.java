@@ -1,5 +1,6 @@
 package com.ctsousa.mover.core.api;
 
+import com.ctsousa.mover.response.ClientResponse;
 import com.ctsousa.mover.response.FuelTypeResponse;
 import com.ctsousa.mover.response.SituationResponse;
 import com.ctsousa.mover.response.VehicleResponse;
@@ -19,4 +20,7 @@ public interface VehicleApi {
 
     @GetMapping("situation")
     ResponseEntity<List<SituationResponse>> findAllSituation();
+
+    @GetMapping("/only-available")
+    ResponseEntity<List<VehicleResponse>> onlyAvailable();
 }

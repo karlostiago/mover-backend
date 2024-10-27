@@ -5,11 +5,16 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.repository.VehicleRepository;
+import com.ctsousa.mover.service.BrandService;
+import com.ctsousa.mover.service.ModelService;
 import com.ctsousa.mover.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class VehicleServiceImpl extends BaseServiceImpl<VehicleEntity, Long> implements VehicleService {
@@ -17,8 +22,14 @@ public class VehicleServiceImpl extends BaseServiceImpl<VehicleEntity, Long> imp
     @Autowired
     private VehicleRepository repository;
 
-    public VehicleServiceImpl(VehicleRepository repository) {
+    private final ModelService modelService;
+
+    private final BrandService brandService;
+
+    public VehicleServiceImpl(VehicleRepository repository, ModelService modelService, BrandService brandService) {
         super(repository);
+        this.modelService = modelService;
+        this.brandService = brandService;
     }
 
     @Override
@@ -36,6 +47,24 @@ public class VehicleServiceImpl extends BaseServiceImpl<VehicleEntity, Long> imp
             }
         }
         return super.save(entity);
+    }
+
+    @Override
+    public List<VehicleEntity> onlyAvailable() {
+        Map<Long, VehicleEntity> mapEntities = repository.findAll().stream()
+                .collect(Collectors.toMap(VehicleEntity::getId, v -> v));
+
+        List<VehicleEntity> entitiesAvailables = repository.onlyAvailable();
+        List<VehicleEntity> entities = new ArrayList<>(entitiesAvailables.size());
+
+        for (VehicleEntity entity : entitiesAvailables) {
+            VehicleEntity newEntity = mapEntities.get(entity.getId());
+            if (newEntity != null) {
+                entities.add(newEntity);
+            }
+        }
+
+        return entities;
     }
 
     @Override

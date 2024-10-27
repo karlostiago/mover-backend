@@ -13,8 +13,7 @@ public enum Situation {
     TOTAL_LOSS(5, "PERDA TOTAL"),
     IN_ACQUISITION(6, "EM AQUISICAO"),
     CLOSED(7, "ENCERRADO"),
-    ONGOING(8, "EM ANDAMENTO"),
-    AVAILABLE(9, "DISPONÍVEL");
+    ONGOING(8, "EM ANDAMENTO");
 
     private final Integer code;
     private final String description;
