@@ -1,6 +1,7 @@
 package com.ctsousa.mover.repository;
 
 import com.ctsousa.mover.core.entity.CardEntity;
+import com.ctsousa.mover.core.entity.ContractEntity;
 import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.enumeration.CardType;
 import lombok.NonNull;
@@ -28,4 +29,9 @@ public interface CardRepository extends JpaRepository<CardEntity, Long> {
     @Override
     @Query("SELECT c FROM CardEntity c INNER JOIN FETCH c.account WHERE c.id = :id")
     Optional<CardEntity> findById(@NonNull @Param("id") Long id);
+
+    @NonNull
+    @Override
+    @Query("SELECT c FROM CardEntity c INNER JOIN FETCH c.account WHERE 1 = 1")
+    List<CardEntity> findAll();
 }
