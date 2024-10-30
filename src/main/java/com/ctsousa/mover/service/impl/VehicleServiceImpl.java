@@ -5,8 +5,6 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.repository.VehicleRepository;
-import com.ctsousa.mover.service.BrandService;
-import com.ctsousa.mover.service.ModelService;
 import com.ctsousa.mover.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,14 +20,8 @@ public class VehicleServiceImpl extends BaseServiceImpl<VehicleEntity, Long> imp
     @Autowired
     private VehicleRepository repository;
 
-    private final ModelService modelService;
-
-    private final BrandService brandService;
-
-    public VehicleServiceImpl(VehicleRepository repository, ModelService modelService, BrandService brandService) {
+    public VehicleServiceImpl(VehicleRepository repository) {
         super(repository);
-        this.modelService = modelService;
-        this.brandService = brandService;
     }
 
     @Override
