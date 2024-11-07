@@ -18,15 +18,15 @@ import java.time.LocalDate;
 public class MaintenanceEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "car_id", nullable = false)
-    private VehicleEntity car;
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    private VehicleEntity vehicle;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private AccountEntity account;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "card_id", nullable = false)
+    @JoinColumn(name = "card_id")
     private CardEntity card;
 
     @Column(name = "date", nullable = false)
@@ -35,21 +35,15 @@ public class MaintenanceEntity extends AbstractEntity {
     @Column(name = "mileage", nullable = false)
     private Long mileage;
 
-    @Column(name = "workshop", nullable = false)
-    private String workshop;
+    @Column(name = "establishment", nullable = false)
+    private String establishment;
 
     @Column(name = "type", nullable = false)
     private String type;
 
-    @Column(name = "description", nullable = false)
-    private String description;
+    @Column(name = "detail", nullable = false, columnDefinition = "LONGTEXT")
+    private String detail;
 
-    @Column(name = "observation", nullable = false)
-    private String observation;
-
-    @Column(name = "attachment", nullable = false)
-    private String attachment;
-
-    @Column(name = "amount", nullable = false)
-    private BigDecimal amount;
+    @Column(name = "`value`", nullable = false)
+    private BigDecimal value;
 }

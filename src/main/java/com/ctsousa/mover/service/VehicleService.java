@@ -8,4 +8,6 @@ import java.util.List;
 public interface VehicleService extends BaseService<VehicleEntity, Long> {
 
     List<VehicleEntity> findBy(String search);
+
+    List<VehicleEntity> onlyAvailable();
 }

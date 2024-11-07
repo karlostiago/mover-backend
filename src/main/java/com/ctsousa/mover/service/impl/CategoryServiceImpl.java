@@ -25,11 +25,11 @@ public class CategoryServiceImpl extends BaseServiceImpl<CategoryEntity, Long> i
     @Override
     public CategoryEntity save(CategoryEntity entity) {
         if (entity.isNew()) {
-            if (repository.existsByDescription(entity.getDescription())) {
+            if (repository.existsByDescriptionAndType(entity.getDescription(), entity.getType())) {
                 throw new NotificationException("Já existe uma categoria cadastrada com os dados informados.", Severity.WARNING);
             }
         } else if (!entity.isNew()) {
-            if (repository.existsByDescriptionNotId(entity.getDescription(), entity.getId())) {
+            if (repository.existsByDescriptionNotId(entity.getDescription(), entity.getType(), entity.getId())) {
                 throw new NotificationException("Não foi possível atualizar, já existe uma categoria cadastrada com os dados informados.", Severity.WARNING);
             }
         }
@@ -37,6 +37,15 @@ public class CategoryServiceImpl extends BaseServiceImpl<CategoryEntity, Long> i
         return super.save(entity);
     }
 
+    @Override
+    public void deleteById(Long aLong) {
+        try {
+            super.deleteById(aLong);
+        }
+        catch (Exception e) {
+            throw new NotificationException("Essa categoria já esta em uso e não pode ser excluída.", Severity.ERROR);
+        }
+    }
 
     @Override
     public List<CategoryEntity> filterBy(String search) {

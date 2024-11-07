@@ -6,7 +6,9 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class DateUtil {
@@ -70,10 +72,42 @@ public final class DateUtil {
         return localDate.format(formatter);
     }
 
+    public static boolean isValidDate(String date) {
+        for (DateTimeFormatter formatter : formatters()) {
+            try {
+                LocalDate.parse(date, formatter);
+                return true;
+            } catch (DateTimeParseException e) {
+                // Ignora e tenta o próximo formato.
+            }
+        }
+        return false;
+    }
+
+    public static LocalDate parseToLocalDate(String date) {
+        for (DateTimeFormatter formatter : formatters()) {
+            try {
+                return LocalDate.parse(date, formatter);
+            } catch (DateTimeParseException e) {
+                // Ignora e tenta o próximo formato.
+            }
+        }
+        return null;
+    }
+
     public static boolean isValidDate(LocalDate localDate) {
         return isValidYear(localDate) && isValidMonth(localDate) && isValidDay(localDate);
     }
 
+    private static List<DateTimeFormatter> formatters() {
+        return Arrays.asList(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+                DateTimeFormatter.ofPattern("ddMMyyyy"),
+                DateTimeFormatter.ofPattern("yyyyMMdd")
+        );
+    }
+    
     private static boolean isValidDateFormmatter(String dateStr, String pattern) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         try {

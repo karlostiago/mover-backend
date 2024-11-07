@@ -3,7 +3,6 @@ package com.ctsousa.mover.core.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -12,7 +11,6 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "tb_vehicle")
 public class VehicleEntity extends AbstractEntity {
@@ -66,4 +64,10 @@ public class VehicleEntity extends AbstractEntity {
 
     @Column(name = "fuel_type", nullable = false)
     private String fuelType;
+
+    public VehicleEntity() { }
+
+    public VehicleEntity(Long id) {
+        super.setId(id);
+    }
 }

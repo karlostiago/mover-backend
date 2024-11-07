@@ -33,5 +33,10 @@ public class VehicleResponse {
     private String color;
     private String situation;
     private String fuelType;
+    private String fullname;
     private Boolean active;
+
+    public String getFullname() {
+        return this.brandName + " - " + this.modelName + " - " + this.licensePlate;
+    }
 }

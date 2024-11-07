@@ -13,11 +13,11 @@ import java.util.List;
 @Repository
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
 
-    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM CategoryEntity c WHERE c.description = :description AND c.id NOT IN (:id)")
-    boolean existsByDescriptionNotId(@Param("description") String description, @Param("id") Long id);
+    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM CategoryEntity c WHERE c.description = :description AND c.type = :type AND c.id NOT IN (:id)")
+    boolean existsByDescriptionNotId(@Param("description") String description, @Param("type") TypeCategory type, @Param("id") Long id);
 
-    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM CategoryEntity c WHERE c.description = :description")
-    boolean existsByDescription(@Param("description") String description);
+    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM CategoryEntity c WHERE c.description = :description AND c.type = :type")
+    boolean existsByDescriptionAndType(@Param("description") String description, @Param("type") TypeCategory type);
 
     @Query(value = "SELECT c.* FROM tb_category c WHERE CASE " +
             "WHEN c.type = 'EXPENSE' THEN 'DESPESA' " +
@@ -28,7 +28,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
     List<CategoryEntity> findBy(@Param("query") String query);
 
     @Query("SELECT c FROM CategoryEntity c WHERE c.type = :type")
-    List<CategoryEntity> findByType(@Param("type")TypeCategory type);
+    List<CategoryEntity> findByType(@Param("type") TypeCategory type);
 
     @NonNull
     @Override

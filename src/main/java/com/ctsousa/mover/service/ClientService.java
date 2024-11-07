@@ -13,4 +13,6 @@ public interface ClientService extends BaseService<ClientEntity, Long> {
     ClientEntity findByAddress(Integer postalCode);
 
     List<ClientEntity> filterBy(String search);
+
+    List<ClientEntity> onlyAvailable();
 }

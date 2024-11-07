@@ -9,7 +9,10 @@ import com.ctsousa.mover.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class VehicleServiceImpl extends BaseServiceImpl<VehicleEntity, Long> implements VehicleService {
@@ -36,6 +39,24 @@ public class VehicleServiceImpl extends BaseServiceImpl<VehicleEntity, Long> imp
             }
         }
         return super.save(entity);
+    }
+
+    @Override
+    public List<VehicleEntity> onlyAvailable() {
+        Map<Long, VehicleEntity> mapEntities = repository.findAll().stream()
+                .collect(Collectors.toMap(VehicleEntity::getId, v -> v));
+
+        List<VehicleEntity> entitiesAvailables = repository.onlyAvailable();
+        List<VehicleEntity> entities = new ArrayList<>(entitiesAvailables.size());
+
+        for (VehicleEntity entity : entitiesAvailables) {
+            VehicleEntity newEntity = mapEntities.get(entity.getId());
+            if (newEntity != null) {
+                entities.add(newEntity);
+            }
+        }
+
+        return entities;
     }
 
     @Override

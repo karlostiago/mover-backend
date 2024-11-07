@@ -39,4 +39,8 @@ public class CardEntity extends AbstractEntity {
 
     @Column(name = "icon")
     private String icon;
+
+    public CardEntity(Long id) {
+        setId(id);
+    }
 }

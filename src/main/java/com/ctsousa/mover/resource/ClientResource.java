@@ -93,6 +93,12 @@ public class ClientResource extends BaseResource<ClientResponse, ClientRequest, 
     }
 
     @Override
+    public ResponseEntity<List<ClientResponse>> onlyAvailable() {
+        List<ClientEntity> entities = clientService.onlyAvailable();
+        return ResponseEntity.ok(toCollection(entities, ClientResponse.class));
+    }
+
+    @Override
     public Class<?> responseClass() {
         return ClientResponse.class;
     }

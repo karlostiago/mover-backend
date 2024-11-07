@@ -11,7 +11,9 @@ public enum Situation {
     IN_FLEET(3,"EM FROTA"),
     SOLD(4, "VENDIDO"),
     TOTAL_LOSS(5, "PERDA TOTAL"),
-    IN_ACQUISITION(6, "EM AQUISICAO");
+    IN_ACQUISITION(6, "EM AQUISICAO"),
+    CLOSED(7, "ENCERRADO"),
+    ONGOING(8, "EM ANDAMENTO");
 
     private final Integer code;
     private final String description;

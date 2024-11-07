@@ -28,4 +28,7 @@ public interface ClientApi {
 
     @PostMapping("/register/client-and-user")
     ResponseEntity<ClientResponse> registerClientAndUser(@RequestBody ClientRequest request);
+
+    @GetMapping("/only-available")
+    ResponseEntity<List<ClientResponse>> onlyAvailable();
 }

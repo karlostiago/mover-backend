@@ -57,4 +57,7 @@ public class ContractEntity extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_day", nullable = false)
     private DayOfWeek paymentDay;
+
+    @Column(name = "reason", columnDefinition = "LONGTEXT")
+    private String reason;
 }

@@ -22,6 +22,7 @@ public abstract class BaseResource<RESPONSE, REQUEST, T> implements Api<REQUEST,
     public ResponseEntity<List<RESPONSE>> findAll() {
         List<T> entities = service.findAll();
         List<RESPONSE> response = (List<RESPONSE>) toCollection(entities, responseClass());
+        updateResponse(response, entities);
         return ResponseEntity.ok(response);
     }
 
@@ -30,6 +31,7 @@ public abstract class BaseResource<RESPONSE, REQUEST, T> implements Api<REQUEST,
     public ResponseEntity<RESPONSE> findById(Long id) {
         T entity = service.findById(id);
         RESPONSE response = (RESPONSE) toMapper(entity, responseClass());
+        updateResponse(List.of(response), List.of(entity));
         return ResponseEntity.ok(response);
     }
 
@@ -37,6 +39,14 @@ public abstract class BaseResource<RESPONSE, REQUEST, T> implements Api<REQUEST,
     public void delete(Long id) {
         service.existsById(id);
         service.deleteById(id);
+    }
+
+    /**
+     * Utilizado para atualizar o response quando necessario.
+     * na classe ContractResource tem um exemplo de uso.
+     */
+    public void updateResponse(List<RESPONSE> response, List<T> entities) {
+
     }
 
     public abstract Class<?> responseClass();

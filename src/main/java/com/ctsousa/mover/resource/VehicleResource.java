@@ -1,7 +1,7 @@
 package com.ctsousa.mover.resource;
 
-import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.api.VehicleApi;
+import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.domain.Vehicle;
 import com.ctsousa.mover.enumeration.FuelType;
@@ -78,6 +78,12 @@ public class VehicleResource extends BaseResource<VehicleResponse, VehicleReques
     public ResponseEntity<List<SituationResponse>> findAllSituation() {
         List<Situation> situations = List.of(Situation.IN_FLEET, Situation.SOLD, Situation.TOTAL_LOSS, Situation.IN_ACQUISITION);
         return ResponseEntity.ok(toCollection(situations, SituationResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<List<VehicleResponse>> onlyAvailable() {
+        List<VehicleEntity> entities = vehicleService.onlyAvailable();
+        return ResponseEntity.ok(toCollection(entities, VehicleResponse.class));
     }
 
     @Override
