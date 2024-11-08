@@ -9,11 +9,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ContractApi {
 
     @GetMapping("/filterBy")
     ResponseEntity<List<ContractResponse>> filterBy(@RequestParam("search") String search);
+
+    @GetMapping("/contract-by/{clientId}")
+    ResponseEntity<Optional<ContractResponse>> contractBy(@PathVariable Long clientId);
 
     @GetMapping("/payment-frequencies")
     ResponseEntity<List<PaymentFrequencyResponse>> paymentFrequencies();

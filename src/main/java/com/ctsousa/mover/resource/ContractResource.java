@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.ContractApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.ContractEntity;
+import com.ctsousa.mover.core.mapper.Transform;
 import com.ctsousa.mover.domain.Contract;
 import com.ctsousa.mover.enumeration.DayOfWeek;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.mapper.Transform.toCollection;
@@ -65,6 +67,25 @@ public class ContractResource extends BaseResource<ContractResponse, ContractReq
         List<ContractResponse> response = toCollection(entities, ContractResponse.class);
         updateResponse(response, entities);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<Optional<ContractResponse>> contractBy(Long clientId) {
+        Optional<ContractEntity> contractEntity = contractService.findContratoByClientId(clientId);
+
+        return contractEntity
+                .map(entity -> {
+                    ContractResponse contractResponse = Transform.toMapper(entity, ContractResponse.class);
+
+                    String fullNameVehicle =
+                            entity.getVehicle().getBrand().getName() + " - " +
+                            entity.getVehicle().getModel().getName() + " - " +
+                            entity.getVehicle().getLicensePlate();
+
+                    contractResponse.setVehicleName(fullNameVehicle);
+                    return ResponseEntity.ok(Optional.of(contractResponse));
+
+                }).orElseGet(() -> ResponseEntity.ok(Optional.empty()));
     }
 
     @Override
