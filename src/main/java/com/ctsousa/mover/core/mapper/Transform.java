@@ -40,7 +40,11 @@ public class Transform {
             throw new NotificationException(e.getMessage());
         }
     }
-
+    /*
+      FIX-ME: Para alguns mapeamentos de coleções de entidade -> response,
+      o response muitas vezes não faz o bind de atributos, revisar para testar asta pegar o getInspecao Por contratos
+      onde usando o objeto de ContractResponse objeto não atribui os valores para lá ver uma forma de melhorar posteriormente.
+     */
     public static <S, T> List<T> toCollection(List<S> sources, Class<T> targetClass, String ... ignoreAttrs) {
         List<T> list = new ArrayList<>();
 

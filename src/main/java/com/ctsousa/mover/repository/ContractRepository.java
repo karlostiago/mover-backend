@@ -40,8 +40,8 @@ public interface ContractRepository extends JpaRepository<ContractEntity, Long> 
     @Query("SELECT ct FROM ContractEntity ct " +
             "INNER JOIN FETCH ct.client c " +
             "INNER JOIN FETCH ct.vehicle v " +
-            "INNER JOIN FETCH v.brand b " +   // Usa LEFT JOIN para carregar opcionalmente
-            "INNER JOIN FETCH v.model m " +   // Usa LEFT JOIN para carregar opcionalmente
+            "INNER JOIN FETCH v.brand b " +
+            "INNER JOIN FETCH v.model m " +
             "WHERE c.id = :clientId")
     Optional<ContractEntity> findContratoByClientId(@Param("clientId") Long clientId);
 

@@ -52,13 +52,21 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
         inspection.setActive(true);
         inspection.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
 
+        List<InspectionPhotoEntity> photoList = new ArrayList<>(inspection.getPhotos());
+
         String emailAnalyst = this.mailMover;
-        senderService.sendPhotosForAnalysis(emailAnalyst, inspection.getContract().getId(), inspection.getPhotos());
+        senderService.sendPhotosForAnalysis(emailAnalyst, inspection.getContract().getId(), photoList);
         inspectionRepository.save(inspection);
     }
 
+    @Override
+    public InspectionEntity findInspectionById(Long id) {
+        return inspectionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Inspeção não encontrada"));
+    }
+
     private void processInspection(List<MultipartFile> photos, InspectionEntity inspection) throws IOException {
-        List<InspectionPhotoEntity> photoEntities = new ArrayList<>();
+        Set<InspectionPhotoEntity> photoEntities = new HashSet<>();
 
         for (MultipartFile photo : photos) {
             PhotoEntity photoEntity = savePhoto(photo);
@@ -108,8 +116,10 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
         inspectionRepository.save(inspection);
         inspectionPhotoRepository.save(photo);
 
+        List<InspectionPhotoEntity> photoList = new ArrayList<>(inspection.getPhotos());
+
         String clientEmail = inspection.getContract().getClient().getEmail();
-        senderService.sendRejectionEmail(clientEmail, inspection.getContract().getId(), inspection.getPhotos());
+        senderService.sendRejectionEmail(clientEmail, inspection.getContract().getId(), photoList);
 
     }
 
@@ -118,6 +128,11 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
         InspectionEntity inspection = inspectionRepository.findById(id)
                 .orElseThrow(() -> new NotificationException("Inspeção não encontrada.", Severity.INFO));
         return inspection.getInspectionStatus();
+    }
+
+    @Override
+    public List<InspectionEntity> findUnderReviewInspectionsWithQuestionsByContractId(Long contractId) {
+        return inspectionRepository.findUnderReviewInspectionsWithQuestionsByContractId(contractId);
     }
 
     public PhotoEntity savePhoto(MultipartFile photo) throws IOException {

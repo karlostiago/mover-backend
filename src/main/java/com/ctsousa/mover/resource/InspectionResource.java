@@ -1,25 +1,73 @@
 package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.api.InspectionApi;
-import com.ctsousa.mover.service.InspectionService;
+import com.ctsousa.mover.core.api.resource.SimpleBaseResource;
+import com.ctsousa.mover.core.entity.InspectionEntity;
+import com.ctsousa.mover.core.service.BaseService;
 import com.ctsousa.mover.enumeration.InspectionStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ctsousa.mover.request.InspectionRequest;
+import com.ctsousa.mover.response.InspectionResponse;
+import com.ctsousa.mover.service.InspectionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/inspections")
-public class InspectionResource implements InspectionApi {
+public class InspectionResource extends SimpleBaseResource<InspectionResponse, InspectionRequest, InspectionEntity> implements InspectionApi {
 
     private final InspectionService inspectionService;
 
-    @Autowired
-    public InspectionResource(InspectionService inspectionService) {
+    public InspectionResource(BaseService<InspectionEntity, Long> service, InspectionService inspectionService) {
+        super(service);
         this.inspectionService = inspectionService;
+    }
+
+    @Override
+    public ResponseEntity<InspectionResponse> startInspection(Long id, List<MultipartFile> photos) throws IOException {
+        inspectionService.startInspection(id, photos);
+        InspectionEntity inspection = inspectionService.findInspectionById(id);
+
+        InspectionResponse response = toResponse(inspection);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @Override
+    public ResponseEntity<List<InspectionResponse>> findUnderReviewInspectionsWithQuestionsByContractId(Long contractId) {
+        List<InspectionEntity> inspections = inspectionService.findUnderReviewInspectionsWithQuestionsByContractId(contractId);
+        List<InspectionResponse> responseList = toResponseList(inspections);
+
+        updateResponse(responseList, inspections);
+        return ResponseEntity.ok(responseList);
+    }
+
+    public void updateResponse(List<InspectionResponse> responseList, List<InspectionEntity> entityList) {
+        Map<Long, InspectionResponse> responseMap = responseList.stream()
+                .collect(Collectors.toMap(InspectionResponse::getId, r -> r));
+
+        for (InspectionEntity entity : entityList) {
+
+            String fullNameVehicle =
+                    entity.getContract().getVehicle().getBrand().getName() + " - " +
+                    entity.getContract().getVehicle().getModel().getName() + " - " +
+                    entity.getContract().getVehicle().getLicensePlate();
+
+            String clientName = entity.getContract().getClient().getName();
+            Long vehicleId = entity.getContract().getVehicle().getId();
+            Long clientId = entity.getContract().getClient().getId();
+
+            InspectionResponse inspectionResponse = responseMap.get(entity.getId());
+
+            inspectionResponse.getContract().setVehicleName(fullNameVehicle);
+            inspectionResponse.getContract().setClientName(clientName);
+            inspectionResponse.getContract().setVehicleId(vehicleId);
+            inspectionResponse.getContract().setClientId(clientId);
+        }
     }
 
     @Override
@@ -41,9 +89,12 @@ public class InspectionResource implements InspectionApi {
     }
 
     @Override
-    public ResponseEntity<String> startInspection( Long id, List<MultipartFile> photos) throws IOException {
-        inspectionService.startInspection(id, photos);
-        String message = "Autoinspeção iniciada com sucesso.";
-        return ResponseEntity.status(HttpStatus.OK).body(message);
+    protected Class<InspectionResponse> responseClass() {
+        return InspectionResponse.class;
+    }
+
+    @Override
+    protected Class<InspectionEntity> entityClass() {
+        return InspectionEntity.class;
     }
 }

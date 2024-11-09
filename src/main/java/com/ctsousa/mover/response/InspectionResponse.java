@@ -1,12 +1,17 @@
 package com.ctsousa.mover.response;
 
-import lombok.AllArgsConstructor;
+import com.ctsousa.mover.enumeration.InspectionStatus;
 import lombok.Getter;
 import lombok.Setter;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class InspectionResponse {
-    private String message;
+    private Long id;
+    private BigDecimal mileage;
+    private LocalDate date;
+    private InspectionStatus inspectionStatus;
+    private ContractResponse contract;
 }

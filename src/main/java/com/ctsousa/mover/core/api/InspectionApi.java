@@ -1,6 +1,7 @@
 package com.ctsousa.mover.core.api;
 
 import com.ctsousa.mover.enumeration.InspectionStatus;
+import com.ctsousa.mover.response.InspectionResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,5 +19,8 @@ public interface InspectionApi {
     ResponseEntity<InspectionStatus> getInspectionStatus(@PathVariable Long id);
 
     @PostMapping("/{id}/start")
-    ResponseEntity<String> startInspection(@PathVariable Long id, @RequestParam("photos") List<MultipartFile> photos) throws IOException;
+    ResponseEntity<InspectionResponse> startInspection(@PathVariable Long id, @RequestParam("photos") List<MultipartFile> photos) throws IOException;
+
+    @GetMapping("/under-review/{contractId}")
+    ResponseEntity<List<InspectionResponse>> findUnderReviewInspectionsWithQuestionsByContractId(@PathVariable Long contractId);
 }

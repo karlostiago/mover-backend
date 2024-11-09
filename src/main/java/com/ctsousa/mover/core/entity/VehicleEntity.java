@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Table(name = "tb_vehicle")
 public class VehicleEntity extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "brand_id", nullable = false)
     private BrandEntity brand;
 
