@@ -13,16 +13,12 @@ import com.ctsousa.mover.response.ContractResponse;
 import com.ctsousa.mover.response.DayOfWeekResponse;
 import com.ctsousa.mover.response.PaymentFrequencyResponse;
 import com.ctsousa.mover.response.SituationResponse;
-import com.ctsousa.mover.service.ClientService;
 import com.ctsousa.mover.service.ContractGeneratedSequenceService;
 import com.ctsousa.mover.service.ContractService;
-import com.ctsousa.mover.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

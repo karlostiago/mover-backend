@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.InspectionApi;
 import com.ctsousa.mover.core.api.resource.SimpleBaseResource;
 import com.ctsousa.mover.core.entity.InspectionEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.BaseService;
 import com.ctsousa.mover.enumeration.InspectionStatus;
 import com.ctsousa.mover.request.InspectionRequest;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,10 +32,20 @@ public class InspectionResource extends SimpleBaseResource<InspectionResponse, I
 
     @Override
     public ResponseEntity<InspectionResponse> startInspection(Long id, List<MultipartFile> photos) throws IOException {
-        inspectionService.startInspection(id, photos);
-        InspectionEntity inspection = inspectionService.findInspectionById(id);
 
-        InspectionResponse response = toResponse(inspection);
+        inspectionService.startInspection(id, photos);
+
+        List<InspectionEntity> inspections = inspectionService.findInspectionById(id);
+
+        if (inspections.isEmpty()) {
+            throw new NotificationException("Nenhuma inspeção encontrada para o ID do contrato fornecido.");
+        }
+
+        InspectionEntity selectedInspection = inspections.stream()
+                .max(Comparator.comparing(InspectionEntity::getDate))
+                .orElseThrow(() -> new NotificationException("Não foi possível determinar a última inspeção."));
+
+        InspectionResponse response = toResponse(selectedInspection);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -51,9 +63,7 @@ public class InspectionResource extends SimpleBaseResource<InspectionResponse, I
                 .collect(Collectors.toMap(InspectionResponse::getId, r -> r));
 
         for (InspectionEntity entity : entityList) {
-
-            String fullNameVehicle =
-                    entity.getContract().getVehicle().getBrand().getName() + " - " +
+            String fullNameVehicle = entity.getContract().getVehicle().getBrand().getName() + " - " +
                     entity.getContract().getVehicle().getModel().getName() + " - " +
                     entity.getContract().getVehicle().getLicensePlate();
 
@@ -62,7 +72,6 @@ public class InspectionResource extends SimpleBaseResource<InspectionResponse, I
             Long clientId = entity.getContract().getClient().getId();
 
             InspectionResponse inspectionResponse = responseMap.get(entity.getId());
-
             inspectionResponse.getContract().setVehicleName(fullNameVehicle);
             inspectionResponse.getContract().setClientName(clientName);
             inspectionResponse.getContract().setVehicleId(vehicleId);

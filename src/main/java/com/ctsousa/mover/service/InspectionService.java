@@ -19,6 +19,6 @@ public interface InspectionService extends BaseService<InspectionEntity, Long> {
 
     List<InspectionEntity> findUnderReviewInspectionsWithQuestionsByContractId(Long contractId);
 
-    InspectionEntity findInspectionById(Long id);
+    List<InspectionEntity> findInspectionById(Long id);
 
 }

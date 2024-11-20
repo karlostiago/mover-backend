@@ -45,24 +45,46 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
     @Transactional
     public void startInspection(Long id, List<MultipartFile> photos) throws IOException {
 
-        InspectionEntity inspection = inspectionRepository.findById(id)
-                .orElseThrow(() -> new NotificationException("Inspeção não encontrada.", Severity.INFO));
+        List<InspectionEntity> inspections = inspectionRepository.findByContractId(id);
+        if (inspections.isEmpty()) {
+            throw new NotificationException("Nenhuma inspeção encontrada para o contrato.", Severity.INFO);
+        }
 
-        processInspection(photos, inspection);
-        inspection.setActive(true);
-        inspection.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
+        for (InspectionEntity inspection : inspections) {
+            processInspection(photos, inspection);
 
-        List<InspectionPhotoEntity> photoList = new ArrayList<>(inspection.getPhotos());
+            inspection.setActive(true);
+            inspection.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
 
-        String emailAnalyst = this.mailMover;
-        senderService.sendPhotosForAnalysis(emailAnalyst, inspection.getContract().getId(), photoList);
-        inspectionRepository.save(inspection);
+            List<InspectionPhotoEntity> photoList = new ArrayList<>();
+
+            for (MultipartFile photo : photos) {
+                PhotoEntity photoEntity = savePhoto(photo);
+
+                InspectionPhotoEntity inspectionPhoto = new InspectionPhotoEntity();
+                inspectionPhoto.setInspection(inspection);
+                inspectionPhoto.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
+                inspectionPhoto.setPhotoEntity(photoEntity);
+
+                photoList.add(inspectionPhoto);
+            }
+
+            inspectionPhotoRepository.saveAll(photoList);
+
+            String emailAnalyst = this.mailMover;
+            senderService.sendPhotosForAnalysis(emailAnalyst, inspection.getContract().getId(), photoList);
+
+            inspectionRepository.save(inspection);
+        }
     }
 
     @Override
-    public InspectionEntity findInspectionById(Long id) {
-        return inspectionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Inspeção não encontrada"));
+    public  List<InspectionEntity> findInspectionById(Long id) {
+        List<InspectionEntity> inspections = inspectionRepository.findByContractId(id);
+        if (inspections.isEmpty()) {
+            throw new RuntimeException("Nenhuma inspeção encontrada para o contrato com ID: " + id);
+        }
+        return inspections;
     }
 
     private void processInspection(List<MultipartFile> photos, InspectionEntity inspection) throws IOException {
@@ -110,15 +132,16 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
                 .orElseThrow(() -> new NotificationException("Inspeção não encontrada.", Severity.INFO));
 
         InspectionPhotoEntity photo = findPhotoById(photoId);
-        photo.setInspectionStatus(InspectionStatus.REJECTED);
 
+        photo.setInspectionStatus(InspectionStatus.REJECTED);
         inspection.setInspectionStatus(InspectionStatus.REJECTED);
+
         inspectionRepository.save(inspection);
         inspectionPhotoRepository.save(photo);
 
         List<InspectionPhotoEntity> photoList = new ArrayList<>(inspection.getPhotos());
-
         String clientEmail = inspection.getContract().getClient().getEmail();
+
         senderService.sendRejectionEmail(clientEmail, inspection.getContract().getId(), photoList);
 
     }
