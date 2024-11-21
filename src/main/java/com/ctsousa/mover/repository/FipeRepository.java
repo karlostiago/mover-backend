@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface FipeRepository extends JpaRepository<FipeEntity, Long> {
@@ -49,5 +50,19 @@ public interface FipeRepository extends JpaRepository<FipeEntity, Long> {
                     END;
             """,
             nativeQuery = true)
-    FipeEntity findByVehicleAndReference(@Param("vehicleId") Long vehicleId, @Param("reference")LocalDate reference);
+    FipeEntity findByVehicleAndReference(@Param("vehicleId") Long vehicleId, @Param("reference") LocalDate reference);
+
+    @Query(value = """
+                SELECT
+                	f.*
+                FROM tb_fipe f
+                JOIN tb_vehicle v ON v.model_year = f.model_year
+                JOIN tb_brand b ON b.id = v.brand_id
+                JOIN tb_model m ON m.id = v.model_id
+                WHERE v.id IN (:vehicleId)
+                  AND f.brand = b.name
+                  AND f.model = m.name
+            """,
+            nativeQuery = true)
+    List<FipeEntity> findByHistory(@Param("vehicleId") List<Long> vehicleId);
 }

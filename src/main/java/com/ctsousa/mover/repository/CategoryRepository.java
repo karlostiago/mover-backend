@@ -23,6 +23,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
             "WHEN c.type = 'EXPENSE' THEN 'DESPESA' " +
             "WHEN c.type = 'INCOME' THEN 'RECEITA' " +
             "WHEN c.type = 'INVESTMENT' THEN 'INVESTIMENTO' " +
+            "WHEN c.type = 'TRANSFER' THEN 'TRANSFERÊNCIA' " +
             "ELSE c.type END LIKE %:query% OR c.description LIKE %:query% " +
             "ORDER BY c.type ASC, c.description ASC", nativeQuery = true)
     List<CategoryEntity> findBy(@Param("query") String query);
@@ -37,6 +38,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
             "WHEN c.type = 'EXPENSE' THEN 'DESPESA' " +
             "WHEN c.type = 'INCOME' THEN 'RECEITA' " +
             "WHEN c.type = 'INVESTMENT' THEN 'INVESTIMENTO' " +
+            "WHEN c.type = 'TRANSFER' THEN 'TRANSFERÊNCIA' " +
             "ELSE c.type END ASC, " +
             "c.description ASC ", nativeQuery = true)
     List<CategoryEntity> findAll();
