@@ -17,21 +17,31 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Component
+
 public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> implements ContractService {
 
-    @Autowired
-    private ContractRepository repository;
+    private final ContractRepository repository;
 
     private final ClientRepository clientRepository;
 
     private final ClientService clientService;
 
-    public ContractServiceImpl(ContractRepository repository, ClientRepository clientRepository, ClientService clientService) {
+    private final ContractRepository contractRepository;
+
+    public ContractServiceImpl(ContractRepository repository,
+                               ContractRepository repository1,
+                               ClientRepository clientRepository,
+                               ClientService clientService,
+                               ContractRepository contractRepository) {
+
         super(repository);
+        this.repository = repository1;
         this.clientRepository = clientRepository;
         this.clientService = clientService;
+        this.contractRepository = contractRepository;
     }
 
     @Override
@@ -63,6 +73,11 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
         repository.save(entity);
         
         return entity;
+    }
+
+    @Override
+    public Optional<ContractEntity> findContratoByClientId(Long id) {
+        return contractRepository.findContratoByClientId(id);
     }
 
     private void validContract(ContractEntity entity) {

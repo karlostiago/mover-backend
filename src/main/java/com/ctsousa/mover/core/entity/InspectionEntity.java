@@ -10,7 +10,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -18,6 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_inspection")
+
 public class InspectionEntity extends AbstractEntity {
 
     @Column(nullable = false)
@@ -35,8 +38,9 @@ public class InspectionEntity extends AbstractEntity {
     private InspectionStatus inspectionStatus;
 
     @OneToMany(mappedBy = "inspection", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InspectionQuestionEntity> questions = new ArrayList<>();
+    private Set<InspectionQuestionEntity> questions = new HashSet<>();
 
     @OneToMany(mappedBy = "inspection", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InspectionPhotoEntity> photos = new ArrayList<>();
+    private Set<InspectionPhotoEntity> photos = new HashSet<>();
+
 }

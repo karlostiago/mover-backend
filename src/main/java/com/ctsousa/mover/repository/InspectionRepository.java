@@ -5,6 +5,7 @@ import com.ctsousa.mover.core.entity.InspectionPhotoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.List;
 
 public interface InspectionRepository extends JpaRepository<InspectionEntity, Long> {
 
@@ -28,5 +29,16 @@ public interface InspectionRepository extends JpaRepository<InspectionEntity, Lo
             "AND photo.photoEntity.image <> '' " +
             "AND photo.inspectionStatus = 'APPROVED'")
     boolean existsPhotoApproved(@Param("photo") InspectionPhotoEntity photo);
+
+    @Query("SELECT i FROM InspectionEntity i " +
+            "LEFT JOIN FETCH i.contract c " +
+            "LEFT JOIN FETCH c.vehicle v " +
+            "LEFT JOIN FETCH v.brand b " +
+            "LEFT JOIN FETCH v.model m " +
+            "WHERE c.id = :contractId")
+    List<InspectionEntity> findUnderReviewInspectionsWithQuestionsByContractId(@Param("contractId") Long contractId);
+
+    @Query("SELECT i FROM InspectionEntity i WHERE i.contract.id = :contractId")
+    List<InspectionEntity> findByContractId(@Param("contractId") Long contractId);
 
 }
