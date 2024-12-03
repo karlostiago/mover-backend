@@ -1,5 +1,6 @@
 package com.ctsousa.mover.core.api;
 
+import com.ctsousa.mover.response.BalanceResponse;
 import com.ctsousa.mover.response.TransactionResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,4 +20,7 @@ public interface TransactionApi {
 
     @PutMapping("/{id}/refund")
     ResponseEntity<TransactionResponse> refund(@PathVariable Long id);
+
+    @GetMapping("/balances")
+    ResponseEntity<BalanceResponse> balance();
 }

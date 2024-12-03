@@ -29,6 +29,7 @@ public class Account extends DomainModel<AccountEntity> {
         entity.setName(toUppercase(this.getName()));
         entity.setNumber(this.getNumber());
         entity.setInitialBalance(this.getInitialBalance());
+        entity.setAvailableBalance(this.getInitialBalance());
 
         BankIcon icon = BankIcon.toCode(this.getCodeIcon());
         entity.setIcon(icon.name());

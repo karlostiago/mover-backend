@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,4 +50,29 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "LEFT JOIN FETCH t.partner " +
             "WHERE t.id = :id ORDER BY t.id DESC ")
     Optional<TransactionEntity> findById(@NonNull Long id);
+
+    @Query(value = """
+            SELECT
+            	SUM(TEMP.BALANCE) AS BALANCE
+            FROM (
+            	SELECT\s
+            	    c.name AS NAME,
+            	    COALESCE(c.initial_balance, 0) + COALESCE((
+            	        SELECT SUM(t.value)
+            	        FROM tb_transaction t
+            	        WHERE t.account_id = c.id
+            	          AND t.card_id IS NULL
+            	          AND t.contract_id IS NULL
+            	          AND t.partner_id IS NULL
+            	          AND t.vehicle_id IS NULL
+            	          AND t.paid
+            	    ), 0) AS BALANCE
+            	FROM\s
+            	    tb_account c
+            	WHERE\s
+            	    c.id IN (:accounts)
+            	    AND c.caution = :scrowAccount
+            ) AS TEMP
+            """, nativeQuery = true)
+    BigDecimal balance(@Param("accounts") List<Long> accounts, @Param("scrowAccount") Boolean scrowAccount);
 }

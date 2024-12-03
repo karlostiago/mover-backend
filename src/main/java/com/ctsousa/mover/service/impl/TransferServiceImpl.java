@@ -83,14 +83,13 @@ public class TransferServiceImpl implements TransferService {
     }
 
     private void updateBalance(AccountEntity account, BigDecimal value) {
-        BigDecimal balance = account.getAvailableBalance()
-                .add(value);
+        BigDecimal balance = account.getAvailableBalance().add(value);
         account.setAvailableBalance(balance);
         accountService.save(account);
     }
 
     private void hasBalance(AccountEntity account, BigDecimal value) {
-        if (account.getAvailableBalance().compareTo(value) < 0) {
+        if (account.getAvailableBalance().compareTo(value) <= 0) {
             throw new NotificationException("Não foi possível completar essa transferência, por insuficiência de saldo. Essa conta só tem disponível "
                     + currencyFormatter(account.getAvailableBalance(), new Locale("pt", "BR")));
         }

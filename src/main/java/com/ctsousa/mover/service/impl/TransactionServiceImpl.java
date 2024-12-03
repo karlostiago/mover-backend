@@ -1,5 +1,6 @@
 package com.ctsousa.mover.service.impl;
 
+import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
@@ -7,10 +8,15 @@ import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
+import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.TransactionService;
 import com.ctsousa.mover.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class TransactionServiceImpl extends BaseServiceImpl<TransactionEntity, Long> implements TransactionService {
@@ -20,6 +26,9 @@ public class TransactionServiceImpl extends BaseServiceImpl<TransactionEntity, L
 
     @Autowired
     private TransferService transferService;
+
+    @Autowired
+    private AccountService accountService;
 
     public TransactionServiceImpl(TransactionRepository repository) {
         super(repository);
@@ -73,5 +82,14 @@ public class TransactionServiceImpl extends BaseServiceImpl<TransactionEntity, L
             default -> throw new NotificationException("Transação não suportada!");
         }
         return entity;
+    }
+
+    @Override
+    public BigDecimal balance(final Boolean scrowAccount) {
+        List<Long> accounts = accountService.findByAccount(scrowAccount)
+                .stream().map(AccountEntity::getId)
+                .toList();
+
+        return repository.balance(accounts, scrowAccount);
     }
 }

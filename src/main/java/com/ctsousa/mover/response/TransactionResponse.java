@@ -15,6 +15,7 @@ import java.util.Locale;
 @Setter
 public class TransactionResponse {
     private Long id;
+    private String icon;
     private String description;
     private Long subcategoryId;
     private Integer installment;

@@ -17,8 +17,8 @@ public class AccountServiceImpl extends BaseServiceImpl<AccountEntity, Long> imp
     @Autowired
     private AccountRepository accountRepository;
 
-    public AccountServiceImpl(AccountRepository repository) {
-        super(repository);
+    public AccountServiceImpl(AccountRepository accountRepository) {
+        super(accountRepository);
     }
 
     @Override
@@ -39,5 +39,10 @@ public class AccountServiceImpl extends BaseServiceImpl<AccountEntity, Long> imp
     public List<AccountEntity> filterBy(String search) {
         if (search == null || search.isEmpty()) return accountRepository.findAll();
         return accountRepository.findBy(search);
+    }
+
+    @Override
+    public List<AccountEntity> findByAccount(final Boolean scrowAccount) {
+        return accountRepository.findByAccount(scrowAccount);
     }
 }
