@@ -25,11 +25,11 @@ public class SubCategoryServiceImpl extends BaseServiceImpl<SubCategoryEntity, L
     @Override
     public SubCategoryEntity save(SubCategoryEntity entity) {
         if (entity.isNew()) {
-            if (repository.existsByDescription(entity.getDescription())) {
+            if (repository.existsByDescription(entity.getDescription(), entity.getCategory())) {
                 throw new NotificationException("Já existe uma subcategoria cadastrado com os dados informados.", Severity.WARNING);
             }
         } else if (!entity.isNew()) {
-            if (repository.existsByDescriptionNotId(entity.getDescription(), entity.getId())) {
+            if (repository.existsByDescriptionNotId(entity.getDescription(), entity.getCategory(), entity.getId())) {
                 throw new NotificationException("Não foi possível atualizar, já existe uma subcategoria cadastrada com os dados informados.", Severity.WARNING);
             }
         }

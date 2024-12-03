@@ -1,15 +1,10 @@
 package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
-import com.ctsousa.mover.core.entity.BrandEntity;
-import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.util.HashUtil;
-import com.ctsousa.mover.core.util.StringUtil;
 import com.ctsousa.mover.enumeration.BankIcon;
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 
