@@ -62,9 +62,6 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             	        FROM tb_transaction t
             	        WHERE t.account_id = c.id
             	          AND t.card_id IS NULL
-            	          AND t.contract_id IS NULL
-            	          AND t.partner_id IS NULL
-            	          AND t.vehicle_id IS NULL
             	          AND t.paid
             	    ), 0) AS BALANCE
             	FROM\s

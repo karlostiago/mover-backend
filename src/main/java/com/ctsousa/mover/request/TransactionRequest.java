@@ -47,6 +47,7 @@ public class TransactionRequest {
     private Long destinationAccountId;
     private Long vehicleId;
     private Long contractId;
+    private Long partnerId;
     private Boolean paid;
     private Boolean active;
 }

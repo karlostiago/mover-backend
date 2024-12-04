@@ -6,7 +6,7 @@ import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.AccountService;
-import com.ctsousa.mover.service.TransferService;
+import com.ctsousa.mover.service.CorporateCapitalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,36 +17,21 @@ import java.util.List;
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 
 @Component
-public class TransferServiceImpl implements TransferService {
+public class CorporateCapitalServiceImpl implements CorporateCapitalService {
 
     @Autowired
     private AccountService accountService;
 
     @Override
-    public TransactionEntity transferBetweenAccount(Transaction transaction, TransactionRepository repository) {
-        AccountEntity creditAccount = accountService.findById(transaction.getDestinationAccount().getId());
-        AccountEntity debitAccount = accountService.findById(transaction.getAccount().getId());
-
+    public TransactionEntity contribuition(Transaction transaction, TransactionRepository repository) {
         TransactionEntity entity = transaction.toEntity();
-
         entity.setTransactionType(TransactionType.CREDIT.name());
-        entity.setAccount(creditAccount);
-        repository.save(entity);
 
         if (entity.getPaid()) {
-            updateBalance(creditAccount, entity.getValue());
+            updateBalance(entity.getAccount(), entity.getValue());
         }
 
-        entity.setTransactionType(TransactionType.DEBIT.name());
-        entity.setAccount(debitAccount);
-        entity.setValue(entity.getValue().multiply(BigDecimal.valueOf(-1)));
-        repository.save(entity);
-
-        if (entity.getPaid()) {
-            updateBalance(debitAccount, entity.getValue());
-        }
-
-        return entity;
+        return repository.save(entity);
     }
 
     @Override

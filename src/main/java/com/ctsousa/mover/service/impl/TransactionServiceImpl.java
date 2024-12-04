@@ -9,6 +9,7 @@ import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.AccountService;
+import com.ctsousa.mover.service.CorporateCapitalService;
 import com.ctsousa.mover.service.TransactionService;
 import com.ctsousa.mover.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class TransactionServiceImpl extends BaseServiceImpl<TransactionEntity, L
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private CorporateCapitalService corporateCapitalService;
+
     public TransactionServiceImpl(TransactionRepository repository) {
         super(repository);
     }
@@ -48,7 +52,7 @@ public class TransactionServiceImpl extends BaseServiceImpl<TransactionEntity, L
             case TRANSFER -> entity = transferService.transferBetweenAccount(transaction, repository);
             case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
             case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case CORPORATE_CAPITAL -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case CORPORATE_CAPITAL -> entity = corporateCapitalService.contribuition(transaction, repository);
             default -> throw new NotificationException("Transação não suportada!");
         }
         return entity;
@@ -63,7 +67,7 @@ public class TransactionServiceImpl extends BaseServiceImpl<TransactionEntity, L
             case TRANSFER -> transferService.pay(entity.getSignature(), repository);
             case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
             case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case CORPORATE_CAPITAL -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case CORPORATE_CAPITAL -> corporateCapitalService.pay(entity.getSignature(), repository);
             default -> throw new NotificationException("Transação não suportada!");
         }
         return entity;
@@ -78,7 +82,7 @@ public class TransactionServiceImpl extends BaseServiceImpl<TransactionEntity, L
             case TRANSFER -> transferService.refund(entity.getSignature(), repository);
             case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
             case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case CORPORATE_CAPITAL -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case CORPORATE_CAPITAL -> corporateCapitalService.refund(entity.getSignature(), repository);
             default -> throw new NotificationException("Transação não suportada!");
         }
         return entity;

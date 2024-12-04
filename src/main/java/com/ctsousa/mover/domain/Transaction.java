@@ -34,6 +34,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
     private Account destinationAccount;
     private Vehicle vehicle;
     private Contract contract;
+    private Partner partner;
     private String signature;
     private String transactionType;
     private Boolean paid;
@@ -69,6 +70,9 @@ public class Transaction extends DomainModel<TransactionEntity> {
         if (this.getContract() != null && (this.getContract().getId() != null && this.getContract().getId() > 0)) {
             entity.setContract(new ContractEntity(this.getContract().getId()));
         }
+        if (this.getPartner() != null && (this.getPartner().getId() != null && this.getPartner().getId() > 0)) {
+            entity.setPartner(new PartnerEntity(this.getPartner().getId()));
+        }
 
         entity.setPaid(this.getPaid());
         entity.setActive(this.getActive());
@@ -78,6 +82,10 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setHour(LocalTime.now());
 
         return entity;
+    }
+
+    private boolean hasId(Long id) {
+        return id != null && id > 0;
     }
 
     private String generateSignature() {
