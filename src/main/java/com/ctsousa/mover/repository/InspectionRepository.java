@@ -41,4 +41,10 @@ public interface InspectionRepository extends JpaRepository<InspectionEntity, Lo
     @Query("SELECT i FROM InspectionEntity i WHERE i.contract.id = :contractId")
     List<InspectionEntity> findByContractId(@Param("contractId") Long contractId);
 
+    @Query("SELECT i FROM InspectionEntity i " +
+            "JOIN FETCH i.photos " +
+            "JOIN FETCH i.questions " +
+            "WHERE i.contract.id = :contractId")
+    List<InspectionEntity> findByContractIdJoinFech(@Param("contractId") Long contractId);
+
 }

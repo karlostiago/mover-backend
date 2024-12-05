@@ -1,6 +1,7 @@
 package com.ctsousa.mover.core.entity;
 
 import com.ctsousa.mover.enumeration.ResponseEnum;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class InspectionQuestionEntity extends AbstractEntity{
 
     @ManyToOne
     @JoinColumn(name = "inspection_id")
+    @JsonBackReference
     private InspectionEntity inspection;
 
     @ManyToOne

@@ -1,6 +1,7 @@
 package com.ctsousa.mover.core.entity;
 
 import com.ctsousa.mover.enumeration.InspectionStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class InspectionPhotoEntity extends AbstractEntity {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "inspection_id")
+    @JsonBackReference
     private InspectionEntity inspection;
 
     @Enumerated(EnumType.STRING)

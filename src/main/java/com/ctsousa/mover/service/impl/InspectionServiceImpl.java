@@ -87,6 +87,11 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
         return inspections;
     }
 
+    @Override
+    public List<InspectionEntity> findByContractId(Long contractId) {
+        return inspectionRepository.findByContractIdJoinFech(contractId);
+    }
+
     private void processInspection(List<MultipartFile> photos, InspectionEntity inspection) throws IOException {
         Set<InspectionPhotoEntity> photoEntities = new HashSet<>();
 

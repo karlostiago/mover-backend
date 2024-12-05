@@ -58,6 +58,15 @@ public class InspectionResource extends SimpleBaseResource<InspectionResponse, I
         return ResponseEntity.ok(responseList);
     }
 
+    @Override
+    public List<InspectionEntity> getInspectionsByContractId(Long contractId) {
+        List<InspectionEntity> inspections = inspectionService.findByContractId(contractId);
+        if (inspections.isEmpty()) {
+            throw new NotificationException("Nenhuma inspeção encontrada para o ID do contrato fornecido.");
+        }
+        return inspections;
+    }
+
     public void updateResponse(List<InspectionResponse> responseList, List<InspectionEntity> entityList) {
         Map<Long, InspectionResponse> responseMap = responseList.stream()
                 .collect(Collectors.toMap(InspectionResponse::getId, r -> r));
