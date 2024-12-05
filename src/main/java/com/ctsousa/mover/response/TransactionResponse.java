@@ -38,6 +38,9 @@ public class TransactionResponse {
 
     private String transactionType;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate date;
+
     public void setCategoryType(String categoryType) {
         this.categoryType = TypeCategory.toDescription(categoryType)
                 .getDescription();

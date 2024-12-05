@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
@@ -19,7 +20,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
     @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM CategoryEntity c WHERE c.description = :description AND c.type = :type")
     boolean existsByDescriptionAndType(@Param("description") String description, @Param("type") TypeCategory type);
 
-    @Query(value = "SELECT c.* FROM tb_category c WHERE CASE " +
+    @Query(value = "SELECT c.* FROM tb_category c LEFT JOIN FETCH c.subcategories WHERE CASE " +
             "WHEN c.type = 'EXPENSE' THEN 'DESPESA' " +
             "WHEN c.type = 'INCOME' THEN 'RECEITA' " +
             "WHEN c.type = 'INVESTMENT' THEN 'INVESTIMENTO' " +
@@ -42,4 +43,9 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
             "ELSE c.type END ASC, " +
             "c.description ASC ", nativeQuery = true)
     List<CategoryEntity> findAll();
+
+    @NonNull
+    @Override
+    @Query("SELECT c FROM CategoryEntity c LEFT JOIN FETCH c.subcategories WHERE c.id = :id")
+    Optional<CategoryEntity> findById(@NonNull @Param("id") Long id);
 }

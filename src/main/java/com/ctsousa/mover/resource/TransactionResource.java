@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -79,6 +80,12 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
             TransactionResponse transactionResponse = responseMap.get(entity.getId());
             transactionResponse.setSubcategory(subcategory);
             transactionResponse.setCategory(category);
+
+            if (transactionResponse.getPaymentDate() != null) {
+                transactionResponse.setDate(transactionResponse.getPaymentDate());
+            } else {
+                transactionResponse.setDate(transactionResponse.getDueDate());
+            }
 
             BankIcon icon = BankIcon.toName(entity.getAccount().getIcon());
             transactionResponse.setIcon(icon.getImage());
