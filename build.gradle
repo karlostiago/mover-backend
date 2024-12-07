@@ -21,7 +21,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-hibernate6', version: '2.15.0-rc3'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.apache.commons:commons-lang3:3.0'
 	implementation 'org.springframework.boot:spring-boot-starter-mail:3.3.1'

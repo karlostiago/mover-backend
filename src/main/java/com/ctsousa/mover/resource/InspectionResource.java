@@ -50,12 +50,12 @@ public class InspectionResource extends SimpleBaseResource<InspectionResponse, I
     }
 
     @Override
-    public ResponseEntity<List<InspectionResponse>> findUnderReviewInspectionsWithQuestionsByContractId(Long contractId) {
+    public List <InspectionEntity>findUnderReviewInspectionsWithQuestionsByContractId(Long contractId) {
         List<InspectionEntity> inspections = inspectionService.findUnderReviewInspectionsWithQuestionsByContractId(contractId);
-        List<InspectionResponse> responseList = toResponseList(inspections);
-
-        updateResponse(responseList, inspections);
-        return ResponseEntity.ok(responseList);
+        if (inspections.isEmpty()) {
+            throw new NotificationException("Nenhuma inspeção encontrada para o ID do contrato fornecido.");
+        }
+        return inspections;
     }
 
     @Override

@@ -23,7 +23,7 @@ public interface InspectionApi {
     ResponseEntity<InspectionResponse> startInspection(@PathVariable Long id, @RequestParam("photos") List<MultipartFile> photos) throws IOException;
 
     @GetMapping("/under-review/{contractId}")
-    ResponseEntity<List<InspectionResponse>> findUnderReviewInspectionsWithQuestionsByContractId(@PathVariable Long contractId);
+    List<InspectionEntity> findUnderReviewInspectionsWithQuestionsByContractId(@PathVariable Long contractId);
 
     @GetMapping("/inspection-by/{contractId}")
     List<InspectionEntity> getInspectionsByContractId(@PathVariable Long contractId);

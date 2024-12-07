@@ -35,6 +35,8 @@ public interface InspectionRepository extends JpaRepository<InspectionEntity, Lo
             "LEFT JOIN FETCH c.vehicle v " +
             "LEFT JOIN FETCH v.brand b " +
             "LEFT JOIN FETCH v.model m " +
+            "LEFT JOIN FETCH i.photos p " +
+            "LEFT JOIN FETCH i.questions q " +
             "WHERE c.id = :contractId")
     List<InspectionEntity> findUnderReviewInspectionsWithQuestionsByContractId(@Param("contractId") Long contractId);
 
