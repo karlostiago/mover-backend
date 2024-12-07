@@ -1,5 +1,6 @@
 package com.ctsousa.mover.core.api;
 
+import com.ctsousa.mover.core.entity.InspectionEntity;
 import com.ctsousa.mover.enumeration.InspectionStatus;
 import com.ctsousa.mover.response.InspectionResponse;
 import org.springframework.http.ResponseEntity;
@@ -23,4 +24,7 @@ public interface InspectionApi {
 
     @GetMapping("/under-review/{contractId}")
     ResponseEntity<List<InspectionResponse>> findUnderReviewInspectionsWithQuestionsByContractId(@PathVariable Long contractId);
+
+    @GetMapping("/inspection-by/{contractId}")
+    List<InspectionEntity> getInspectionsByContractId(@PathVariable Long contractId);
 }
