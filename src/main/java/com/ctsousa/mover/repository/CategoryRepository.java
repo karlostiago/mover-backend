@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
@@ -23,6 +24,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
             "WHEN c.type = 'EXPENSE' THEN 'DESPESA' " +
             "WHEN c.type = 'INCOME' THEN 'RECEITA' " +
             "WHEN c.type = 'INVESTMENT' THEN 'INVESTIMENTO' " +
+            "WHEN c.type = 'TRANSFER' THEN 'TRANSFERÊNCIA' " +
             "ELSE c.type END LIKE %:query% OR c.description LIKE %:query% " +
             "ORDER BY c.type ASC, c.description ASC", nativeQuery = true)
     List<CategoryEntity> findBy(@Param("query") String query);
@@ -37,7 +39,13 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
             "WHEN c.type = 'EXPENSE' THEN 'DESPESA' " +
             "WHEN c.type = 'INCOME' THEN 'RECEITA' " +
             "WHEN c.type = 'INVESTMENT' THEN 'INVESTIMENTO' " +
+            "WHEN c.type = 'TRANSFER' THEN 'TRANSFERÊNCIA' " +
             "ELSE c.type END ASC, " +
             "c.description ASC ", nativeQuery = true)
     List<CategoryEntity> findAll();
+
+    @NonNull
+    @Override
+    @Query("SELECT c FROM CategoryEntity c LEFT JOIN FETCH c.subcategories WHERE c.id = :id")
+    Optional<CategoryEntity> findById(@NonNull @Param("id") Long id);
 }

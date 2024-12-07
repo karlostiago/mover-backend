@@ -18,4 +18,7 @@ public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
 
     @Query("SELECT ac FROM AccountEntity ac WHERE ac.name LIKE %:query% OR ac.number LIKE %:query%")
     List<AccountEntity> findBy(@Param("query") String query);
+
+    @Query("SELECT c FROM AccountEntity c WHERE c.caution = :scrowAccount")
+    List<AccountEntity> findByAccount(@Param("scrowAccount") Boolean scrowAccount);
 }

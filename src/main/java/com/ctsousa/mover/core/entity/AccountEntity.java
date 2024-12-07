@@ -26,7 +26,10 @@ public class AccountEntity extends AbstractEntity {
     private String number;
 
     @Column(name = "initial_balance", nullable = false)
-    private BigDecimal InitialBalance;
+    private BigDecimal initialBalance;
+
+    @Column(name = "available_balance", nullable = false)
+    private BigDecimal availableBalance;
 
     @Column(name = "hash", nullable = false)
     private String hash;

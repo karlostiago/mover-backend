@@ -1,10 +1,7 @@
 package com.ctsousa.mover.enumeration;
 
 import com.ctsousa.mover.core.exception.notification.NotificationException;
-import com.ctsousa.mover.core.util.StringUtil;
 import lombok.Getter;
-
-import java.lang.reflect.Type;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
@@ -13,7 +10,9 @@ public enum TypeCategory {
 
     INCOME(1, "RECEITA"),
     EXPENSE(2, "DESPESA"),
-    INVESTMENT(3, "INVESTIMENTO");
+    INVESTMENT(3, "INVESTIMENTO"),
+    TRANSFER(4, "TRANSFERÊNCIA"),
+    CORPORATE_CAPITAL(5, "CAPITAL SOCIETÁRIO");
 
     private final Integer code;
     private final String description;
@@ -32,7 +31,7 @@ public enum TypeCategory {
 
     public static TypeCategory toDescription(String description) {
         for (TypeCategory typeCategory : TypeCategory.values()) {
-            if (typeCategory.description.equals(description)) return typeCategory;
+            if (typeCategory.name().equals(description) || typeCategory.description.equals(description)) return typeCategory;
         }
         throw new NotificationException("Tipo categoria não suportada :: " + description);
     }

@@ -1,5 +1,6 @@
 package com.ctsousa.mover.repository;
 
+import com.ctsousa.mover.core.entity.CategoryEntity;
 import com.ctsousa.mover.core.entity.SubCategoryEntity;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import lombok.NonNull;
@@ -14,11 +15,11 @@ import java.util.Optional;
 @Repository
 public interface SubCategoryRepository extends JpaRepository<SubCategoryEntity, Long> {
 
-    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM SubCategoryEntity c WHERE c.description = :description AND c.id NOT IN (:id)")
-    boolean existsByDescriptionNotId(@Param("description") String description, @Param("id") Long id);
+    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM SubCategoryEntity c WHERE c.description = :description AND c.category = :category AND c.id NOT IN (:id)")
+    boolean existsByDescriptionNotId(@Param("description") String description,  @Param("category") CategoryEntity category, @Param("id") Long id);
 
-    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM SubCategoryEntity c WHERE c.description = :description")
-    boolean existsByDescription(@Param("description") String description);
+    @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM SubCategoryEntity c WHERE c.description = :description AND c.category = :category")
+    boolean existsByDescription(@Param("description") String description, @Param("category") CategoryEntity category);
 
     @Query("SELECT c FROM SubCategoryEntity c INNER JOIN FETCH c.category ct WHERE c.description LIKE %:query% OR ct.description LIKE %:query% ORDER BY ct.type ASC, ct.description ASC, c.description ASC ")
     List<SubCategoryEntity> findBy(@Param("query") String query);

@@ -127,6 +127,7 @@ public class AccountServiceTest {
         entity.setNumber("12346");
         entity.setIcon("BANK_WILL");
         entity.setInitialBalance(BigDecimal.valueOf(1000D));
+        entity.setAvailableBalance(entity.getInitialBalance());
         entity.setActive(true);
         entity.setCaution(false);
         return entity;

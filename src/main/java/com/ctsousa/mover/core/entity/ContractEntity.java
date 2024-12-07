@@ -60,4 +60,8 @@ public class ContractEntity extends AbstractEntity {
 
     @Column(name = "reason", columnDefinition = "LONGTEXT")
     private String reason;
+
+    public ContractEntity(Long id) {
+        super.setId(id);
+    }
 }

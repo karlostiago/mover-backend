@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -19,6 +22,9 @@ public class CategoryEntity extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private TypeCategory type;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SubCategoryEntity> subcategories = new ArrayList<>();
 
     public CategoryEntity() { }
 

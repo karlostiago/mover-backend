@@ -3,6 +3,7 @@ package com.ctsousa.mover.core.util;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
@@ -25,5 +26,14 @@ public final class NumberUtil {
         } catch (ParseException e) {
             return BigDecimal.ZERO;
         }
+    }
+
+    public static BigDecimal invertSignal(final BigDecimal value) {
+        return value.multiply(BigDecimal.valueOf(-1));
+    }
+
+    public static String currencyFormatter(BigDecimal value, Locale locale) {
+        NumberFormat format = NumberFormat.getCurrencyInstance(locale);
+        return format.format(value);
     }
 }

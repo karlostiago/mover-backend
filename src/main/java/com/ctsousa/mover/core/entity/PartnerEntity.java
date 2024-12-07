@@ -21,4 +21,8 @@ public class PartnerEntity extends AbstractEntity {
 
     @Column(name = "email", nullable = false)
     private String email;
+
+    public PartnerEntity(Long id) {
+        super.setId(id);
+    }
 }
