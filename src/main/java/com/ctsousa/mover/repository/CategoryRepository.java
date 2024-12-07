@@ -20,7 +20,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
     @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM CategoryEntity c WHERE c.description = :description AND c.type = :type")
     boolean existsByDescriptionAndType(@Param("description") String description, @Param("type") TypeCategory type);
 
-    @Query(value = "SELECT c.* FROM tb_category c LEFT JOIN FETCH c.subcategories WHERE CASE " +
+    @Query(value = "SELECT c.* FROM tb_category c WHERE CASE " +
             "WHEN c.type = 'EXPENSE' THEN 'DESPESA' " +
             "WHEN c.type = 'INCOME' THEN 'RECEITA' " +
             "WHEN c.type = 'INVESTMENT' THEN 'INVESTIMENTO' " +
