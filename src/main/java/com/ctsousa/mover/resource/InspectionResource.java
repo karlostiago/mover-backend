@@ -67,27 +67,6 @@ public class InspectionResource extends SimpleBaseResource<InspectionResponse, I
         return inspections;
     }
 
-    public void updateResponse(List<InspectionResponse> responseList, List<InspectionEntity> entityList) {
-        Map<Long, InspectionResponse> responseMap = responseList.stream()
-                .collect(Collectors.toMap(InspectionResponse::getId, r -> r));
-
-        for (InspectionEntity entity : entityList) {
-            String fullNameVehicle = entity.getContract().getVehicle().getBrand().getName() + " - " +
-                    entity.getContract().getVehicle().getModel().getName() + " - " +
-                    entity.getContract().getVehicle().getLicensePlate();
-
-            String clientName = entity.getContract().getClient().getName();
-            Long vehicleId = entity.getContract().getVehicle().getId();
-            Long clientId = entity.getContract().getClient().getId();
-
-            InspectionResponse inspectionResponse = responseMap.get(entity.getId());
-            inspectionResponse.getContract().setVehicleName(fullNameVehicle);
-            inspectionResponse.getContract().setClientName(clientName);
-            inspectionResponse.getContract().setVehicleId(vehicleId);
-            inspectionResponse.getContract().setClientId(clientId);
-        }
-    }
-
     @Override
     public ResponseEntity<String> approveInspection(Long inspectionId, Long photoId) {
         inspectionService.approveInspection(inspectionId, photoId);

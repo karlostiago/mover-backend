@@ -39,11 +39,11 @@ public class InspectionEntity extends AbstractEntity {
     @Column(name = "inspection_status", nullable = false)
     private InspectionStatus inspectionStatus;
 
-    @OneToMany(mappedBy = "inspection", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "inspection", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<InspectionQuestionEntity> questions = new HashSet<>();
 
-    @OneToMany(mappedBy = "inspection", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "inspection", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<InspectionPhotoEntity> photos = new HashSet<>();
 

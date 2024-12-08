@@ -1,5 +1,6 @@
 package com.ctsousa.mover.service.impl;
 
+import com.ctsousa.mover.core.entity.ContractEntity;
 import com.ctsousa.mover.core.entity.InspectionEntity;
 import com.ctsousa.mover.core.entity.InspectionPhotoEntity;
 import com.ctsousa.mover.core.entity.PhotoEntity;
@@ -7,6 +8,7 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.enumeration.InspectionStatus;
+import com.ctsousa.mover.repository.ContractRepository;
 import com.ctsousa.mover.repository.InspectionPhotoRepository;
 import com.ctsousa.mover.repository.InspectionRepository;
 import com.ctsousa.mover.repository.PhotoRepository;
@@ -17,6 +19,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
@@ -29,54 +33,61 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
     private final PhotoRepository photoRepository;
     private final SenderService senderService;
     private final InspectionPhotoRepository inspectionPhotoRepository;
+    private final ContractRepository contractRepository;
 
     public InspectionServiceImpl(InspectionRepository repository,
                                  InspectionRepository inspectionRepository,
                                  PhotoRepository photoRepository,
-                                 SenderService senderService, InspectionPhotoRepository inspectionPhotoRepository) {
+                                 SenderService senderService, InspectionPhotoRepository inspectionPhotoRepository, ContractRepository contractRepository) {
         super(repository);
         this.inspectionRepository = inspectionRepository;
         this.photoRepository = photoRepository;
         this.senderService = senderService;
         this.inspectionPhotoRepository = inspectionPhotoRepository;
+        this.contractRepository = contractRepository;
     }
 
     @Override
     @Transactional
     public void startInspection(Long id, List<MultipartFile> photos) throws IOException {
 
-        List<InspectionEntity> inspections = inspectionRepository.findByContractId(id);
-        if (inspections.isEmpty()) {
-            throw new NotificationException("Nenhuma inspeção encontrada para o contrato.", Severity.INFO);
+        // Criar uma nova inspeção
+        InspectionEntity newInspection = new InspectionEntity();
+
+        // Encontrar o contrato associado ao id
+        ContractEntity contract = contractRepository.findById(id)
+                .orElseThrow(() -> new NotificationException("Contrato não encontrado."));
+
+        // Configurar os detalhes da nova inspeção
+        newInspection.setContract(contract);
+        newInspection.setActive(true);
+        newInspection.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
+        newInspection.setDate(LocalDate.from(LocalDateTime.now())); // ou qualquer outra lógica para data
+
+        // Salvar a nova inspeção
+        inspectionRepository.save(newInspection);
+
+        // Processar as fotos
+        List<InspectionPhotoEntity> photoList = new ArrayList<>();
+        for (MultipartFile photo : photos) {
+            PhotoEntity photoEntity = savePhoto(photo); // Método para salvar a foto
+
+            InspectionPhotoEntity inspectionPhoto = new InspectionPhotoEntity();
+            inspectionPhoto.setInspection(newInspection); // Associar a foto à nova inspeção
+            inspectionPhoto.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
+            inspectionPhoto.setPhotoEntity(photoEntity);
+
+            photoList.add(inspectionPhoto);
         }
 
-        for (InspectionEntity inspection : inspections) {
-            processInspection(photos, inspection);
+        // Salvar as fotos associadas à nova inspeção
+        inspectionPhotoRepository.saveAll(photoList);
 
-            inspection.setActive(true);
-            inspection.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
-
-            List<InspectionPhotoEntity> photoList = new ArrayList<>();
-
-            for (MultipartFile photo : photos) {
-                PhotoEntity photoEntity = savePhoto(photo);
-
-                InspectionPhotoEntity inspectionPhoto = new InspectionPhotoEntity();
-                inspectionPhoto.setInspection(inspection);
-                inspectionPhoto.setInspectionStatus(InspectionStatus.UNDER_REVIEW);
-                inspectionPhoto.setPhotoEntity(photoEntity);
-
-                photoList.add(inspectionPhoto);
-            }
-
-            inspectionPhotoRepository.saveAll(photoList);
-
-            String emailAnalyst = this.mailMover;
-            senderService.sendPhotosForAnalysis(emailAnalyst, inspection.getContract().getId(), photoList);
-
-            inspectionRepository.save(inspection);
-        }
+        // Enviar email com as fotos para análise
+        String emailAnalyst = this.mailMover;
+        senderService.sendPhotosForAnalysis(emailAnalyst, contract.getId(), photoList);
     }
+
 
     @Override
     public  List<InspectionEntity> findInspectionById(Long id) {
@@ -89,7 +100,7 @@ public class InspectionServiceImpl extends BaseServiceImpl<InspectionEntity, Lon
 
     @Override
     public List<InspectionEntity> findByContractId(Long contractId) {
-        return inspectionRepository.findByContractIdJoinFech(contractId);
+        return inspectionRepository.findAllByContractId(contractId);
     }
 
     private void processInspection(List<MultipartFile> photos, InspectionEntity inspection) throws IOException {
