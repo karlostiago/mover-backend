@@ -1,5 +1,6 @@
 package com.ctsousa.mover.core.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
@@ -20,6 +21,8 @@ public class JacksonConfig {
         objectMapper.registerModule(new Jdk8Module());
         objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return objectMapper;
     }
+
 }
