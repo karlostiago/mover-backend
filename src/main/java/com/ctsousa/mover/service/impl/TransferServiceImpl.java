@@ -2,6 +2,7 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
@@ -11,19 +12,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
-import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 
 @Component
-public class TransferServiceImpl implements TransferService {
+public class TransferServiceImpl extends BaseTransactionServiceImpl implements TransferService {
 
     @Autowired
-    private AccountService accountService;
+    private final AccountService accountService;
+
+    public TransferServiceImpl(TransactionRepository repository, AccountService accountService) {
+        super(repository, accountService);
+        this.accountService = accountService;
+    }
 
     @Override
-    public TransactionEntity transferBetweenAccount(Transaction transaction, TransactionRepository repository) {
+    public TransactionEntity betweenAccount(Transaction transaction, TransactionRepository repository) {
         AccountEntity creditAccount = accountService.findById(transaction.getDestinationAccount().getId());
         AccountEntity debitAccount = accountService.findById(transaction.getAccount().getId());
 
@@ -49,6 +51,7 @@ public class TransferServiceImpl implements TransferService {
         return entity;
     }
 
+    /*
     @Override
     public void pay(final String signature, TransactionRepository repository) {
         List<TransactionEntity> entities = repository.findBySignature(signature);
@@ -80,4 +83,5 @@ public class TransferServiceImpl implements TransferService {
         account.setAvailableBalance(balance);
         accountService.save(account);
     }
+    */
 }

@@ -24,6 +24,9 @@ public interface SubCategoryRepository extends JpaRepository<SubCategoryEntity, 
     @Query("SELECT c FROM SubCategoryEntity c INNER JOIN FETCH c.category ct WHERE c.description LIKE %:query% OR ct.description LIKE %:query% ORDER BY ct.type ASC, ct.description ASC, c.description ASC ")
     List<SubCategoryEntity> findBy(@Param("query") String query);
 
+    @Query("SELECT s FROM SubCategoryEntity s INNER JOIN FETCH s.category c WHERE s.category = :category")
+    List<SubCategoryEntity> findAllByCategory(@Param("category") CategoryEntity category);
+
     @Query("SELECT c FROM SubCategoryEntity c INNER JOIN FETCH c.category ct WHERE ct.type = :type ORDER BY ct.type ASC, ct.description ASC, c.description ASC ")
     List<SubCategoryEntity> findBy(@Param("type") TypeCategory type);
 
@@ -36,4 +39,7 @@ public interface SubCategoryRepository extends JpaRepository<SubCategoryEntity, 
     @Override
     @Query("SELECT c FROM SubCategoryEntity c INNER JOIN FETCH c.category ct WHERE 1 = 1 ORDER BY ct.type ASC, ct.description ASC, c.description ASC ")
     List<SubCategoryEntity> findAll();
+
+    @Query(value = "SELECT CASE WHEN COUNT(t.id) > 0 THEN TRUE ELSE FALSE END FROM tb_transaction t WHERE t.subcategory_id = :id", nativeQuery = true)
+    Long inUse(@Param("id") Long id);
 }

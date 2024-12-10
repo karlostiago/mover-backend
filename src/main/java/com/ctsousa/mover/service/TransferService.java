@@ -6,7 +6,7 @@ import com.ctsousa.mover.repository.TransactionRepository;
 
 public interface TransferService {
 
-    TransactionEntity transferBetweenAccount(final Transaction transaction, TransactionRepository repository);
+    TransactionEntity betweenAccount(final Transaction transaction, TransactionRepository repository);
 
     void pay(final String signature, TransactionRepository repository);
 
