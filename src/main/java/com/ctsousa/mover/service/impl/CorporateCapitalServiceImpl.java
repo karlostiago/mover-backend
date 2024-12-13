@@ -22,7 +22,7 @@ public class CorporateCapitalServiceImpl extends BaseTransactionServiceImpl impl
     }
 
     @Override
-    public TransactionEntity contribuition(Transaction transaction, TransactionRepository repository) {
+    public TransactionEntity contribuition(Transaction transaction) {
         TransactionEntity entity = transaction.toEntity();
         entity.setTransactionType(TransactionType.CREDIT.name());
 
@@ -33,37 +33,8 @@ public class CorporateCapitalServiceImpl extends BaseTransactionServiceImpl impl
         return repository.save(entity);
     }
 
-    /*
     @Override
-    public void pay(final String signature, TransactionRepository repository) {
-        List<TransactionEntity> entities = repository.findBySignature(signature);
-
-        for (TransactionEntity entity : entities) {
-            if (entity.getPaid()) continue;
-            entity.setPaid(true);
-            entity.setPaymentDate(entity.getPaymentDate() != null ? entity.getPaymentDate() : entity.getDueDate());
-            updateBalance(entity.getAccount(), entity.getValue());
-            repository.save(entity);
-        }
+    public TransactionEntity update(Transaction transaction) {
+        return null;
     }
-
-    @Override
-    public void refund(String signature, TransactionRepository repository) {
-        List<TransactionEntity> entities = repository.findBySignature(signature);
-
-        for (TransactionEntity entity : entities) {
-            if (!entity.getPaid()) continue;
-            entity.setPaid(false);
-            entity.setRefund(true);
-            updateBalance(entity.getAccount(), invertSignal(entity.getValue()));
-            repository.save(entity);
-        }
-    }
-
-    private void updateBalance(AccountEntity account, BigDecimal value) {
-        BigDecimal balance = account.getAvailableBalance().add(value);
-        account.setAvailableBalance(balance);
-        accountService.save(account);
-    }
-    */
 }

@@ -78,14 +78,14 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setActive(this.getActive());
         entity.setPredicted(Boolean.FALSE);
         entity.setRefund(Boolean.FALSE);
-        entity.setSignature(generateSignature());
+
+        if (entity.getId() == null || entity.getId() == 0) {
+            entity.setSignature(generateSignature());
+        }
+
         entity.setHour(LocalTime.now());
 
         return entity;
-    }
-
-    private boolean hasId(Long id) {
-        return id != null && id > 0;
     }
 
     private String generateSignature() {

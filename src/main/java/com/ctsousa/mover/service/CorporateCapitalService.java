@@ -2,13 +2,14 @@ package com.ctsousa.mover.service;
 
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.domain.Transaction;
-import com.ctsousa.mover.repository.TransactionRepository;
 
 public interface CorporateCapitalService {
 
-    TransactionEntity contribuition(Transaction transaction, TransactionRepository repository);
+    TransactionEntity contribuition(final Transaction transaction);
 
-    void pay(final String signature, TransactionRepository repository);
+    TransactionEntity update(final Transaction transaction);
 
-    void refund(final String signature, TransactionRepository repository);
+    void pay(final String signature);
+
+    void refund(final String signature);
 }

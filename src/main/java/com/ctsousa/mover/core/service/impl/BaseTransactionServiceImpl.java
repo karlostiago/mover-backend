@@ -6,6 +6,7 @@ import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.AccountService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
@@ -14,30 +15,34 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     private final AccountService accountService;
 
+    protected final TransactionRepository repository;
+
     public BaseTransactionServiceImpl(TransactionRepository repository, AccountService accountService) {
         super(repository);
+        this.repository = repository;
         this.accountService = accountService;
     }
 
-    public void pay(final String signature, TransactionRepository repository) {
+    public void pay(final String signature) {
         List<TransactionEntity> entities = repository.findBySignature(signature);
 
         for (TransactionEntity entity : entities) {
             if (entity.getPaid()) continue;
             entity.setPaid(true);
-            entity.setPaymentDate(entity.getPaymentDate() != null ? entity.getPaymentDate() : entity.getDueDate());
+            entity.setPaymentDate(LocalDate.now());
             updateBalance(entity.getAccount(), entity.getValue());
             repository.save(entity);
         }
     }
 
-    public void refund(String signature, TransactionRepository repository) {
+    public void refund(String signature) {
         List<TransactionEntity> entities = repository.findBySignature(signature);
 
         for (TransactionEntity entity : entities) {
             if (!entity.getPaid()) continue;
             entity.setPaid(false);
             entity.setRefund(true);
+            entity.setPaymentDate(null);
             updateBalance(entity.getAccount(), invertSignal(entity.getValue()));
             repository.save(entity);
         }

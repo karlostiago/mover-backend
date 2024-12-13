@@ -1,5 +1,6 @@
 package com.ctsousa.mover.repository;
 
+import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;

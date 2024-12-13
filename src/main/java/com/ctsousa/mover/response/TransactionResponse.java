@@ -1,6 +1,5 @@
 package com.ctsousa.mover.response;
 
-import com.ctsousa.mover.domain.SubCategory;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,7 +8,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Locale;
 
 @Getter
 @Setter
@@ -37,6 +35,10 @@ public class TransactionResponse {
     private String subcategory;
 
     private String transactionType;
+
+    private Long accountId;
+    private Long destinationAccountId;
+    private Long partnerId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate date;
