@@ -8,8 +8,4 @@ public interface CorporateCapitalService {
     TransactionEntity contribuition(final Transaction transaction);
 
     TransactionEntity update(final Transaction transaction);
-
-    void pay(final String signature);
-
-    void refund(final String signature);
 }

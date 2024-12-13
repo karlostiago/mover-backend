@@ -8,10 +8,6 @@ public interface TransferService {
 
     TransactionEntity betweenAccount(final Transaction transaction);
 
-    void pay(final String signature);
-
-    void refund(final String signature);
-
     TransactionEntity update(final Transaction transaction);
 
     TransactionResponse searchById(final Long id);

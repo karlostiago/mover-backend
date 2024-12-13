@@ -54,4 +54,9 @@ public class CorporateCapitalServiceImpl extends BaseTransactionServiceImpl impl
 
         return repository.save(entity);
     }
+
+    @Override
+    public void delete(TransactionEntity entity) {
+        super.delete(entity);
+    }
 }

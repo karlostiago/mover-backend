@@ -48,6 +48,16 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         }
     }
 
+    public void delete(TransactionEntity entity) {
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
+        for (TransactionEntity transaction : entities) {
+            if (entity.getPaid()) {
+                updateBalance(transaction.getAccount(), invertSignal(transaction.getValue()));
+            }
+            super.deleteById(transaction.getId());
+        }
+    }
+
     public void updateBalance(AccountEntity account, BigDecimal value) {
         BigDecimal balance = account.getAvailableBalance().add(value);
         account.setAvailableBalance(balance);
