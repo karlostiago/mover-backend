@@ -99,8 +99,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
 
     @Override
     public TransactionResponse update(Long id, Transaction transaction) {
-        TransactionEntity entity = findById(id);
-        return switch (getTypeCategory(entity.getCategoryType())) {
+        return switch (getTypeCategory(transaction.getCategoryType())) {
             case INCOME -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
             case TRANSFER -> toMapper(transferService.update(transaction), TransactionResponse.class);
             case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
@@ -117,7 +116,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
             case TRANSFER -> transferService.searchById(id);
             case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
             case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case CORPORATE_CAPITAL -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case CORPORATE_CAPITAL -> toMapper(entity, TransactionResponse.class);
         };
     }
 

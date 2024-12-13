@@ -2,7 +2,6 @@ package com.ctsousa.mover.service;
 
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.domain.Transaction;
-import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.TransactionResponse;
 
 public interface TransferService {

@@ -74,7 +74,7 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
     @Override
     public TransactionResponse searchById(Long id) {
         TransactionEntity transactionEntity = findById(id);
-        List<TransactionEntity> entities = repository.findBySignature(findById(id).getSignature());
+        List<TransactionEntity> entities = repository.findBySignature(transactionEntity.getSignature());
         TransactionResponse response = Transform.toMapper(transactionEntity, TransactionResponse.class);
 
         for (TransactionEntity entity : entities) {
