@@ -56,13 +56,24 @@ public class CategoryServiceImpl extends BaseServiceImpl<CategoryEntity, Long> i
 
     @Override
     public List<CategoryEntity> filterBy(String search) {
-        if (search == null || search.isEmpty()) return repository.findAll();
-        return repository.findBy(search);
+        if (search == null || search.isEmpty()) return findAll();
+        List<CategoryEntity> entities = repository.findBy(search);
+        entities.forEach(c -> c.setSubcategories(subCategoryRepository.findAllByCategory(c)));
+        return entities;
     }
 
     @Override
     public List<CategoryEntity> filterBy(TypeCategory type) {
-        return repository.findByType(type);
+        List<CategoryEntity> entities = repository.findByType(type);
+        entities.forEach(c -> c.setSubcategories(subCategoryRepository.findAllByCategory(c)));
+        return entities;
+    }
+
+    @Override
+    public List<CategoryEntity> findAll() {
+        List<CategoryEntity> entities = super.findAll();
+        entities.forEach(c -> c.setSubcategories(subCategoryRepository.findAllByCategory(c)));
+        return entities;
     }
 
     private void validateSubCategoryDeletion(CategoryEntity category) {

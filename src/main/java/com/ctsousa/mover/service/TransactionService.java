@@ -17,7 +17,7 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
 
     TransactionEntity refund(final Long id);
 
-    BigDecimal balance(final Boolean scrowAccount);
+    BigDecimal balance(final Boolean escrowAccount);
 
     TransactionResponse searchById(final Long id);
 }

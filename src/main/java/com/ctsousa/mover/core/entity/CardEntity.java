@@ -40,6 +40,9 @@ public class CardEntity extends AbstractEntity {
     @Column(name = "icon")
     private String icon;
 
+    @Column(name = "available_balance", nullable = false)
+    private BigDecimal availableBalance;
+
     public CardEntity(Long id) {
         setId(id);
     }

@@ -73,4 +73,25 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             ) AS TEMP
             """, nativeQuery = true)
     BigDecimal balance(@Param("accounts") List<Long> accounts, @Param("scrowAccount") Boolean scrowAccount);
+
+    @Query(value = """
+            SELECT
+            	SUM(TEMP.BALANCE) AS BALANCE
+            FROM (
+            	SELECT\s
+            	    c.name AS NAME,
+            	    COALESCE(c.limit, 0) + COALESCE((
+            	        SELECT SUM(t.value)
+            	        FROM tb_transaction t
+            	        WHERE t.account_id = c.account_id
+            	          AND t.card_id = c.id
+            	          AND t.paid
+            	    ), 0) AS BALANCE
+            	FROM\s
+            	    tb_card c
+            	WHERE\s
+            	    c.id IN (:cards)
+            ) AS TEMP
+            """, nativeQuery = true)
+    BigDecimal creditBalance(@Param("cards") List<Long> cards);
 }

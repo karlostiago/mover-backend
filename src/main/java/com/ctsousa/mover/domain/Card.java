@@ -38,6 +38,7 @@ public class Card extends DomainModel<CardEntity> {
 
         entity.setIcon(BankIcon.toCode(this.getCodeIcon()).name());
         entity.setCardType(CardType.toDescription(this.getCardType()));
+        entity.setAvailableBalance(this.getLimit());
 
         return entity;
     }

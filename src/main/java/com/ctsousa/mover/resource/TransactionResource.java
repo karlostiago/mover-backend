@@ -73,6 +73,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
         BalanceResponse response = new BalanceResponse();
         response.setCurrentAccount(transactionService.balance(false));
         response.setEscrowAccount(transactionService.balance(true));
+        response.setCreditCard(transactionService.balance(null));
         return ResponseEntity.ok(response);
     }
 

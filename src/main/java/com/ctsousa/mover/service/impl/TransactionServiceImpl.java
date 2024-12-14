@@ -5,14 +5,13 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
+import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.domain.Transaction;
+import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.TransactionResponse;
-import com.ctsousa.mover.service.AccountService;
-import com.ctsousa.mover.service.CorporateCapitalService;
-import com.ctsousa.mover.service.TransactionService;
-import com.ctsousa.mover.service.TransferService;
+import com.ctsousa.mover.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,8 +34,10 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     private AccountService accountService;
 
     @Autowired
-    private CorporateCapitalService corporateCapitalService;
+    private CardService cardService;
 
+    @Autowired
+    private IncomeService incomeService;
 
     public TransactionServiceImpl(TransactionRepository repository, AccountService accountService) {
         super(repository, accountService);
@@ -50,11 +51,9 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     @Override
     public TransactionEntity save(Transaction transaction) {
         return switch (getTypeCategory(transaction.getCategoryType())) {
-            case INCOME -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case INCOME, CORPORATE_CAPITAL -> save(transaction, TransactionType.CREDIT);
             case TRANSFER -> transferService.betweenAccount(transaction);
-            case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case CORPORATE_CAPITAL -> corporateCapitalService.contribuition(transaction);
+            case EXPENSE, INVESTMENT -> save(transaction, TransactionType.DEBIT);
         };
     }
 
@@ -62,10 +61,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     public TransactionEntity pay(Long id) {
         TransactionEntity entity = findById(id);
         switch (getTypeCategory(entity.getCategoryType())) {
-            case INCOME -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case TRANSFER, CORPORATE_CAPITAL -> pay(entity.getSignature());
-            case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case TRANSFER, CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> pay(entity.getSignature());
             default -> throw new NotificationException("Transação não suportada!");
         }
         return entity;
@@ -75,44 +71,42 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     public TransactionEntity refund(Long id) {
         TransactionEntity entity = findById(id);
         switch (getTypeCategory(entity.getCategoryType())) {
-            case INCOME -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case TRANSFER, CORPORATE_CAPITAL -> refund(entity.getSignature());
-            case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case TRANSFER, CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> refund(entity.getSignature());
             default -> throw new NotificationException("Transação não suportada!");
         }
         return entity;
     }
 
     @Override
-    public BigDecimal balance(final Boolean scrowAccount) {
-        List<Long> accounts = accountService.findByAccount(scrowAccount)
+    public BigDecimal balance(final Boolean escrowAccount) {
+        List<Long> listId = new ArrayList<>(accountService.findByAccount(escrowAccount)
                 .stream().map(AccountEntity::getId)
-                .toList();
+                .toList());
 
-        return repository.balance(accounts, scrowAccount);
+        if (escrowAccount == null) {
+            cardService.findAll().forEach(c -> listId.add(c.getId()));
+            return repository.creditBalance(listId);
+        }
+
+        return repository.balance(listId, escrowAccount);
     }
 
     @Override
     public TransactionResponse update(Long id, Transaction transaction) {
         return switch (getTypeCategory(transaction.getCategoryType())) {
-            case INCOME -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case INCOME, CORPORATE_CAPITAL -> toMapper(update(transaction, TransactionType.CREDIT), TransactionResponse.class);
             case TRANSFER -> toMapper(transferService.update(transaction), TransactionResponse.class);
-            case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case CORPORATE_CAPITAL -> toMapper(corporateCapitalService.update(transaction), TransactionResponse.class);
+            case EXPENSE, INVESTMENT -> toMapper(incomeService.update(transaction), TransactionResponse.class);
         };
     }
 
     @Override
     public TransactionResponse searchById(Long id) {
         TransactionEntity entity = findById(id);
+        entity.setValue(isDebit(entity) ? NumberUtil.invertSignal(entity.getValue()) : entity.getValue());
         return switch (getTypeCategory(entity.getCategoryType())) {
-            case INCOME -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case INCOME, CORPORATE_CAPITAL, EXPENSE, INVESTMENT -> toMapper(entity, TransactionResponse.class);
             case TRANSFER -> transferService.searchById(id);
-            case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case CORPORATE_CAPITAL -> toMapper(entity, TransactionResponse.class);
         };
     }
 
@@ -120,10 +114,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     public void deleteById(Long id) {
         TransactionEntity entity = findById(id);
         switch (getTypeCategory(entity.getCategoryType())) {
-            case INCOME -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case TRANSFER, CORPORATE_CAPITAL -> delete(entity);
-            case EXPENSE -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
-            case INVESTMENT -> throw new NotificationException("Operação não suportada.", Severity.WARNING);
+            case TRANSFER, CORPORATE_CAPITAL, EXPENSE, INCOME, INVESTMENT -> delete(entity);
             default -> throw new NotificationException(entity.getCategoryType() + " :: Operação não suportada");
         }
     }

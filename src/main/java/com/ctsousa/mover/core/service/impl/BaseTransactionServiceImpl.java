@@ -2,6 +2,8 @@ package com.ctsousa.mover.core.service.impl;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.domain.Transaction;
+import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.AccountService;
 
@@ -58,9 +60,47 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         }
     }
 
+    public TransactionEntity save(Transaction transaction, TransactionType transactionType) {
+        TransactionEntity entity = transaction.toEntity();
+        entity.setTransactionType(transactionType.name());
+        entity.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
+
+        if (entity.getPaid()) {
+            updateBalance(entity.getAccount(), entity.getValue());
+        }
+
+        return repository.save(entity);
+    }
+
+    public TransactionEntity update(Transaction transaction, TransactionType transactionType) {
+        TransactionEntity originalTransaction = findById(transaction.getId());
+        String signature = originalTransaction.getSignature();
+
+        boolean wasPaid = originalTransaction.getPaid();
+        boolean isNowPaid = transaction.getPaid();
+
+        TransactionEntity entity = transaction.toEntity();
+        entity.setTransactionType(transactionType.name());
+        entity.setAccount(accountService.findById(transaction.getAccount().getId()));
+        entity.setSignature(signature);
+        entity.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
+
+        if (wasPaid && !isNowPaid) {
+            updateBalance(entity.getAccount(), invertSignal(transaction.getValue()));
+        } else if (!wasPaid && isNowPaid) {
+            updateBalance(entity.getAccount(), transaction.getValue());
+        }
+
+        return repository.save(entity);
+    }
+
     public void updateBalance(AccountEntity account, BigDecimal value) {
         BigDecimal balance = account.getAvailableBalance().add(value);
         account.setAvailableBalance(balance);
         accountService.save(account);
+    }
+
+    protected Boolean isDebit(TransactionEntity entity) {
+        return entity.getTransactionType().equals("DEBIT");
     }
 }

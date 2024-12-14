@@ -116,8 +116,4 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
 
         repository.save(entity);
     }
-
-    private Boolean isDebit(TransactionEntity entity) {
-        return entity.getTransactionType().equals("DEBIT");
-    }
 }

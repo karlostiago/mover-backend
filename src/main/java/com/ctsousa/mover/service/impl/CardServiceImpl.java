@@ -38,6 +38,16 @@ public class CardServiceImpl extends BaseServiceImpl<CardEntity, Long> implement
     }
 
     @Override
+    public void deleteById(Long id) {
+        try {
+            super.deleteById(id);
+        }
+        catch (Exception e) {
+            throw new NotificationException("Esse cartão já esta em uso e não pode ser excluído.", Severity.ERROR);
+        }
+    }
+
+    @Override
     public List<CardEntity> filterBy(String search) {
         if (search == null || search.isEmpty()) return repository.findAll();
         return repository.findBy(toUppercase(search));
