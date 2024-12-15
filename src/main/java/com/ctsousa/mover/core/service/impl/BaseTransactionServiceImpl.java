@@ -66,7 +66,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         entity.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
 
         if (entity.getPaid()) {
-            updateBalance(entity.getAccount(), entity.getValue());
+            updateBalance(accountService.findById(entity.getAccount().getId()), entity.getValue());
         }
 
         return repository.save(entity);

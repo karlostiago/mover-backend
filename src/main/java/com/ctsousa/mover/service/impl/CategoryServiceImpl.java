@@ -38,7 +38,7 @@ public class CategoryServiceImpl extends BaseServiceImpl<CategoryEntity, Long> i
             if (repository.existsByDescriptionNotId(entity.getDescription(), entity.getType(), entity.getId())) {
                 throw new NotificationException("Não foi possível atualizar, já existe uma categoria cadastrada com os dados informados.", Severity.WARNING);
             }
-            validateSubCategoryDeletion(entity);
+//            validateSubCategoryDeletion(entity);
         }
 
         return super.save(entity);

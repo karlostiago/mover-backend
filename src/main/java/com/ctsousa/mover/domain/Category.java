@@ -36,6 +36,8 @@ public class Category extends DomainModel<CategoryEntity> {
             for (SubCategory subcategory : subcategories) {
                 SubCategoryEntity subcategoryEntity = new SubCategoryEntity();
                 subcategoryEntity.setCategory(entity);
+                subcategoryEntity.setId(subcategory.getId());
+                subcategoryEntity.setActive(subcategory.getActive());
                 subcategoryEntity.setDescription(toUppercase(subcategory.getDescription()));
                 entity.getSubcategories().add(subcategoryEntity);
             }

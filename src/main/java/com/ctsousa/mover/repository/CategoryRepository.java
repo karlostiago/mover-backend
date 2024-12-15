@@ -20,12 +20,12 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
     @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM CategoryEntity c WHERE c.description = :description AND c.type = :type")
     boolean existsByDescriptionAndType(@Param("description") String description, @Param("type") TypeCategory type);
 
-    @Query(value = "SELECT c.* FROM tb_category c WHERE CASE " +
+    @Query(value = "SELECT DISTINCT c.* FROM tb_category c LEFT JOIN tb_subcategory sb ON sb.category_id = c.id WHERE CASE " +
             "WHEN c.type = 'EXPENSE' THEN 'DESPESA' " +
             "WHEN c.type = 'INCOME' THEN 'RECEITA' " +
             "WHEN c.type = 'INVESTMENT' THEN 'INVESTIMENTO' " +
             "WHEN c.type = 'TRANSFER' THEN 'TRANSFERÊNCIA' " +
-            "ELSE c.type END LIKE %:query% OR c.description LIKE %:query% " +
+            "ELSE c.type END LIKE %:query% OR c.description LIKE %:query% OR sb.description LIKE %:query% " +
             "ORDER BY c.type ASC, c.description ASC", nativeQuery = true)
     List<CategoryEntity> findBy(@Param("query") String query);
 
