@@ -1,11 +1,8 @@
 package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.CategoryEntity;
-import com.ctsousa.mover.core.entity.ConfigurationEntity;
 import com.ctsousa.mover.core.entity.SubCategoryEntity;
-import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.enumeration.TypeCategory;
-import com.ctsousa.mover.enumeration.TypeValueConfiguration;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,7 +33,7 @@ public class Category extends DomainModel<CategoryEntity> {
             for (SubCategory subcategory : subcategories) {
                 SubCategoryEntity subcategoryEntity = new SubCategoryEntity();
                 subcategoryEntity.setCategory(entity);
-                subcategoryEntity.setId(subcategory.getId());
+                subcategoryEntity.setId(this.getId() == null ? null : subcategory.getId());
                 subcategoryEntity.setActive(subcategory.getActive());
                 subcategoryEntity.setDescription(toUppercase(subcategory.getDescription()));
                 entity.getSubcategories().add(subcategoryEntity);

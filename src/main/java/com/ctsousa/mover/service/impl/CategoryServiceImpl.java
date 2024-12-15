@@ -12,6 +12,7 @@ import com.ctsousa.mover.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class CategoryServiceImpl extends BaseServiceImpl<CategoryEntity, Long> i
             if (repository.existsByDescriptionNotId(entity.getDescription(), entity.getType(), entity.getId())) {
                 throw new NotificationException("Não foi possível atualizar, já existe uma categoria cadastrada com os dados informados.", Severity.WARNING);
             }
-//            validateSubCategoryDeletion(entity);
+            validateSubCategoryDeletion(entity);
         }
 
         return super.save(entity);
@@ -78,9 +79,15 @@ public class CategoryServiceImpl extends BaseServiceImpl<CategoryEntity, Long> i
 
     private void validateSubCategoryDeletion(CategoryEntity category) {
         List<SubCategoryEntity> subcategories = subCategoryRepository.findAllByCategory(category);
-        List<SubCategoryEntity> subcategoriesInUse = subcategories.stream()
-                .filter(s -> subCategoryRepository.inUse(s.getId()) > 0L)
-                .toList();
+        List<SubCategoryEntity> subcategoriesInUse = new ArrayList<>();
+
+        for (SubCategoryEntity subcategory : subcategories) {
+            if (!category.getSubcategories().contains(subcategory)) {
+                if (subCategoryRepository.inUse(subcategory.getId()) > 0L) {
+                    subcategoriesInUse.add(subcategory);
+                }
+            }
+        }
 
         if (!subcategoriesInUse.isEmpty()) {
             String message = subcategoriesInUse.stream()
