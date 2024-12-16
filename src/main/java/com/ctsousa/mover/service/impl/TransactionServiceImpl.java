@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
+import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 
 @Component
 public class TransactionServiceImpl extends BaseTransactionServiceImpl implements TransactionService {
@@ -103,7 +104,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     @Override
     public TransactionResponse searchById(Long id) {
         TransactionEntity entity = findById(id);
-        entity.setValue(isDebit(entity) ? NumberUtil.invertSignal(entity.getValue()) : entity.getValue());
+        entity.setValue(isDebit(entity) ? invertSignal(entity.getValue()) : entity.getValue());
         return switch (getTypeCategory(entity.getCategoryType())) {
             case INCOME, CORPORATE_CAPITAL, EXPENSE, INVESTMENT -> toMapper(entity, TransactionResponse.class);
             case TRANSFER -> transferService.searchById(id);

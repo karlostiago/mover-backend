@@ -40,7 +40,7 @@ public final class DateUtil {
         catalogOfMonths.put("NOV", 11);
         catalogOfMonths.put("DEC", 12);
 
-        maxYear = LocalDate.now().getYear();
+        maxYear = 3000;
         minYear = 1900;
         minMonth = 1;
         maxMonth = 12;

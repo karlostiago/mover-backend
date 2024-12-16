@@ -31,7 +31,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         for (TransactionEntity entity : entities) {
             if (entity.getPaid()) continue;
             entity.setPaid(true);
-            entity.setPaymentDate(LocalDate.now());
+            entity.setPaymentDate(entity.getPaymentDate() == null ? entity.getDueDate() : entity.getPaymentDate());
             updateBalance(entity.getAccount(), entity.getValue());
             repository.save(entity);
         }
