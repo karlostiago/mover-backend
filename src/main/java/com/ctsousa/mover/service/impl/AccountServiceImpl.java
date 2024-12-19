@@ -40,9 +40,4 @@ public class AccountServiceImpl extends BaseServiceImpl<AccountEntity, Long> imp
         if (search == null || search.isEmpty()) return accountRepository.findAll();
         return accountRepository.findBy(search);
     }
-
-    @Override
-    public List<AccountEntity> findByAccount(final Boolean scrowAccount) {
-        return accountRepository.findByAccount(scrowAccount);
-    }
 }

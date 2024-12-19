@@ -5,7 +5,6 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
-import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
@@ -79,17 +78,21 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     }
 
     @Override
-    public BigDecimal balance(final Boolean escrowAccount) {
-        List<Long> listId = new ArrayList<>(accountService.findByAccount(escrowAccount)
+    public BigDecimal accountBalace() {
+        List<Long> listId = new ArrayList<>(accountService.findAll()
                 .stream().map(AccountEntity::getId)
                 .toList());
+        return repository.accountBalance(listId);
+    }
 
-        if (escrowAccount == null) {
-            cardService.findAll().forEach(c -> listId.add(c.getId()));
-            return repository.creditBalance(listId);
-        }
+    @Override
+    public BigDecimal incomeBalance() {
+        return repository.incomeBalance();
+    }
 
-        return repository.balance(listId, escrowAccount);
+    @Override
+    public BigDecimal expenseBalance() {
+        return repository.expenseBalance();
     }
 
     @Override

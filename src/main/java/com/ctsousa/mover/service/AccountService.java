@@ -8,6 +8,4 @@ import java.util.List;
 public interface AccountService extends BaseService<AccountEntity, Long> {
 
     List<AccountEntity> filterBy(String search);
-
-    List<AccountEntity> findByAccount(final Boolean scrowAccount);
 }

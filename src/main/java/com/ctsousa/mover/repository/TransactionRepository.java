@@ -1,6 +1,5 @@
 package com.ctsousa.mover.repository;
 
-import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -69,10 +68,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             	    tb_account c
             	WHERE\s
             	    c.id IN (:accounts)
-            	    AND c.caution = :scrowAccount
             ) AS TEMP
             """, nativeQuery = true)
-    BigDecimal balance(@Param("accounts") List<Long> accounts, @Param("scrowAccount") Boolean scrowAccount);
+    BigDecimal accountBalance(@Param("accounts") List<Long> accounts);
 
     @Query(value = """
             SELECT
@@ -94,4 +92,10 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             ) AS TEMP
             """, nativeQuery = true)
     BigDecimal creditBalance(@Param("cards") List<Long> cards);
+
+    @Query(value = "SELECT SUM(t.value * -1) AS DESPESA FROM tb_transaction t WHERE t.category_type = 'EXPENSE'", nativeQuery = true)
+    BigDecimal expenseBalance();
+
+    @Query(value = "SELECT SUM(t.value) AS RECEITA FROM tb_transaction t WHERE t.category_type = 'INCOME'", nativeQuery = true)
+    BigDecimal incomeBalance();
 }
