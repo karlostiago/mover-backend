@@ -1,12 +1,15 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.BrandEntity;
+import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.repository.BrandRepository;
+import com.ctsousa.mover.repository.VehicleRepository;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ImageIOService;
+import com.ctsousa.mover.service.ModelService;
 import com.ctsousa.mover.service.SymbolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,10 +33,16 @@ public class BrandServiceImpl extends BaseServiceImpl<BrandEntity, Long> impleme
 
     private final SymbolService symbolService;
 
-    public BrandServiceImpl(BrandRepository repository, ImageIOService imageIOService, SymbolService symbolService) {
+    private final ModelService modelService;
+
+    private final VehicleRepository vehicleRepository;
+
+    public BrandServiceImpl(BrandRepository repository, ImageIOService imageIOService, SymbolService symbolService, ModelService modelService, VehicleRepository vehicleRepository) {
         super(repository);
         this.imageIOService = imageIOService;
         this.symbolService = symbolService;
+        this.modelService = modelService;
+        this.vehicleRepository = vehicleRepository;
     }
 
     @Override
@@ -45,6 +54,11 @@ public class BrandServiceImpl extends BaseServiceImpl<BrandEntity, Long> impleme
     public void deleteById(Long id) {
         try {
             BrandEntity entity = findById(id);
+            if (vehicleRepository.brandInUse(entity)) {
+                throw new Exception("Marca está em uso");
+            }
+            List<ModelEntity> models = modelService.findByBrandId(entity.getId());
+            models.forEach( m -> modelService.deleteById(m.getId()));
             brandRepository.deleteById(entity.getId());
             symbolService.deleteById(entity.getSymbol().getId());
         } catch (Exception e) {

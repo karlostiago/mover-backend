@@ -1,5 +1,6 @@
 package com.ctsousa.mover.repository;
 
+import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.enumeration.Situation;
 import lombok.NonNull;
@@ -39,4 +40,7 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
 
     @Query(value = "SELECT v.* FROM tb_vehicle v LEFT JOIN tb_contract c ON v.id = c.vehicle_id WHERE c.vehicle_id is null OR c.situation = 'CLOSED'", nativeQuery = true)
     List<VehicleEntity> onlyAvailable();
+
+    @Query("SELECT CASE WHEN COUNT(v.id) > 0 THEN TRUE ELSE FALSE END FROM VehicleEntity v WHERE v.brand = :brand ")
+    boolean brandInUse(@Param("brand") BrandEntity brand);
 }
