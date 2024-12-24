@@ -37,3 +37,6 @@ spring:
           socketFactory:
             port: 465
             class: javax.net.ssl.SSLSocketFactory
+
+
+# carlo4284.c44.integrator.host

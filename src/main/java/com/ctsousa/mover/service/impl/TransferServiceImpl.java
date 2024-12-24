@@ -9,6 +9,7 @@ import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.service.AccountService;
+import com.ctsousa.mover.service.InstallmentService;
 import com.ctsousa.mover.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,8 +25,8 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
     @Autowired
     private final AccountService accountService;
 
-    public TransferServiceImpl(TransactionRepository repository, AccountService accountService) {
-        super(repository, accountService);
+    public TransferServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService) {
+        super(repository, accountService, installmentService);
         this.accountService = accountService;
     }
 

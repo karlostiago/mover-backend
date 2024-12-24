@@ -39,8 +39,11 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     @Autowired
     private IncomeService incomeService;
 
-    public TransactionServiceImpl(TransactionRepository repository, AccountService accountService) {
-        super(repository, accountService);
+    @Autowired
+    private InstallmentService installmentService;
+
+    public TransactionServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService) {
+        super(repository, accountService, installmentService);
     }
 
     @Override
@@ -87,12 +90,14 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
 
     @Override
     public BigDecimal incomeBalance() {
-        return repository.incomeBalance();
+        BigDecimal incomeBalance = repository.incomeBalance();
+        return incomeBalance == null ? BigDecimal.ZERO : incomeBalance;
     }
 
     @Override
     public BigDecimal expenseBalance() {
-        return repository.expenseBalance();
+        BigDecimal expenseBalance = repository.expenseBalance();
+        return expenseBalance == null ? BigDecimal.ZERO : expenseBalance;
     }
 
     @Override

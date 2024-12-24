@@ -2,13 +2,14 @@ package com.ctsousa.mover.core.service.impl;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.AccountService;
+import com.ctsousa.mover.service.InstallmentService;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
@@ -19,10 +20,13 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     protected final TransactionRepository repository;
 
-    public BaseTransactionServiceImpl(TransactionRepository repository, AccountService accountService) {
+    private final InstallmentService installmentService;
+
+    public BaseTransactionServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService) {
         super(repository);
         this.repository = repository;
         this.accountService = accountService;
+        this.installmentService = installmentService;
     }
 
     public void pay(final String signature) {
@@ -61,15 +65,23 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
     }
 
     public TransactionEntity save(Transaction transaction, TransactionType transactionType) {
-        TransactionEntity entity = transaction.toEntity();
-        entity.setTransactionType(transactionType.name());
-        entity.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
 
-        if (entity.getPaid()) {
-            updateBalance(accountService.findById(entity.getAccount().getId()), entity.getValue());
+        boolean hasInstallment = installmentService.hasInstallment(transaction);
+        if (hasInstallment) {
+            List<TransactionEntity> entities = installmentService.generated(transaction);
+            return entities.stream().findFirst()
+                    .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));
+        } else {
+            TransactionEntity entity = transaction.toEntity();
+            entity.setTransactionType(transactionType.name());
+            entity.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
+
+            if (entity.getPaid()) {
+                updateBalance(accountService.findById(entity.getAccount().getId()), entity.getValue());
+            }
+
+            return repository.save(entity);
         }
-
-        return repository.save(entity);
     }
 
     public TransactionEntity update(Transaction transaction, TransactionType transactionType) {
