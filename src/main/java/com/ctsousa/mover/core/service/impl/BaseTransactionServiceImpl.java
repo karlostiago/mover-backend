@@ -33,25 +33,33 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         List<TransactionEntity> entities = repository.findBySignature(signature);
 
         for (TransactionEntity entity : entities) {
-            if (entity.getPaid()) continue;
-            entity.setPaid(true);
-            entity.setPaymentDate(entity.getPaymentDate() == null ? entity.getDueDate() : entity.getPaymentDate());
-            updateBalance(entity.getAccount(), entity.getValue());
-            repository.save(entity);
+            pay(entity);
         }
+    }
+
+    public void pay(final TransactionEntity entity) {
+        if (entity.getPaid()) return;
+        entity.setPaid(true);
+        entity.setPaymentDate(entity.getPaymentDate() == null ? entity.getDueDate() : entity.getPaymentDate());
+        updateBalance(entity.getAccount(), entity.getValue());
+        repository.save(entity);
     }
 
     public void refund(String signature) {
         List<TransactionEntity> entities = repository.findBySignature(signature);
 
         for (TransactionEntity entity : entities) {
-            if (!entity.getPaid()) continue;
-            entity.setPaid(false);
-            entity.setRefund(true);
-            entity.setPaymentDate(null);
-            updateBalance(entity.getAccount(), invertSignal(entity.getValue()));
-            repository.save(entity);
+            refund(entity);
         }
+    }
+
+    public void refund(TransactionEntity entity) {
+        if (!entity.getPaid()) return;
+        entity.setPaid(false);
+        entity.setRefund(true);
+        entity.setPaymentDate(null);
+        updateBalance(entity.getAccount(), invertSignal(entity.getValue()));
+        repository.save(entity);
     }
 
     public void delete(TransactionEntity entity) {
@@ -67,14 +75,17 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
     public TransactionEntity save(Transaction transaction, TransactionType transactionType) {
 
         boolean hasInstallment = installmentService.hasInstallment(transaction);
+        transaction.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
+        transaction.setTransactionType(transactionType.name());
+
         if (hasInstallment) {
             List<TransactionEntity> entities = installmentService.generated(transaction);
+            entities.forEach(repository::save);
             return entities.stream().findFirst()
                     .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));
         } else {
             TransactionEntity entity = transaction.toEntity();
             entity.setTransactionType(transactionType.name());
-            entity.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
 
             if (entity.getPaid()) {
                 updateBalance(accountService.findById(entity.getAccount().getId()), entity.getValue());

@@ -64,7 +64,8 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     public TransactionEntity pay(Long id) {
         TransactionEntity entity = findById(id);
         switch (getTypeCategory(entity.getCategoryType())) {
-            case TRANSFER, CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> pay(entity.getSignature());
+            case TRANSFER -> pay(entity.getSignature());
+            case CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> pay(entity);
             default -> throw new NotificationException("Transação não suportada!");
         }
         return entity;
@@ -74,7 +75,8 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     public TransactionEntity refund(Long id) {
         TransactionEntity entity = findById(id);
         switch (getTypeCategory(entity.getCategoryType())) {
-            case TRANSFER, CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> refund(entity.getSignature());
+            case TRANSFER -> refund(entity.getSignature());
+            case CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> refund(entity);
             default -> throw new NotificationException("Transação não suportada!");
         }
         return entity;

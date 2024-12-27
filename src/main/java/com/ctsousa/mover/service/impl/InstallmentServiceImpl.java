@@ -1,7 +1,9 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.domain.Transaction;
+import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.service.InstallmentService;
 import org.springframework.stereotype.Component;
 
@@ -19,18 +21,20 @@ public class InstallmentServiceImpl implements InstallmentService {
         Integer quantityInstallment = transaction.getInstallment();
         BigDecimal totalValue = transaction.getValue();
         BigDecimal installmentValue = totalValue.divide(BigDecimal.valueOf(quantityInstallment), 2, RoundingMode.HALF_UP);
-        BigDecimal firstInstallmentValue = calculateFirtsInstallmentValue(quantityInstallment, installmentValue, totalValue);
+        BigDecimal differentValue = calculateDifferentValue(quantityInstallment, installmentValue, totalValue);
         String signature = null;
 
         List<TransactionEntity> entities = new ArrayList<>();
 
-        for (int index = 0; index < quantityInstallment; index++) {
+        for (int installment = 0; installment < quantityInstallment; installment++) {
             TransactionEntity entity = transaction.toEntity();
             signature = signature == null ? entity.getSignature() : signature;
-            entity.setValue(index == 0 ? firstInstallmentValue : installmentValue);
+
+            entity.setValue(calculateInstallmentValue(quantityInstallment, differentValue, installmentValue, installment));
             entity.setSignature(signature);
-            entity.setDueDate(calculateDueDate(entity.getDueDate(), entity.getFrequency(), index));
-            entity.setInstallment(index + 1);
+            entity.setDueDate(calculateDueDate(entity.getDueDate(), entity.getFrequency(), installment));
+            entity.setInstallment(installment + 1);
+            entity.setTransactionType(transaction.getTransactionType());
             entities.add(entity);
         }
 
@@ -42,23 +46,41 @@ public class InstallmentServiceImpl implements InstallmentService {
         return transaction.getInstallment() != null && transaction.getInstallment() > 1;
     }
 
-    private LocalDate calculateDueDate(LocalDate dueDate, String fraquency, long position) {
-        if (position == 0) return dueDate;
-        if ("MONTHLY".equals(fraquency)) {
-            long quantityDays = 30 * position;
-            return dueDate.plusDays(quantityDays);
+    private LocalDate calculateDueDate(LocalDate dueDate, String frequency, long installment) {
+        if (installment == 0) return dueDate;
+
+        try {
+            PaymentFrequency paymentFrequency = PaymentFrequency.toDescription(frequency);
+            return dueDate.plusDays(paymentFrequency.days() * installment);
+        } catch (NotificationException e) {
+            throw new NotificationException("Não há suporte para calcular a data de vencimento para a frequência informada.");
         }
-        return null;
+//        return switch (frequency) {
+//            case "DAILY" : yield dueDate.plusDays(installment);
+//            case "WEEKLY" : yield dueDate.plusDays(7 * installment);
+//            case "BIWEEKLY" : yield dueDate.plusDays(15 * installment);
+//            case "MONTHLY" : yield dueDate.plusDays(30 * installment);
+//            case "BIMONTHLY" : yield dueDate.plusDays(60 * installment);
+//            case "QUARTERLY" : yield dueDate.plusDays(90 * installment);
+//            case "SEMIANNUAL" : yield dueDate.plusDays(180 * installment);
+//            case "ANNUAL" : yield dueDate.plusDays(360 * installment);
+//            default:
+//                throw new NotificationException("Não há suporte para calcular a data de vencimento para a frequência ::: " + frequency);
+//        };
     }
 
-    private BigDecimal calculateFirtsInstallmentValue(Integer quantityInstallment, BigDecimal installmentValue, BigDecimal totalValue) {
+    private BigDecimal calculateDifferentValue(Integer quantityInstallment, BigDecimal installmentValue, BigDecimal totalValue) {
         BigDecimal calculatedValue = installmentValue.multiply(BigDecimal.valueOf(quantityInstallment));
-        BigDecimal differenceValue = totalValue.subtract(calculatedValue);
+        return totalValue.subtract(calculatedValue);
+    }
 
-        if (differenceValue.compareTo(BigDecimal.ZERO) == 0) {
+    private BigDecimal calculateInstallmentValue(Integer quantityInstallment, BigDecimal differentValue, BigDecimal installmentValue, long position) {
+        if (differentValue.compareTo(BigDecimal.ZERO) < 0) {
+            return position == (quantityInstallment - 1) ? installmentValue.add(differentValue) : installmentValue;
+        } else if (differentValue.compareTo(BigDecimal.ZERO) > 0) {
+            return position == 0 ? installmentValue.add(differentValue) : installmentValue;
+        } else {
             return installmentValue;
         }
-
-        return installmentValue.add(differenceValue);
     }
 }
