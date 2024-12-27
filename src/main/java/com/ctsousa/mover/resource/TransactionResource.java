@@ -64,6 +64,11 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
+    public void delete(Long id, Boolean deleteOnlyThis) {
+        transactionService.deleteById(id, deleteOnlyThis);
+    }
+
+    @Override
     public ResponseEntity<List<TransactionResponse>> filterBy(String search) {
         return null;
     }

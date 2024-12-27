@@ -2,6 +2,7 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.mapper.Transform;
 import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
 import com.ctsousa.mover.domain.Transaction;
@@ -15,46 +16,93 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 
 @Component
 public class TransferServiceImpl extends BaseTransactionServiceImpl implements TransferService {
 
+    private final String CREDIT_LABEL = "CREDIT_";
+    private final String DEBIT_LABEL = "DEBIT_";
+
     @Autowired
     private final AccountService accountService;
+
+    private final InstallmentService installmentService;
 
     public TransferServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService) {
         super(repository, accountService, installmentService);
         this.accountService = accountService;
+        this.installmentService = installmentService;
     }
 
     @Override
     public TransactionEntity betweenAccount(Transaction transaction) {
-        AccountEntity creditAccount = accountService.findById(transaction.getDestinationAccount().getId());
-        AccountEntity debitAccount = accountService.findById(transaction.getAccount().getId());
+        if (installmentService.hasInstallment(transaction)) {
+            List<TransactionEntity> entities = installmentService.generated(transaction);
+            entities.forEach(this.repository::save);
+            return entities.stream().findFirst()
+                    .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));
+        }else {
+            List<TransactionEntity> entities = new ArrayList<>();
 
-        TransactionEntity entity = transaction.toEntity();
+            AccountEntity creditAccount = new AccountEntity(transaction.getDestinationAccount().getId());
+            AccountEntity debitAccount = new AccountEntity((transaction.getAccount().getId()));
 
-        entity.setTransactionType(TransactionType.CREDIT.name());
-        entity.setAccount(creditAccount);
-        repository.save(entity);
+            TransactionEntity creditEntity = transaction.toEntity();
+            creditEntity.setTransactionType(TransactionType.CREDIT.name());
+            creditEntity.setAccount(creditAccount);
+            entities.add(creditEntity);
 
-        if (entity.getPaid()) {
-            updateBalance(creditAccount, entity.getValue());
+            TransactionEntity debitEntity = transaction.toEntity();
+            debitEntity.setTransactionType(TransactionType.DEBIT.name());
+            debitEntity.setAccount(debitAccount);
+            debitEntity.setValue(invertSignal(debitEntity.getValue()));
+            debitEntity.setSignature(creditEntity.getSignature());
+            entities.add(debitEntity);
+
+            for (TransactionEntity e : entities) {
+                if (e.getPaid()) {
+                    updateBalance(e.getAccount(), e.getValue());
+                }
+                repository.save(e);
+            }
+
+            return entities.stream().findFirst()
+                    .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));
+        }
+    }
+
+    @Override
+    public void delete(TransactionEntity entity, Boolean deleteOnlyThis) {
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
+        List<TransactionEntity> entitiesToDelete = new ArrayList<>(entities.size());
+
+        Map<String, TransactionEntity> mapTransactions = getTransactionMap(entities);
+
+        TransactionEntity credit = mapTransactions.get(CREDIT_LABEL + entity.getInstallment());
+        entitiesToDelete.add(credit);
+
+        TransactionEntity debit = mapTransactions.get(DEBIT_LABEL + entity.getInstallment());
+        entitiesToDelete.add(debit);
+
+        if (Boolean.FALSE.equals(deleteOnlyThis)) {
+            for (TransactionEntity e : entities) {
+                if (entitiesToDelete.contains(e)) continue;
+                if (e.getInstallment() > entity.getInstallment()) {
+                    credit = mapTransactions.get(CREDIT_LABEL + e.getInstallment());
+                    debit = mapTransactions.get(DEBIT_LABEL + e.getInstallment());
+                    entitiesToDelete.add(credit);
+                    entitiesToDelete.add(debit);
+                }
+            }
         }
 
-        entity.setTransactionType(TransactionType.DEBIT.name());
-        entity.setAccount(debitAccount);
-        entity.setValue(invertSignal(entity.getValue()));
-        repository.save(entity);
-
-        if (entity.getPaid()) {
-            updateBalance(debitAccount, entity.getValue());
-        }
-
-        return entity;
+        entitiesToDelete.forEach(this::deleteAndUpdateBalance);
     }
 
     @Override
@@ -88,6 +136,33 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
         }
 
         return response;
+    }
+
+    @Override
+    public void payOrRefund(TransactionEntity entity, Boolean pay) {
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
+        Map<String, TransactionEntity> mapTransactions = getTransactionMap(entities);
+        TransactionEntity credit = mapTransactions.get(CREDIT_LABEL + entity.getInstallment());
+        TransactionEntity debit = mapTransactions.get(DEBIT_LABEL + entity.getInstallment());
+        if (Boolean.TRUE.equals(pay)) {
+            super.pay(credit);
+            super.pay(debit);
+        } else {
+            super.refund(credit);
+            super.refund(debit);
+        }
+    }
+
+    private Map<String, TransactionEntity> getTransactionMap(List<TransactionEntity> entities) {
+        Map<String, TransactionEntity> transactionMap = new HashMap<>();
+        for (TransactionEntity e : entities) {
+            if ("CREDIT".equals(e.getTransactionType())) {
+                transactionMap.put(TransactionType.CREDIT + "_" + e.getInstallment(), e);
+            } else {
+                transactionMap.put(TransactionType.DEBIT + "_" + e.getInstallment(), e);
+            }
+        }
+        return transactionMap;
     }
 
     private void updateBalance(TransactionEntity originalTransaction, TransactionEntity updatedTransaction, BigDecimal balance) {

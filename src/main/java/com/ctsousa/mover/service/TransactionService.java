@@ -24,4 +24,6 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
     BigDecimal expenseBalance();
 
     TransactionResponse searchById(final Long id);
+
+    void deleteById(Long id, Boolean deleteOnlyThis);
 }

@@ -10,6 +10,7 @@ import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.InstallmentService;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
@@ -31,10 +32,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     public void pay(final String signature) {
         List<TransactionEntity> entities = repository.findBySignature(signature);
-
-        for (TransactionEntity entity : entities) {
-            pay(entity);
-        }
+        entities.forEach(this::pay);
     }
 
     public void pay(final TransactionEntity entity) {
@@ -47,10 +45,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     public void refund(String signature) {
         List<TransactionEntity> entities = repository.findBySignature(signature);
-
-        for (TransactionEntity entity : entities) {
-            refund(entity);
-        }
+        entities.forEach(this::refund);
     }
 
     public void refund(TransactionEntity entity) {
@@ -62,14 +57,23 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         repository.save(entity);
     }
 
-    public void delete(TransactionEntity entity) {
-        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
-        for (TransactionEntity transaction : entities) {
-            if (entity.getPaid()) {
-                updateBalance(transaction.getAccount(), invertSignal(transaction.getValue()));
+    public void delete(TransactionEntity entity, Boolean deleteOnlyThis) {
+        if (Boolean.TRUE.equals(deleteOnlyThis)) {
+            deleteAndUpdateBalance(entity);
+        } else {
+            List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
+            List<TransactionEntity> entitiesToDelete = new ArrayList<>(entities.size());
+            entitiesToDelete.add(entity);
+            entitiesToDelete.addAll(entities.stream().filter(e -> e.getInstallment() > entity.getInstallment()).toList());
+            for (TransactionEntity e : entitiesToDelete) {
+                deleteAndUpdateBalance(e);
             }
-            super.deleteById(transaction.getId());
         }
+    }
+
+    public void delete(String signature, Boolean deleteOnlyThis) {
+        List<TransactionEntity> entities = repository.findBySignature(signature);
+        entities.forEach(entity -> delete(entity, deleteOnlyThis));
     }
 
     public TransactionEntity save(Transaction transaction, TransactionType transactionType) {
@@ -117,13 +121,21 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         return repository.save(entity);
     }
 
-    public void updateBalance(AccountEntity account, BigDecimal value) {
-        BigDecimal balance = account.getAvailableBalance().add(value);
-        account.setAvailableBalance(balance);
-        accountService.save(account);
+    public void updateBalance(final AccountEntity account, BigDecimal value) {
+        AccountEntity accountFound = accountService.findById(account.getId());
+        BigDecimal balance = accountFound.getAvailableBalance().add(value);
+        accountFound.setAvailableBalance(balance);
+        accountService.save(accountFound);
     }
 
     protected Boolean isDebit(TransactionEntity entity) {
         return entity.getTransactionType().equals("DEBIT");
+    }
+
+    protected void deleteAndUpdateBalance(TransactionEntity entity) {
+        if(entity.getPaid()) {
+            updateBalance(entity.getAccount(), invertSignal(entity.getValue()));
+        }
+        super.deleteById(entity.getId());
     }
 }

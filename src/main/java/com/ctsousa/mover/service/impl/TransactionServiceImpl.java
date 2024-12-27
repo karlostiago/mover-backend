@@ -64,7 +64,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     public TransactionEntity pay(Long id) {
         TransactionEntity entity = findById(id);
         switch (getTypeCategory(entity.getCategoryType())) {
-            case TRANSFER -> pay(entity.getSignature());
+            case TRANSFER -> transferService.payOrRefund(entity, true);
             case CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> pay(entity);
             default -> throw new NotificationException("Transação não suportada!");
         }
@@ -75,7 +75,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     public TransactionEntity refund(Long id) {
         TransactionEntity entity = findById(id);
         switch (getTypeCategory(entity.getCategoryType())) {
-            case TRANSFER -> refund(entity.getSignature());
+            case TRANSFER -> transferService.payOrRefund(entity, false);
             case CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> refund(entity);
             default -> throw new NotificationException("Transação não suportada!");
         }
@@ -122,10 +122,11 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void deleteById(Long id, Boolean deleteOnlyThis) {
         TransactionEntity entity = findById(id);
         switch (getTypeCategory(entity.getCategoryType())) {
-            case TRANSFER, CORPORATE_CAPITAL, EXPENSE, INCOME, INVESTMENT -> delete(entity);
+            case TRANSFER -> transferService.delete(entity, deleteOnlyThis);
+            case CORPORATE_CAPITAL, EXPENSE, INCOME, INVESTMENT -> delete(entity, deleteOnlyThis);
             default -> throw new NotificationException(entity.getCategoryType() + " :: Operação não suportada");
         }
     }

@@ -3,10 +3,7 @@ package com.ctsousa.mover.core.api;
 import com.ctsousa.mover.response.BalanceResponse;
 import com.ctsousa.mover.response.TransactionResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,4 +20,7 @@ public interface TransactionApi {
 
     @GetMapping("/balances")
     ResponseEntity<BalanceResponse> balance();
+
+    @DeleteMapping("/remove/{id}")
+    void delete(@PathVariable Long id, @RequestParam("deleteOnlyThis") Boolean deleteOnlyThis);
 }

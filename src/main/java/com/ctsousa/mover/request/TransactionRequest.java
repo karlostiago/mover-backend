@@ -51,4 +51,5 @@ public class TransactionRequest {
     private Long partnerId;
     private Boolean paid;
     private Boolean active;
+    private Boolean deleteOnlyThis;
 }

@@ -12,8 +12,11 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Random;
+import java.util.UUID;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
+import static java.util.UUID.randomUUID;
 
 @Getter
 @Setter
@@ -80,20 +83,11 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setRefund(Boolean.FALSE);
 
         if (entity.getId() == null || entity.getId() == 0) {
-            entity.setSignature(generateSignature());
+            entity.setSignature(String.valueOf(randomUUID()));
         }
 
         entity.setHour(LocalTime.now());
 
         return entity;
-    }
-
-    private String generateSignature() {
-        String context = this.getCategoryType()
-                .concat(this.getDescription())
-                .concat(this.getDueDate().toString())
-                .concat(this.getAccount().getId().toString())
-                .concat(Timestamp.valueOf(LocalDateTime.now()).toString());
-        return HashUtil.buildSHA256(context);
     }
 }

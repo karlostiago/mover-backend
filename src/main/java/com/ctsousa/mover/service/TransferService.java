@@ -11,4 +11,8 @@ public interface TransferService {
     TransactionEntity update(final Transaction transaction);
 
     TransactionResponse searchById(final Long id);
+
+    void delete(final TransactionEntity entity, Boolean deleteOnlyThis);
+
+    void payOrRefund(TransactionEntity entity, Boolean pay);
 }

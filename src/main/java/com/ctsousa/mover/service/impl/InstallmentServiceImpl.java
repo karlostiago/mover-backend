@@ -1,9 +1,12 @@
 package com.ctsousa.mover.service.impl;
 
+import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
+import com.ctsousa.mover.enumeration.TransactionType;
+import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.service.InstallmentService;
 import org.springframework.stereotype.Component;
 
@@ -13,29 +16,39 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
+import static com.ctsousa.mover.enumeration.TypeCategory.toDescription;
+
 @Component
 public class InstallmentServiceImpl implements InstallmentService {
 
+    private static final long FIRST_INSTALLMENT = 0L;
+
     @Override
     public List<TransactionEntity> generated(Transaction transaction) {
-        Integer quantityInstallment = transaction.getInstallment();
+        int quantityInstallment = transaction.getInstallment();
         BigDecimal totalValue = transaction.getValue();
         BigDecimal installmentValue = totalValue.divide(BigDecimal.valueOf(quantityInstallment), 2, RoundingMode.HALF_UP);
         BigDecimal differentValue = calculateDifferentValue(quantityInstallment, installmentValue, totalValue);
         String signature = null;
 
-        List<TransactionEntity> entities = new ArrayList<>();
+        List<TransactionEntity> entities = generatedToTransfer(transaction, toDescription(transaction.getCategoryType()));
 
-        for (int installment = 0; installment < quantityInstallment; installment++) {
-            TransactionEntity entity = transaction.toEntity();
-            signature = signature == null ? entity.getSignature() : signature;
+        if (entities == null) {
+            entities = new ArrayList<>();
+            for (int installment = 0; installment < quantityInstallment; installment++) {
+                TransactionEntity entity = transaction.toEntity();
+                signature = signature == null ? entity.getSignature() : signature;
 
-            entity.setValue(calculateInstallmentValue(quantityInstallment, differentValue, installmentValue, installment));
-            entity.setSignature(signature);
-            entity.setDueDate(calculateDueDate(entity.getDueDate(), entity.getFrequency(), installment));
-            entity.setInstallment(installment + 1);
-            entity.setTransactionType(transaction.getTransactionType());
-            entities.add(entity);
+                entity.setValue(calculateInstallmentValue(quantityInstallment, differentValue, installmentValue, installment));
+                entity.setDueDate(calculateDueDate(entity.getDueDate(), entity.getFrequency(), installment));
+                entity.setTransactionType(transaction.getTransactionType());
+                entity.setInstallment(installment + 1);
+                entity.setSignature(signature);
+                entity.setDescription(entity.getDescription() + " (" + entity.getInstallment() + ")");
+
+                entities.add(entity);
+            }
         }
 
         return entities;
@@ -46,8 +59,48 @@ public class InstallmentServiceImpl implements InstallmentService {
         return transaction.getInstallment() != null && transaction.getInstallment() > 1;
     }
 
+    private List<TransactionEntity> generatedToTransfer(Transaction transaction, TypeCategory category) {
+        if (!TypeCategory.TRANSFER.equals(category)) return null;
+
+        int quantityInstallment = transaction.getInstallment();
+        BigDecimal totalValue = transaction.getValue();
+        BigDecimal installmentValue = totalValue.divide(BigDecimal.valueOf(quantityInstallment), 2, RoundingMode.HALF_UP);
+        BigDecimal differentValue = calculateDifferentValue(quantityInstallment, installmentValue, totalValue);
+
+        AccountEntity creditAccount = new AccountEntity(transaction.getDestinationAccount().getId());
+        AccountEntity debitAccount = new AccountEntity((transaction.getAccount().getId()));
+        String signature = null;
+
+        List<TransactionEntity> entities = new ArrayList<>();
+        for (int installment = 0; installment < quantityInstallment; installment++) {
+            TransactionEntity creditEntity = transaction.toEntity();
+            signature = signature == null ? creditEntity.getSignature() : signature;
+
+            creditEntity.setTransactionType(TransactionType.CREDIT.name());
+            creditEntity.setAccount(creditAccount);
+            creditEntity.setInstallment(installment + 1);
+            creditEntity.setValue(calculateInstallmentValue(quantityInstallment, differentValue, installmentValue, installment));
+            creditEntity.setDueDate(calculateDueDate(creditEntity.getDueDate(), creditEntity.getFrequency(), installment));
+            creditEntity.setDescription(creditEntity.getDescription() + " (" + creditEntity.getInstallment() + ")");
+            creditEntity.setSignature(signature);
+            entities.add(creditEntity);
+
+            TransactionEntity debitEntity = transaction.toEntity();
+            debitEntity.setTransactionType(TransactionType.DEBIT.name());
+            debitEntity.setAccount(debitAccount);
+            debitEntity.setValue(invertSignal(creditEntity.getValue()));
+            debitEntity.setDueDate(creditEntity.getDueDate());
+            debitEntity.setSignature(creditEntity.getSignature());
+            debitEntity.setInstallment(creditEntity.getInstallment());
+            debitEntity.setDescription(creditEntity.getDescription());
+            entities.add(debitEntity);
+        }
+
+        return entities;
+    }
+
     private LocalDate calculateDueDate(LocalDate dueDate, String frequency, long installment) {
-        if (installment == 0) return dueDate;
+        if (installment == FIRST_INSTALLMENT) return dueDate;
 
         try {
             PaymentFrequency paymentFrequency = PaymentFrequency.toDescription(frequency);
@@ -55,18 +108,6 @@ public class InstallmentServiceImpl implements InstallmentService {
         } catch (NotificationException e) {
             throw new NotificationException("Não há suporte para calcular a data de vencimento para a frequência informada.");
         }
-//        return switch (frequency) {
-//            case "DAILY" : yield dueDate.plusDays(installment);
-//            case "WEEKLY" : yield dueDate.plusDays(7 * installment);
-//            case "BIWEEKLY" : yield dueDate.plusDays(15 * installment);
-//            case "MONTHLY" : yield dueDate.plusDays(30 * installment);
-//            case "BIMONTHLY" : yield dueDate.plusDays(60 * installment);
-//            case "QUARTERLY" : yield dueDate.plusDays(90 * installment);
-//            case "SEMIANNUAL" : yield dueDate.plusDays(180 * installment);
-//            case "ANNUAL" : yield dueDate.plusDays(360 * installment);
-//            default:
-//                throw new NotificationException("Não há suporte para calcular a data de vencimento para a frequência ::: " + frequency);
-//        };
     }
 
     private BigDecimal calculateDifferentValue(Integer quantityInstallment, BigDecimal installmentValue, BigDecimal totalValue) {
@@ -74,11 +115,11 @@ public class InstallmentServiceImpl implements InstallmentService {
         return totalValue.subtract(calculatedValue);
     }
 
-    private BigDecimal calculateInstallmentValue(Integer quantityInstallment, BigDecimal differentValue, BigDecimal installmentValue, long position) {
+    private BigDecimal calculateInstallmentValue(Integer quantityInstallment, BigDecimal differentValue, BigDecimal installmentValue, long installment) {
         if (differentValue.compareTo(BigDecimal.ZERO) < 0) {
-            return position == (quantityInstallment - 1) ? installmentValue.add(differentValue) : installmentValue;
+            return installment == (quantityInstallment - 1) ? installmentValue.add(differentValue) : installmentValue;
         } else if (differentValue.compareTo(BigDecimal.ZERO) > 0) {
-            return position == 0 ? installmentValue.add(differentValue) : installmentValue;
+            return installment == FIRST_INSTALLMENT ? installmentValue.add(differentValue) : installmentValue;
         } else {
             return installmentValue;
         }
