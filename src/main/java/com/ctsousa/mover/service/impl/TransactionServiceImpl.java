@@ -42,8 +42,11 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     @Autowired
     private InstallmentService installmentService;
 
-    public TransactionServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService) {
-        super(repository, accountService, installmentService);
+    @Autowired
+    private FixedInstallmentService fixedInstallmentService;
+
+    public TransactionServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService, FixedInstallmentService fixedInstallmentService) {
+        super(repository, accountService, installmentService, fixedInstallmentService);
     }
 
     @Override

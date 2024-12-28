@@ -10,6 +10,7 @@ import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.service.AccountService;
+import com.ctsousa.mover.service.FixedInstallmentService;
 import com.ctsousa.mover.service.InstallmentService;
 import com.ctsousa.mover.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,22 +35,26 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
 
     private final InstallmentService installmentService;
 
-    public TransferServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService) {
-        super(repository, accountService, installmentService);
+    private final FixedInstallmentService fixedInstallmentService;
+
+    public TransferServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService, FixedInstallmentService fixedInstallmentService) {
+        super(repository, accountService, installmentService, fixedInstallmentService);
         this.accountService = accountService;
         this.installmentService = installmentService;
+        this.fixedInstallmentService = fixedInstallmentService;
     }
 
     @Override
     public TransactionEntity betweenAccount(Transaction transaction) {
-        if (installmentService.hasInstallment(transaction)) {
-            List<TransactionEntity> entities = installmentService.generated(transaction);
-            entities.forEach(this.repository::save);
-            return entities.stream().findFirst()
-                    .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));
-        }else {
-            List<TransactionEntity> entities = new ArrayList<>();
+        List<TransactionEntity> entities = new ArrayList<>();
 
+        if (fixedInstallmentService.isFixed(transaction)) {
+            entities = fixedInstallmentService.generated(transaction);
+        }
+        else if (installmentService.hasInstallment(transaction)) {
+            entities = installmentService.generated(transaction);
+        }
+        else {
             AccountEntity creditAccount = new AccountEntity(transaction.getDestinationAccount().getId());
             AccountEntity debitAccount = new AccountEntity((transaction.getAccount().getId()));
 
@@ -64,17 +69,12 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
             debitEntity.setValue(invertSignal(debitEntity.getValue()));
             debitEntity.setSignature(creditEntity.getSignature());
             entities.add(debitEntity);
-
-            for (TransactionEntity e : entities) {
-                if (e.getPaid()) {
-                    updateBalance(e.getAccount(), e.getValue());
-                }
-                repository.save(e);
-            }
-
-            return entities.stream().findFirst()
-                    .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));
         }
+
+        entities.forEach(this::saveAndUpdateBalance);
+
+        return entities.stream().findFirst()
+                .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));
     }
 
     @Override

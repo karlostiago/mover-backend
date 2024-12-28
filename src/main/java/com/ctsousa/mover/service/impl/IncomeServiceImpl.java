@@ -7,7 +7,6 @@ import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.IncomeService;
-import com.ctsousa.mover.service.InstallmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +18,8 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
     @Autowired
     private final AccountService accountService;
 
-    public IncomeServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService) {
-        super(repository, accountService, installmentService);
+    public IncomeServiceImpl(TransactionRepository repository, AccountService accountService) {
+        super(repository, accountService, null, null);
         this.accountService = accountService;
     }
 

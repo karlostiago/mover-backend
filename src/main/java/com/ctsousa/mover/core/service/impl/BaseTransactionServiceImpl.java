@@ -4,12 +4,15 @@ import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.domain.Transaction;
+import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.AccountService;
+import com.ctsousa.mover.service.FixedInstallmentService;
 import com.ctsousa.mover.service.InstallmentService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,16 +26,14 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     private final InstallmentService installmentService;
 
-    public BaseTransactionServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService) {
+    private final FixedInstallmentService fixedInstallmentService;
+
+    public BaseTransactionServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService, FixedInstallmentService fixedInstallmentService) {
         super(repository);
         this.repository = repository;
         this.accountService = accountService;
         this.installmentService = installmentService;
-    }
-
-    public void pay(final String signature) {
-        List<TransactionEntity> entities = repository.findBySignature(signature);
-        entities.forEach(this::pay);
+        this.fixedInstallmentService = fixedInstallmentService;
     }
 
     public void pay(final TransactionEntity entity) {
@@ -41,11 +42,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         entity.setPaymentDate(entity.getPaymentDate() == null ? entity.getDueDate() : entity.getPaymentDate());
         updateBalance(entity.getAccount(), entity.getValue());
         repository.save(entity);
-    }
-
-    public void refund(String signature) {
-        List<TransactionEntity> entities = repository.findBySignature(signature);
-        entities.forEach(this::refund);
     }
 
     public void refund(TransactionEntity entity) {
@@ -79,24 +75,28 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
     public TransactionEntity save(Transaction transaction, TransactionType transactionType) {
 
         boolean hasInstallment = installmentService.hasInstallment(transaction);
+        boolean isFixed = fixedInstallmentService.isFixed(transaction);
         transaction.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
         transaction.setTransactionType(transactionType.name());
 
-        if (hasInstallment) {
-            List<TransactionEntity> entities = installmentService.generated(transaction);
-            entities.forEach(repository::save);
-            return entities.stream().findFirst()
-                    .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));
-        } else {
+        List<TransactionEntity> entities = new ArrayList<>();
+
+        if (isFixed) {
+            entities = fixedInstallmentService.generated(transaction);
+        }
+        else if (hasInstallment) {
+            entities = installmentService.generated(transaction);
+        }
+        else {
             TransactionEntity entity = transaction.toEntity();
             entity.setTransactionType(transactionType.name());
-
-            if (entity.getPaid()) {
-                updateBalance(accountService.findById(entity.getAccount().getId()), entity.getValue());
-            }
-
-            return repository.save(entity);
+            entities.add(entity);
         }
+
+        entities.forEach(this::saveAndUpdateBalance);
+
+        return entities.stream().findFirst()
+                .orElseThrow(() -> new NotificationException("Ocorreu um erro ao salvar o lançamento."));
     }
 
     public TransactionEntity update(Transaction transaction, TransactionType transactionType) {
@@ -108,9 +108,15 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
         TransactionEntity entity = transaction.toEntity();
         entity.setTransactionType(transactionType.name());
-        entity.setAccount(accountService.findById(transaction.getAccount().getId()));
+        entity.setAccount(new AccountEntity(transaction.getAccount().getId()));
         entity.setSignature(signature);
         entity.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
+
+        if ("IN_INSTALLMENTS".equals(originalTransaction.getPaymentType())) {
+            entity.setInstallment(originalTransaction.getInstallment());
+            entity.setFrequency(originalTransaction.getFrequency());
+            entity.setPaymentType(originalTransaction.getPaymentType());
+        }
 
         if (wasPaid && !isNowPaid) {
             updateBalance(entity.getAccount(), invertSignal(transaction.getValue()));
@@ -137,5 +143,23 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             updateBalance(entity.getAccount(), invertSignal(entity.getValue()));
         }
         super.deleteById(entity.getId());
+    }
+
+    protected void saveAndUpdateBalance(TransactionEntity entity) {
+        if(entity.getPaid()) {
+            updateBalance(entity.getAccount(), entity.getValue());
+        }
+        super.save(entity);
+    }
+
+    public static LocalDate calculateDueDate(LocalDate dueDate, String frequency, long installment) {
+        try {
+            final long FIRST_INSTALLMENT = 0;
+            if (installment == FIRST_INSTALLMENT) return dueDate;
+            PaymentFrequency paymentFrequency = PaymentFrequency.toDescription(frequency);
+            return dueDate.plusDays(paymentFrequency.days() * installment);
+        } catch (NotificationException e) {
+            throw new NotificationException("Não há suporte para calcular a data de vencimento para a frequência informada.");
+        }
     }
 }
