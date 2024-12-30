@@ -21,7 +21,7 @@ import static com.ctsousa.mover.enumeration.TypeCategory.toDescription;
 @Component
 public class FixedInstallmentServiceImpl implements FixedInstallmentService {
 
-    private final int quantityInstallment = 2;
+    private final int quantityInstallment = 1000;
 
     @Override
     public List<TransactionEntity> generated(Transaction transaction) {
