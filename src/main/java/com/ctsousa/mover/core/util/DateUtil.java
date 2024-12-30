@@ -3,6 +3,7 @@ package com.ctsousa.mover.core.util;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -97,6 +98,26 @@ public final class DateUtil {
 
     public static boolean isValidDate(LocalDate localDate) {
         return isValidYear(localDate) && isValidMonth(localDate) && isValidDay(localDate);
+    }
+
+    public static LocalDate getFirstDay(final String monthYear) {
+        String month = monthYear.split("/")[0];
+        String year = monthYear.split("/")[1];
+        return getFirstDay(Integer.parseInt(year), Integer.parseInt(month));
+    }
+
+    public static LocalDate getLastDay(final String monthYear) {
+        String month = monthYear.split("/")[0];
+        String year = monthYear.split("/")[1];
+        return getLastDay(Integer.parseInt(year), Integer.parseInt(month));
+    }
+
+    public static LocalDate getFirstDay(int year, int month) {
+        return YearMonth.of(year, month).atDay(1);
+    }
+
+    public static LocalDate getLastDay(int year, int month) {
+        return YearMonth.of(year, month).atEndOfMonth();
     }
 
     private static List<DateTimeFormatter> formatters() {

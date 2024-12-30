@@ -10,7 +10,7 @@ import java.util.List;
 public interface TransactionApi {
 
     @GetMapping("/filterBy")
-    ResponseEntity<List<TransactionResponse>> filterBy(@RequestParam("search") String search);
+    ResponseEntity<List<TransactionResponse>> filterBy(@RequestParam("search") String uri);
 
     @PutMapping("/{id}/pay")
     ResponseEntity<TransactionResponse> pay(@PathVariable Long id);

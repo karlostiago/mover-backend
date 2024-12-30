@@ -118,6 +118,13 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             entity.setPaymentType(originalTransaction.getPaymentType());
         }
 
+        if ("FIXED".equals(originalTransaction.getPaymentType())) {
+            entity.setInstallment(originalTransaction.getInstallment());
+            entity.setFrequency(originalTransaction.getFrequency());
+            entity.setPaymentType(originalTransaction.getPaymentType());
+            entity.setPredicted(Boolean.TRUE);
+        }
+
         if (wasPaid && !isNowPaid) {
             updateBalance(entity.getAccount(), invertSignal(transaction.getValue()));
         } else if (!wasPaid && isNowPaid) {

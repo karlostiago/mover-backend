@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +83,7 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
         List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
         List<TransactionEntity> entitiesToDelete = new ArrayList<>(entities.size());
 
-        Map<String, TransactionEntity> mapTransactions = getTransactionMap(entities);
+        Map<String, TransactionEntity> mapTransactions = buildTransactionsCreditAndDebit(entities);
 
         TransactionEntity credit = mapTransactions.get(CREDIT_LABEL + entity.getInstallment());
         entitiesToDelete.add(credit);
@@ -108,11 +109,16 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
     @Override
     public TransactionEntity update(Transaction transaction) {
         TransactionEntity entity = findById(transaction.getId());
-        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
+
+        Map<TransactionType, TransactionEntity> transactions = getTransactions(entity.getSignature(), entity.getInstallment());
+        List<TransactionEntity> entitiesToUpdate = new ArrayList<>();
+        entitiesToUpdate.add(transactions.get(TransactionType.DEBIT));
+        entitiesToUpdate.add(transactions.get(TransactionType.CREDIT));
+
         AccountEntity creditAccount = accountService.findById(transaction.getDestinationAccount().getId());
         AccountEntity debitAccount = accountService.findById(transaction.getAccount().getId());
 
-        for (TransactionEntity e : entities) {
+        for (TransactionEntity e : entitiesToUpdate) {
             updateTransaction(e, transaction, debitAccount, creditAccount);
             updateBalance(entity, e, transaction.getValue());
         }
@@ -122,26 +128,19 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
 
     @Override
     public TransactionResponse searchById(Long id) {
-        TransactionEntity transactionEntity = findById(id);
-        List<TransactionEntity> entities = repository.findBySignature(transactionEntity.getSignature());
-        TransactionResponse response = Transform.toMapper(transactionEntity, TransactionResponse.class);
-
-        for (TransactionEntity entity : entities) {
-            if (isDebit(entity)) {
-                response.setValue(invertSignal(entity.getValue()));
-                response.setAccountId(entity.getAccount().getId());
-            } else {
-                response.setDestinationAccountId(entity.getAccount().getId());
-            }
-        }
-
+        TransactionEntity entity = findById(id);
+        Map<TransactionType, TransactionEntity> transactions = getTransactions(entity.getSignature(), entity.getInstallment());
+        TransactionEntity creditTransaction = transactions.get(TransactionType.CREDIT);
+        TransactionResponse response = Transform.toMapper(entity, TransactionResponse.class);
+        response.setValue(invertSignal(entity.getValue()));
+        response.setDestinationAccountId(creditTransaction.getAccount().getId());
         return response;
     }
 
     @Override
     public void payOrRefund(TransactionEntity entity, Boolean pay) {
         List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
-        Map<String, TransactionEntity> mapTransactions = getTransactionMap(entities);
+        Map<String, TransactionEntity> mapTransactions = buildTransactionsCreditAndDebit(entities);
         TransactionEntity credit = mapTransactions.get(CREDIT_LABEL + entity.getInstallment());
         TransactionEntity debit = mapTransactions.get(DEBIT_LABEL + entity.getInstallment());
         if (Boolean.TRUE.equals(pay)) {
@@ -153,7 +152,16 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
         }
     }
 
-    private Map<String, TransactionEntity> getTransactionMap(List<TransactionEntity> entities) {
+    private Map<TransactionType, TransactionEntity> getTransactions(final String signature, final int installment) {
+        List<TransactionEntity> transactions = repository.findBySignature(signature);
+        Map<String, TransactionEntity> mapTransactions = buildTransactionsCreditAndDebit(transactions);
+        Map<TransactionType, TransactionEntity> map = new HashMap<>();
+        map.put(TransactionType.CREDIT,  mapTransactions.get(CREDIT_LABEL + installment));
+        map.put(TransactionType.DEBIT,  mapTransactions.get(DEBIT_LABEL + installment));
+        return map;
+    }
+
+    private Map<String, TransactionEntity> buildTransactionsCreditAndDebit(List<TransactionEntity> entities) {
         Map<String, TransactionEntity> transactionMap = new HashMap<>();
         for (TransactionEntity e : entities) {
             if ("CREDIT".equals(e.getTransactionType())) {
@@ -181,6 +189,7 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
         entity.setDueDate(transaction.getDueDate());
         entity.setPaymentDate(transaction.getPaymentDate());
         entity.setPaid(transaction.getPaid());
+        entity.setHour(LocalTime.now());
 
         if (isDebit(entity)) {
             entity.setAccount(debitAccount);

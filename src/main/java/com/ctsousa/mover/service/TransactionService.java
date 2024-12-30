@@ -6,6 +6,8 @@ import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.response.TransactionResponse;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 public interface TransactionService extends BaseService<TransactionEntity, Long> {
 
@@ -26,4 +28,6 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
     TransactionResponse searchById(final Long id);
 
     void deleteById(Long id, Boolean deleteOnlyThis);
+
+    List<TransactionEntity> find(final LocalDate dtInitial, final LocalDate dtFinal, List<Long> accountListId, String text);
 }

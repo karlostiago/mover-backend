@@ -21,7 +21,7 @@ import static com.ctsousa.mover.enumeration.TypeCategory.toDescription;
 @Component
 public class FixedInstallmentServiceImpl implements FixedInstallmentService {
 
-    private final int quantityInstallment = 1000;
+    private final int quantityInstallment = 2;
 
     @Override
     public List<TransactionEntity> generated(Transaction transaction) {
@@ -38,6 +38,7 @@ public class FixedInstallmentServiceImpl implements FixedInstallmentService {
                 entity.setDueDate(calculateDueDate(entity.getDueDate(), transaction.getFrequency(), installment));
                 entity.setSignature(signature);
                 entity.setTransactionType(transaction.getTransactionType());
+                entity.setPredicted(Boolean.TRUE);
                 entities.add(entity);
             }
         }
@@ -62,6 +63,7 @@ public class FixedInstallmentServiceImpl implements FixedInstallmentService {
             creditEntity.setInstallment(installment + 1);
             creditEntity.setDueDate(calculateDueDate(creditEntity.getDueDate(), creditEntity.getFrequency(), installment));
             creditEntity.setSignature(signature);
+            creditEntity.setPredicted(Boolean.TRUE);
             entities.add(creditEntity);
 
             TransactionEntity debitEntity = transaction.toEntity();
@@ -72,6 +74,7 @@ public class FixedInstallmentServiceImpl implements FixedInstallmentService {
             debitEntity.setSignature(creditEntity.getSignature());
             debitEntity.setInstallment(creditEntity.getInstallment());
             debitEntity.setDescription(creditEntity.getDescription());
+            debitEntity.setPredicted(creditEntity.getPredicted());
             entities.add(debitEntity);
         }
 

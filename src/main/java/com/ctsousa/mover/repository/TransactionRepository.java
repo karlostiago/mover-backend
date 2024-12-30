@@ -8,11 +8,23 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
+
+    @Query("SELECT t FROM TransactionEntity t " +
+            "JOIN FETCH t.subcategory sb " +
+            "JOIN FETCH sb.category " +
+            "JOIN FETCH t.account " +
+            "LEFT JOIN FETCH t.card " +
+            "LEFT JOIN FETCH t.vehicle " +
+            "LEFT JOIN FETCH t.contract " +
+            "LEFT JOIN FETCH t.partner " +
+            "WHERE t.dueDate BETWEEN :dtInitial AND :dtFinal OR t.paymentDate BETWEEN :dtInitial AND :dtFinal ORDER BY t.id DESC ")
+    List<TransactionEntity> findByPeriod(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal);
 
     @Query("SELECT t FROM TransactionEntity t " +
             "JOIN FETCH t.subcategory sb " +

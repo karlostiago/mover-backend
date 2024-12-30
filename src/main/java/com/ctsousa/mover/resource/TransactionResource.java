@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.TransactionApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.BankIcon;
 import com.ctsousa.mover.request.TransactionRequest;
@@ -15,10 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ctsousa.mover.core.mapper.Transform.toCollection;
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
@@ -69,8 +74,22 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
-    public ResponseEntity<List<TransactionResponse>> filterBy(String search) {
-        return null;
+    public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
+        String [] filters = uri.split(";");
+        String monthAndYear = filters[0];
+        LocalDate dtInitial = DateUtil.getFirstDay(monthAndYear);
+        LocalDate dtFinal = DateUtil.getLastDay(monthAndYear);
+        List<Long> accountsId = new ArrayList<>();
+        if (filters.length > 1 && !filters[1].isEmpty()) {
+            String [] listId = filters[1].split(",");
+            Arrays.stream(listId)
+                    .forEach(id -> accountsId.add(Long.parseLong(id)));
+        }
+        String text = filters.length > 2 ? filters[2] : null;
+        List<TransactionEntity> entities = transactionService.find(dtInitial, dtFinal, accountsId, text);
+        List<TransactionResponse> responses = toCollection(entities, TransactionResponse.class);
+        updateResponse(responses, entities);
+        return ResponseEntity.ok(responses);
     }
 
     @Override
