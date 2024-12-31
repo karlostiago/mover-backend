@@ -126,6 +126,7 @@ public class ContractResource extends BaseResource<ContractResponse, ContractReq
                     entity.getVehicle().getLicensePlate();
             ContractResponse contractResponse = responseMap.get(entity.getId());
             contractResponse.setVehicleName(fullNameVehicle);
+            contractResponse.setPaymentFrequency(entity.getPaymentFrequency());
         }
     }
 

@@ -1,6 +1,5 @@
 package com.ctsousa.mover.service.impl;
 
-import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.enumeration.Situation;
 import com.ctsousa.mover.response.ContractResponse;
 import com.ctsousa.mover.service.ContractGeneratedSequenceService;
@@ -30,7 +29,6 @@ public class ContractGeneratedSequenceImpl implements ContractGeneratedSequenceS
         response.setInitialDate(LocalDate.now());
         response.setSituation(Situation.ONGOING);
         response.setActive(Boolean.TRUE);
-        response.setPaymentFrequency(PaymentFrequency.WEEKLY);
         return response;
     }
 }
