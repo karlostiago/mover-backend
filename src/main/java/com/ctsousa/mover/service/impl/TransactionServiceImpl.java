@@ -190,7 +190,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
         }
 
         for (TransactionEntity entity : entities) {
-            if (!isIgnoreTransaction(entity)) continue;
+            if (isIgnoreTransaction(entity)) continue;
             if (textUpper != null && entity.getDescription().contains(textUpper)) {
                 entitiesFiltered.add(entity);
             } else if (textUpper != null && entity.getSubcategory().getDescription().contains(textUpper)) {

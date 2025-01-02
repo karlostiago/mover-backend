@@ -23,7 +23,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "LEFT JOIN FETCH t.vehicle " +
             "LEFT JOIN FETCH t.contract " +
             "LEFT JOIN FETCH t.partner " +
-            "WHERE t.dueDate BETWEEN :dtInitial AND :dtFinal OR t.paymentDate BETWEEN :dtInitial AND :dtFinal ORDER BY t.id DESC ")
+            "WHERE (t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal) ORDER BY t.id DESC ")
     List<TransactionEntity> findByPeriod(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal);
 
     @Query("SELECT t FROM TransactionEntity t " +
