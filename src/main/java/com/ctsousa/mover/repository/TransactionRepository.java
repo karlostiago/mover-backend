@@ -23,8 +23,81 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "LEFT JOIN FETCH t.vehicle " +
             "LEFT JOIN FETCH t.contract " +
             "LEFT JOIN FETCH t.partner " +
-            "WHERE (t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal) ORDER BY t.id DESC ")
+            "WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal)) ORDER BY t.id DESC ")
     List<TransactionEntity> findByPeriod(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal);
+
+    @Query("SELECT t FROM TransactionEntity t " +
+            "JOIN FETCH t.subcategory sb " +
+            "JOIN FETCH sb.category " +
+            "JOIN FETCH t.account " +
+            "LEFT JOIN FETCH t.card " +
+            "LEFT JOIN FETCH t.vehicle " +
+            "LEFT JOIN FETCH t.contract " +
+            "LEFT JOIN FETCH t.partner " +
+            "WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal)) AND ABS(t.value) = :value ORDER BY t.id DESC ")
+    List<TransactionEntity> findByPeriodAndValue(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("value") BigDecimal value);
+
+    @Query("""
+            SELECT t FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            JOIN FETCH sb.category c
+            JOIN FETCH t.account
+            LEFT JOIN FETCH t.card
+            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.contract
+            LEFT JOIN FETCH t.partner
+            WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
+              AND (sb.description LIKE %:description% OR c.description LIKE %:description% OR t.description LIKE %:description%)
+            ORDER BY t.id DESC
+            """)
+    List<TransactionEntity> findByPeriodAndDescription(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("description") String description);
+
+    @Query("""
+            SELECT t FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            JOIN FETCH sb.category c
+            JOIN FETCH t.account acc
+            LEFT JOIN FETCH t.card
+            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.contract
+            LEFT JOIN FETCH t.partner
+            WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
+              AND t.account.id IN (:accounts)
+            ORDER BY t.id DESC
+            """)
+    List<TransactionEntity> findByPeriodAndAccount(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts);
+
+    @Query("""
+            SELECT t FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            JOIN FETCH sb.category c
+            JOIN FETCH t.account acc
+            LEFT JOIN FETCH t.card
+            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.contract
+            LEFT JOIN FETCH t.partner
+            WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
+              AND (sb.description LIKE %:description% OR c.description LIKE %:description% OR t.description LIKE %:description%)
+              AND t.account.id IN (:accounts)
+            ORDER BY t.id DESC
+            """)
+    List<TransactionEntity> findByPeriodAndAccountAndDescription(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, @Param("description") String description);
+
+    @Query("""
+            SELECT t FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            JOIN FETCH sb.category c
+            JOIN FETCH t.account acc
+            LEFT JOIN FETCH t.card
+            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.contract
+            LEFT JOIN FETCH t.partner
+            WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
+              AND ABS(t.value) = :value
+              AND t.account.id IN (:accounts)
+            ORDER BY t.id DESC
+            """)
+    List<TransactionEntity> findByPeriodAndAccountAndValue(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, @Param("value") BigDecimal value);
 
     @Query("SELECT t FROM TransactionEntity t " +
             "JOIN FETCH t.subcategory sb " +

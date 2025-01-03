@@ -31,13 +31,14 @@ public final class NumberUtil {
     }
 
     public static BigDecimal parseMonetary(String value) {
-        String regex = "^\\d{1,3}(\\.\\d{3})*,\\d{2}$|^\\d{1,3}(\\.\\d{3})*$|^\\d+,\\d{2}$|^\\d+$";
+        if (value == null) return null;
+        String regex = "^-?\\d{1,3}(\\.\\d{3})*,\\d{2}$|^-?\\d{1,3}(\\.\\d{3})*$|^-?\\d+,\\d{2}$|^-?\\d+$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(value);
         if (matcher.matches()) {
             String normalized = value.replace(".", "").replace(",", ".");
             if (!normalized.contains(".")) {
-                normalized += ".00"; // Adicionar ".00" para valores inteiros
+                normalized += ".00";
             }
             return new BigDecimal(normalized);
         }

@@ -12,6 +12,7 @@ import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.service.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,9 @@ import java.util.List;
 
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
+import static com.ctsousa.mover.core.util.NumberUtil.parseMonetary;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Component
 public class TransactionServiceImpl extends BaseTransactionServiceImpl implements TransactionService {
@@ -139,87 +142,63 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
 
     @Override
     public List<TransactionEntity> findAll() {
-        List<TransactionEntity> entities = new ArrayList<>();
-        for (TransactionEntity entity : repository.findAll()) {
-            if (isIgnoreTransaction(entity)) {
-                continue;
-            }
-            entities.add(entity);
-        }
-        return entities;
+        return repository.findAll().stream()
+                .filter(this::isNotIgnoreTransaction)
+                .toList();
     }
 
     @Override
     public List<TransactionEntity> find(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text) {
-        List<TransactionEntity> entities = repository.findByPeriod(dtInitial, dtFinal);
-
-        if (accountListId.isEmpty() && text == null) {
-            return entities.stream().filter(this::isNotIgnoreTransaction)
+        var value = parseMonetary(text);
+        text = value != null ? null : toUppercase(text);
+        if (hasAccountAndText(accountListId, text)) {
+            return repository.findByPeriodAndAccountAndDescription(dtInitial, dtFinal, accountListId, text)
+                    .stream().filter(this::isNotIgnoreTransaction)
                     .toList();
         }
-
-        List<TransactionEntity> entitiesFindByAccounts = null;
-        if (!accountListId.isEmpty()) {
-            entitiesFindByAccounts = findTransactionByAccount(accountListId, entities);
+        if (hasAccountAndValue(accountListId, value)) {
+            return repository.findByPeriodAndAccountAndValue(dtInitial, dtFinal, accountListId, value)
+                    .stream().filter(this::isNotIgnoreTransaction)
+                    .toList();
         }
-        List<TransactionEntity> entitiesFindByText = null;
-        if (text != null && !text.isEmpty()) {
-            entitiesFindByText = findTransactionByText(text, entities);
+        if (hasValueAndNotAccount(accountListId, value)) {
+            return repository.findByPeriodAndValue(dtInitial, dtFinal, value)
+                    .stream().filter(this::isNotIgnoreTransaction)
+                    .toList();
         }
-
-        List<TransactionEntity> entitiesFiltered = new ArrayList<>(entities.size());
-        if (entitiesFindByAccounts != null && !entitiesFindByAccounts.isEmpty()) {
-            entitiesFiltered.addAll(entitiesFindByAccounts);
+        if (hasTextAndNotAccount(accountListId, text)) {
+            return repository.findByPeriodAndDescription(dtInitial, dtFinal, text)
+                    .stream().filter(this::isNotIgnoreTransaction)
+                    .toList();
         }
-
-        if (entitiesFindByText != null && !entitiesFindByText.isEmpty()) {
-            entitiesFiltered.addAll(entitiesFindByText);
+        if (hasAccount(accountListId)) {
+            return repository.findByPeriodAndAccount(dtInitial, dtFinal, accountListId)
+                    .stream().filter(this::isNotIgnoreTransaction)
+                    .toList();
         }
-
-        return entitiesFiltered;
+        return repository.findByPeriod(dtInitial, dtFinal)
+                .stream().filter(this::isNotIgnoreTransaction)
+                .toList();
     }
 
-    private List<TransactionEntity> findTransactionByText(final String text, final List<TransactionEntity> entities) {
-        List<TransactionEntity> entitiesFiltered = new ArrayList<>(entities.size());
-
-        var textUpper = toUppercase(text);
-        var transactionValue = NumberUtil.parseMonetary(text);
-
-        if (transactionValue != null) {
-            textUpper = null;
-        }
-
-        for (TransactionEntity entity : entities) {
-            if (isIgnoreTransaction(entity)) continue;
-            if (textUpper != null && entity.getDescription().contains(textUpper)) {
-                entitiesFiltered.add(entity);
-            } else if (textUpper != null && entity.getSubcategory().getDescription().contains(textUpper)) {
-                entitiesFiltered.add(entity);
-            } else if (textUpper != null && entity.getSubcategory().getCategory().getDescription().contains(textUpper)) {
-                entitiesFiltered.add(entity);
-            } else if (transactionValue != null && entity.getValue().abs().equals(transactionValue.abs())) {
-                entitiesFiltered.add(entity);
-            }
-        }
-
-        return entitiesFiltered;
+    private boolean hasAccountAndText(List<Long> accountListId, String text) {
+        return !accountListId.isEmpty() && isNotEmpty(text);
     }
 
-    private List<TransactionEntity> findTransactionByAccount(final List<Long> accountListId, final List<TransactionEntity> entities) {
-        List<TransactionEntity> entitiesFiltered = new ArrayList<>(entities.size());
+    private boolean hasAccountAndValue(List<Long> accountListId, BigDecimal value) {
+        return !accountListId.isEmpty() && value != null;
+    }
 
-        if (!accountListId.isEmpty()) {
-            for (Long accountId : accountListId) {
-                for (TransactionEntity entity : entities) {
-                    if (isIgnoreTransaction(entity)) continue;
-                    if (entity.getAccount().getId().equals(accountId)) {
-                        entitiesFiltered.add(entity);
-                    }
-                }
-            }
-        }
+    private boolean hasValueAndNotAccount(List<Long> accountListId, BigDecimal value) {
+        return accountListId.isEmpty() && value != null;
+    }
 
-        return entitiesFiltered;
+    private boolean hasTextAndNotAccount(List<Long> accountListId, String text) {
+        return accountListId.isEmpty() && isNotEmpty(text);
+    }
+
+    private boolean hasAccount(List<Long> accountListId) {
+        return !accountListId.isEmpty();
     }
 
     private boolean isIgnoreTransaction(TransactionEntity entity) {
