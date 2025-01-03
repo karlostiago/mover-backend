@@ -2,6 +2,8 @@ package com.ctsousa.mover.repository;
 
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,27 +17,36 @@ import java.util.Optional;
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
 
-    @Query("SELECT t FROM TransactionEntity t " +
-            "JOIN FETCH t.subcategory sb " +
-            "JOIN FETCH sb.category " +
-            "JOIN FETCH t.account " +
-            "LEFT JOIN FETCH t.card " +
-            "LEFT JOIN FETCH t.vehicle " +
-            "LEFT JOIN FETCH t.contract " +
-            "LEFT JOIN FETCH t.partner " +
-            "WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal)) ORDER BY t.id DESC ")
-    List<TransactionEntity> findByPeriod(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal);
+    @Query("""
+            SELECT t
+            FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            JOIN FETCH sb.category
+            JOIN FETCH t.account
+            LEFT JOIN FETCH t.card
+            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.contract
+            LEFT JOIN FETCH t.partner
+            WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
+            ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END ASC
+            """)
+    Page<TransactionEntity> findByPeriod(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, Pageable pageable);
 
-    @Query("SELECT t FROM TransactionEntity t " +
-            "JOIN FETCH t.subcategory sb " +
-            "JOIN FETCH sb.category " +
-            "JOIN FETCH t.account " +
-            "LEFT JOIN FETCH t.card " +
-            "LEFT JOIN FETCH t.vehicle " +
-            "LEFT JOIN FETCH t.contract " +
-            "LEFT JOIN FETCH t.partner " +
-            "WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal)) AND ABS(t.value) = :value ORDER BY t.id DESC ")
-    List<TransactionEntity> findByPeriodAndValue(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("value") BigDecimal value);
+    @Query("""
+            SELECT t
+            FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            JOIN FETCH sb.category
+            JOIN FETCH t.account
+            LEFT JOIN FETCH t.card
+            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.contract
+            LEFT JOIN FETCH t.partner
+            WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
+            AND ABS(t.value) = :value
+            ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END ASC
+            """)
+    Page<TransactionEntity> findByPeriodAndValue(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("value") BigDecimal value, Pageable pageable);
 
     @Query("""
             SELECT t FROM TransactionEntity t
@@ -48,9 +59,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             LEFT JOIN FETCH t.partner
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND (sb.description LIKE %:description% OR c.description LIKE %:description% OR t.description LIKE %:description%)
-            ORDER BY t.id DESC
+            ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END ASC
             """)
-    List<TransactionEntity> findByPeriodAndDescription(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("description") String description);
+    Page<TransactionEntity> findByPeriodAndDescription(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("description") String description, Pageable pageable);
 
     @Query("""
             SELECT t FROM TransactionEntity t
@@ -63,9 +74,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             LEFT JOIN FETCH t.partner
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND t.account.id IN (:accounts)
-            ORDER BY t.id DESC
+            ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END ASC
             """)
-    List<TransactionEntity> findByPeriodAndAccount(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts);
+    Page<TransactionEntity> findByPeriodAndAccount(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, Pageable pageable);
 
     @Query("""
             SELECT t FROM TransactionEntity t
@@ -79,9 +90,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND (sb.description LIKE %:description% OR c.description LIKE %:description% OR t.description LIKE %:description%)
               AND t.account.id IN (:accounts)
-            ORDER BY t.id DESC
+            ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END ASC
             """)
-    List<TransactionEntity> findByPeriodAndAccountAndDescription(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, @Param("description") String description);
+    Page<TransactionEntity> findByPeriodAndAccountAndDescription(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, @Param("description") String description, Pageable pageable);
 
     @Query("""
             SELECT t FROM TransactionEntity t
@@ -95,9 +106,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND ABS(t.value) = :value
               AND t.account.id IN (:accounts)
-            ORDER BY t.id DESC
+            ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END ASC
             """)
-    List<TransactionEntity> findByPeriodAndAccountAndValue(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, @Param("value") BigDecimal value);
+    Page<TransactionEntity> findByPeriodAndAccountAndValue(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, @Param("value") BigDecimal value, Pageable pageable);
 
     @Query("SELECT t FROM TransactionEntity t " +
             "JOIN FETCH t.subcategory sb " +

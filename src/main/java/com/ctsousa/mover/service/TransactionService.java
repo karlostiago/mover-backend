@@ -4,6 +4,8 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.service.BaseService;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.response.TransactionResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,5 +31,5 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
 
     void deleteById(Long id, Boolean deleteOnlyThis);
 
-    List<TransactionEntity> find(final LocalDate dtInitial, final LocalDate dtFinal, List<Long> accountListId, String text);
+    Page<TransactionEntity> find(final LocalDate dtInitial, final LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable);
 }

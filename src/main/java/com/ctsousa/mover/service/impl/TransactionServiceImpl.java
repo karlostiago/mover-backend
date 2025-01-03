@@ -5,15 +5,16 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
-import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.service.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -148,37 +149,38 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     }
 
     @Override
-    public List<TransactionEntity> find(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text) {
+    public Page<TransactionEntity> find(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable) {
         var value = parseMonetary(text);
         text = value != null ? null : toUppercase(text);
+        Page<TransactionEntity> page;
         if (hasAccountAndText(accountListId, text)) {
-            return repository.findByPeriodAndAccountAndDescription(dtInitial, dtFinal, accountListId, text)
-                    .stream().filter(this::isNotIgnoreTransaction)
-                    .toList();
+            page = repository.findByPeriodAndAccountAndDescription(dtInitial, dtFinal, accountListId, text, pageable);
+            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
+            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
         if (hasAccountAndValue(accountListId, value)) {
-            return repository.findByPeriodAndAccountAndValue(dtInitial, dtFinal, accountListId, value)
-                    .stream().filter(this::isNotIgnoreTransaction)
-                    .toList();
+            page = repository.findByPeriodAndAccountAndValue(dtInitial, dtFinal, accountListId, value, pageable);
+            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
+            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
         if (hasValueAndNotAccount(accountListId, value)) {
-            return repository.findByPeriodAndValue(dtInitial, dtFinal, value)
-                    .stream().filter(this::isNotIgnoreTransaction)
-                    .toList();
+            page = repository.findByPeriodAndValue(dtInitial, dtFinal, value, pageable);
+            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
+            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
         if (hasTextAndNotAccount(accountListId, text)) {
-            return repository.findByPeriodAndDescription(dtInitial, dtFinal, text)
-                    .stream().filter(this::isNotIgnoreTransaction)
-                    .toList();
+            page = repository.findByPeriodAndDescription(dtInitial, dtFinal, text, pageable);
+            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
+            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
         if (hasAccount(accountListId)) {
-            return repository.findByPeriodAndAccount(dtInitial, dtFinal, accountListId)
-                    .stream().filter(this::isNotIgnoreTransaction)
-                    .toList();
+            page = repository.findByPeriodAndAccount(dtInitial, dtFinal, accountListId, pageable);
+            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
+            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
-        return repository.findByPeriod(dtInitial, dtFinal)
-                .stream().filter(this::isNotIgnoreTransaction)
-                .toList();
+        page = repository.findByPeriod(dtInitial, dtFinal, pageable);
+        List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
+        return new PageImpl<>(entities, pageable, page.getTotalElements());
     }
 
     private boolean hasAccountAndText(List<Long> accountListId, String text) {

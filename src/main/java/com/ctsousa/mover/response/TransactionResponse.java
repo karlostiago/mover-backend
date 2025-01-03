@@ -45,6 +45,8 @@ public class TransactionResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate date;
 
+    private Long remainingPages;
+
     public void setCategoryType(String categoryType) {
         this.categoryType = TypeCategory.toDescription(categoryType)
                 .getDescription();

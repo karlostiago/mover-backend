@@ -11,6 +11,9 @@ import com.ctsousa.mover.response.BalanceResponse;
 import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +32,8 @@ import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 @RestController
 @RequestMapping("/transactions")
 public class TransactionResource extends BaseResource<TransactionResponse, TransactionRequest, TransactionEntity> implements TransactionApi {
+
+    private static Long REMAINING_PAGE = 0L;
 
     @Autowired
     private TransactionService transactionService;
@@ -77,18 +82,19 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
         String [] filters = uri.split(";");
         String monthAndYear = filters[0];
+
         LocalDate dtInitial = DateUtil.getFirstDay(monthAndYear);
         LocalDate dtFinal = DateUtil.getLastDay(monthAndYear);
-        List<Long> accountsId = new ArrayList<>();
-        if (filters.length > 1 && !filters[1].isEmpty()) {
-            String [] listId = filters[1].split(",");
-            Arrays.stream(listId)
-                    .forEach(id -> accountsId.add(Long.parseLong(id)));
-        }
+        List<Long> accountsId = buildAccountList(filters);
         String text = filters.length > 2 ? filters[2] : null;
-        List<TransactionEntity> entities = transactionService.find(dtInitial, dtFinal, accountsId, text);
+        int pageNumber = Integer.parseInt(filters[3]) - 1;
+
+        Page<TransactionEntity> page = transactionService.find(dtInitial, dtFinal, accountsId, text, PageRequest.of(pageNumber, 10));
+        REMAINING_PAGE = BigDecimal.valueOf(page.getTotalPages() - (page.getNumber() + 1)).longValue();
+        List<TransactionEntity> entities = page.stream().toList();
         List<TransactionResponse> responses = toCollection(entities, TransactionResponse.class);
         updateResponse(responses, entities);
+
         return ResponseEntity.ok(responses);
     }
 
@@ -113,6 +119,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
             TransactionResponse transactionResponse = responseMap.get(entity.getId());
             transactionResponse.setSubcategory(subcategory);
             transactionResponse.setCategory(category);
+            transactionResponse.setRemainingPages(REMAINING_PAGE);
 
             if (transactionResponse.getPaymentDate() != null) {
                 transactionResponse.setDate(transactionResponse.getPaymentDate());
@@ -132,5 +139,15 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     @Override
     public Class<?> responseClass() {
         return TransactionResponse.class;
+    }
+
+    private List<Long> buildAccountList(String [] filters) {
+        List<Long> accountsId = new ArrayList<>();
+        if (filters.length > 1 && !filters[1].isEmpty()) {
+            String [] listId = filters[1].split(",");
+            Arrays.stream(listId)
+                    .forEach(id -> accountsId.add(Long.parseLong(id)));
+        }
+        return accountsId;
     }
 }
