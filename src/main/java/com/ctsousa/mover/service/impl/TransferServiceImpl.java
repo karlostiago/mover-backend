@@ -9,6 +9,7 @@ import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.TransactionResponse;
+import com.ctsousa.mover.scheduler.InsertTransactionScheduler;
 import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.FixedInstallmentService;
 import com.ctsousa.mover.service.InstallmentService;
@@ -72,7 +73,7 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
             entities.add(debitEntity);
         }
 
-        entities.forEach(this::saveAndUpdateBalance);
+        InsertTransactionScheduler.buffers.add(entities);
 
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));

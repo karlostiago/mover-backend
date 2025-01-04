@@ -22,7 +22,7 @@ import static com.ctsousa.mover.core.util.StringUtil.removeLastPoint;
 
 @Slf4j
 @Component
-public class ModelScheduler implements Scheduler{
+public class ModelScheduler implements Scheduler {
 
     public static final Queue<String> buffers = new ConcurrentLinkedQueue<>();
 

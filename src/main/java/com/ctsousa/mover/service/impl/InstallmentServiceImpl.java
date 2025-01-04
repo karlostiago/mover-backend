@@ -2,7 +2,6 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
-import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
@@ -46,6 +45,8 @@ public class InstallmentServiceImpl implements InstallmentService {
                 entity.setSignature(signature);
                 entity.setDescription(entity.getDescription() + " (" + entity.getInstallment() + ")");
 
+                removePaymentDateAndPaidAfterFirstInstallment(installment, entity);
+
                 entities.add(entity);
             }
         }
@@ -82,6 +83,8 @@ public class InstallmentServiceImpl implements InstallmentService {
             creditEntity.setDueDate(calculateDueDate(creditEntity.getDueDate(), creditEntity.getFrequency(), installment));
             creditEntity.setDescription(creditEntity.getDescription() + " (" + creditEntity.getInstallment() + ")");
             creditEntity.setSignature(signature);
+
+            removePaymentDateAndPaidAfterFirstInstallment(installment, creditEntity);
             entities.add(creditEntity);
 
             TransactionEntity debitEntity = transaction.toEntity();
@@ -96,6 +99,13 @@ public class InstallmentServiceImpl implements InstallmentService {
         }
 
         return entities;
+    }
+
+    private void removePaymentDateAndPaidAfterFirstInstallment(int installment, TransactionEntity entity) {
+        if (installment > 0) {
+            entity.setPaymentDate(null);
+            entity.setPaid(Boolean.FALSE);
+        }
     }
 
     private BigDecimal calculateDifferentInstallmentValue(Integer quantityInstallment, BigDecimal installmentValue, BigDecimal totalValue) {

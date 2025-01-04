@@ -36,6 +36,9 @@ public class FixedInstallmentServiceImpl implements FixedInstallmentService {
                 entity.setSignature(signature);
                 entity.setTransactionType(transaction.getTransactionType());
                 entity.setPredicted(Boolean.TRUE);
+
+                removePaymentDateAndPaidAfterFirstInstallment(installment, entity);
+
                 entities.add(entity);
             }
         }
@@ -61,6 +64,8 @@ public class FixedInstallmentServiceImpl implements FixedInstallmentService {
             creditEntity.setDueDate(calculateDueDate(creditEntity.getDueDate(), creditEntity.getFrequency(), installment));
             creditEntity.setSignature(signature);
             creditEntity.setPredicted(Boolean.TRUE);
+
+            removePaymentDateAndPaidAfterFirstInstallment(installment, creditEntity);
             entities.add(creditEntity);
 
             TransactionEntity debitEntity = transaction.toEntity();
@@ -72,6 +77,8 @@ public class FixedInstallmentServiceImpl implements FixedInstallmentService {
             debitEntity.setInstallment(creditEntity.getInstallment());
             debitEntity.setDescription(creditEntity.getDescription());
             debitEntity.setPredicted(creditEntity.getPredicted());
+            debitEntity.setPaymentDate(creditEntity.getPaymentDate());
+            debitEntity.setPaid(creditEntity.getPaid());
             entities.add(debitEntity);
         }
 
@@ -81,5 +88,12 @@ public class FixedInstallmentServiceImpl implements FixedInstallmentService {
     @Override
     public boolean isFixed(Transaction transaction) {
         return transaction.getPaymentType() != null && "FIXED".equals(transaction.getPaymentType());
+    }
+
+    private void removePaymentDateAndPaidAfterFirstInstallment(int installment, TransactionEntity entity) {
+        if (installment > 0) {
+            entity.setPaymentDate(null);
+            entity.setPaid(Boolean.FALSE);
+        }
     }
 }

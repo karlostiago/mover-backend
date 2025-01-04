@@ -7,6 +7,7 @@ import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
+import com.ctsousa.mover.scheduler.InsertTransactionScheduler;
 import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.FixedInstallmentService;
 import com.ctsousa.mover.service.InstallmentService;
@@ -74,6 +75,8 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     public TransactionEntity save(Transaction transaction, TransactionType transactionType) {
 
+        validatedSave(transaction);
+
         boolean hasInstallment = installmentService.hasInstallment(transaction);
         boolean isFixed = fixedInstallmentService.isFixed(transaction);
         transaction.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
@@ -93,7 +96,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             entities.add(entity);
         }
 
-        entities.forEach(this::saveAndUpdateBalance);
+        InsertTransactionScheduler.buffers.add(entities);
 
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Ocorreu um erro ao salvar o lançamento."));
@@ -167,6 +170,15 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             return dueDate.plusDays(paymentFrequency.days() * installment);
         } catch (NotificationException e) {
             throw new NotificationException("Não há suporte para calcular a data de vencimento para a frequência informada.");
+        }
+    }
+
+    private void validatedSave(Transaction transaction) {
+        if ("FIXED".equals(transaction.getPaymentType()) && transaction.getFrequency().isEmpty()) {
+            throw new NotificationException("Erro ao salvar, para lançamento fixo é necessário informar a frenquência.");
+        }
+        if ("IN_INSTALLMENTS".equals(transaction.getPaymentType()) && (transaction.getFrequency().isEmpty() || Integer.valueOf(0).equals(transaction.getInstallment()))) {
+            throw new NotificationException("Erro ao salvar, para lançamento parcelado é necessário informar a frenquência e o número de parcelas.");
         }
     }
 }
