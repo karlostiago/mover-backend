@@ -57,8 +57,8 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
-    public ResponseEntity<TransactionResponse> pay(Long id) {
-        TransactionEntity entity = transactionService.pay(id);
+    public ResponseEntity<TransactionResponse> pay(Long id, LocalDate paymentDate) {
+        TransactionEntity entity = transactionService.pay(id, paymentDate);
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 
@@ -89,7 +89,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
         String text = filters.length > 2 ? filters[2] : null;
         int pageNumber = Integer.parseInt(filters[3]) - 1;
 
-        Page<TransactionEntity> page = transactionService.find(dtInitial, dtFinal, accountsId, text, PageRequest.of(pageNumber, 10));
+        Page<TransactionEntity> page = transactionService.find(dtInitial, dtFinal, accountsId, text, PageRequest.of(pageNumber, 100));
         REMAINING_PAGE = BigDecimal.valueOf(page.getTotalPages() - (page.getNumber() + 1)).longValue();
         List<TransactionEntity> entities = page.stream().toList();
         List<TransactionResponse> responses = toCollection(entities, TransactionResponse.class);

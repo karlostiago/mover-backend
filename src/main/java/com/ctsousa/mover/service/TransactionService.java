@@ -17,7 +17,7 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
 
     TransactionResponse update(final Long id, Transaction transaction);
 
-    TransactionEntity pay(final Long id);
+    TransactionEntity pay(final Long id, LocalDate paymentDate);
 
     TransactionEntity refund(final Long id);
 

@@ -71,8 +71,10 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     }
 
     @Override
-    public TransactionEntity pay(Long id) {
+    public TransactionEntity pay(Long id, LocalDate paymentDate) {
         TransactionEntity entity = findById(id);
+        entity.setPaymentDate(paymentDate);
+
         switch (getTypeCategory(entity.getCategoryType())) {
             case TRANSFER -> transferService.payOrRefund(entity, true);
             case CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> pay(entity);
