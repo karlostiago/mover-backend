@@ -5,6 +5,7 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
+import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
@@ -20,11 +21,12 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
-import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
-import static com.ctsousa.mover.core.util.NumberUtil.parseMonetary;
+import static com.ctsousa.mover.core.util.NumberUtil.*;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -95,23 +97,26 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     }
 
     @Override
-    public BigDecimal accountBalace() {
+    public BigDecimal accountBalace(final List<Long> listAccountId) {
         List<Long> listId = new ArrayList<>(accountService.findAll()
                 .stream().map(AccountEntity::getId)
                 .toList());
-        return repository.accountBalance(listId);
+        return repository.accountBalance(listAccountId.isEmpty() ? listId : listAccountId);
     }
 
     @Override
-    public BigDecimal incomeBalance() {
-        BigDecimal incomeBalance = repository.incomeBalance();
-        return incomeBalance == null ? BigDecimal.ZERO : incomeBalance;
+    public BigDecimal incomeBalance(final List<TransactionEntity> entities) {
+        return entities.stream().filter(t -> "INCOME".equals(t.getCategoryType()))
+                .map(t -> getValueOrZero(t.getValue()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
-    public BigDecimal expenseBalance() {
-        BigDecimal expenseBalance = repository.expenseBalance();
-        return expenseBalance == null ? BigDecimal.ZERO : expenseBalance;
+    public BigDecimal expenseBalance(final List<TransactionEntity> entities) {
+        return entities.stream().filter(t -> "EXPENSE".equals(t.getCategoryType()))
+                .map(t -> getValueOrZero(t.getValue()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .multiply(BigDecimal.valueOf(-1D));
     }
 
     @Override

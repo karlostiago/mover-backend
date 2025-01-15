@@ -45,6 +45,10 @@ public final class NumberUtil {
         return null;
     }
 
+    public static BigDecimal getValueOrZero(final BigDecimal value) {
+        return value != null ? value : BigDecimal.ZERO;
+    }
+
     public static BigDecimal invertSignal(final BigDecimal value) {
         return value.multiply(BigDecimal.valueOf(-1));
     }

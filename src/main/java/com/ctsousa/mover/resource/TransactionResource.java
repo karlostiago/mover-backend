@@ -3,7 +3,6 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.TransactionApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.TransactionEntity;
-import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.BankIcon;
 import com.ctsousa.mover.request.TransactionRequest;
@@ -13,15 +12,12 @@ import com.ctsousa.mover.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -80,17 +76,14 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
 
     @Override
     public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
-        String [] filters = uri.split(";");
-        String monthAndYear = filters[0];
 
-        LocalDate dtInitial = DateUtil.getFirstDay(monthAndYear);
-        LocalDate dtFinal = DateUtil.getLastDay(monthAndYear);
-        List<Long> accountsId = buildAccountList(filters);
-        String text = filters.length > 2 ? filters[2] : null;
-        int pageNumber = Integer.parseInt(filters[3]) - 1;
+        var filter = new Transaction.Filter(uri);
 
-        Page<TransactionEntity> page = transactionService.find(dtInitial, dtFinal, accountsId, text, PageRequest.of(pageNumber, 100));
+        Page<TransactionEntity> page = transactionService.find(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(),
+                filter.getText(), PageRequest.of(filter.getPageNumber(), 100));
+
         REMAINING_PAGE = BigDecimal.valueOf(page.getTotalPages() - (page.getNumber() + 1)).longValue();
+
         List<TransactionEntity> entities = page.stream().toList();
         List<TransactionResponse> responses = toCollection(entities, TransactionResponse.class);
         updateResponse(responses, entities);
@@ -99,12 +92,17 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
-    public ResponseEntity<BalanceResponse> balance() {
+    public ResponseEntity<BalanceResponse> balance(String uri) {
+        var filter = new Transaction.Filter(uri);
         BalanceResponse response = new BalanceResponse();
-        response.setCurrentAccount(transactionService.accountBalace());
-        response.setIncome(transactionService.incomeBalance());
-        response.setExpense(transactionService.expenseBalance());
+        Page<TransactionEntity> page = transactionService.find(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(),
+                filter.getText(), PageRequest.of(0, Integer.MAX_VALUE));
+
+        response.setCurrentAccount(transactionService.accountBalace(filter.getAccountsId()));
+        response.setIncome(transactionService.incomeBalance(page.stream().toList()));
+        response.setExpense(transactionService.expenseBalance(page.stream().toList()));
         response.setGeneralBalance(response.getIncome().subtract(response.getExpense()));
+
         return ResponseEntity.ok(response);
     }
 
@@ -139,15 +137,5 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     @Override
     public Class<?> responseClass() {
         return TransactionResponse.class;
-    }
-
-    private List<Long> buildAccountList(String [] filters) {
-        List<Long> accountsId = new ArrayList<>();
-        if (filters.length > 1 && !filters[1].isEmpty()) {
-            String [] listId = filters[1].split(",");
-            Arrays.stream(listId)
-                    .forEach(id -> accountsId.add(Long.parseLong(id)));
-        }
-        return accountsId;
     }
 }

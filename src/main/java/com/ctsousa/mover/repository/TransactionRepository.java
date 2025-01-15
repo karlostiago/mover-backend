@@ -151,7 +151,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             SELECT
             	SUM(TEMP.BALANCE) AS BALANCE
             FROM (
-            	SELECT\s
+            	SELECT
             	    c.name AS NAME,
             	    COALESCE(c.initial_balance, 0) + COALESCE((
             	        SELECT SUM(t.value)
@@ -160,14 +160,15 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             	          AND t.card_id IS NULL
             	          AND t.paid
             	    ), 0) AS BALANCE
-            	FROM\s
+            	FROM
             	    tb_account c
-            	WHERE\s
+            	WHERE
             	    c.id IN (:accounts)
             ) AS TEMP
             """, nativeQuery = true)
     BigDecimal accountBalance(@Param("accounts") List<Long> accounts);
 
+    @Deprecated
     @Query(value = """
             SELECT
             	SUM(TEMP.BALANCE) AS BALANCE
@@ -189,9 +190,11 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             """, nativeQuery = true)
     BigDecimal creditBalance(@Param("cards") List<Long> cards);
 
+    @Deprecated
     @Query(value = "SELECT SUM(t.value * -1) AS DESPESA FROM tb_transaction t WHERE t.category_type = 'EXPENSE'", nativeQuery = true)
     BigDecimal expenseBalance();
 
+    @Deprecated
     @Query(value = "SELECT SUM(t.value) AS RECEITA FROM tb_transaction t WHERE t.category_type = 'INCOME'", nativeQuery = true)
     BigDecimal incomeBalance();
 }

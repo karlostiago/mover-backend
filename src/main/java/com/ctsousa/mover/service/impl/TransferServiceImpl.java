@@ -73,7 +73,7 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
             entities.add(debitEntity);
         }
 
-        InsertTransactionScheduler.buffers.add(entities);
+        InsertTransactionScheduler.queue.add(entities);
 
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Nenhuma transação encontrada."));

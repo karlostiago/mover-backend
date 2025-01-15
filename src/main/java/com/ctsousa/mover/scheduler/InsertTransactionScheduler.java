@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Component
 public class InsertTransactionScheduler implements Scheduler {
 
-    public static final Queue<List<TransactionEntity>> buffers = new ConcurrentLinkedQueue<>();
+    public static final Queue<List<TransactionEntity>> queue = new ConcurrentLinkedQueue<>();
 
     private final AccountService accountService;
 
@@ -33,11 +33,11 @@ public class InsertTransactionScheduler implements Scheduler {
     @Scheduled(cron = "0/10 * * * * *")
     public void process() {
 
-        if (buffers.isEmpty()) return;
+        if (queue.isEmpty()) return;
 
         log.info("Iniciado processamento de insert de lançamentos :: {} ", LocalDateTime.now());
-        while (!buffers.isEmpty()) {
-            List<TransactionEntity> entities = buffers.poll();
+        while (!queue.isEmpty()) {
+            List<TransactionEntity> entities = queue.poll();
             entities.forEach(this::saveAndUpdateBalance);
         }
         log.info("Finalizado processamento de insert de lançamentos :: {} ", LocalDateTime.now());

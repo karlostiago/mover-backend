@@ -21,7 +21,7 @@ public interface TransactionApi {
     ResponseEntity<TransactionResponse> refund(@PathVariable Long id);
 
     @GetMapping("/balances")
-    ResponseEntity<BalanceResponse> balance();
+    ResponseEntity<BalanceResponse> balance(@RequestParam("search") String uri);
 
     @DeleteMapping("/remove/{id}")
     void delete(@PathVariable Long id, @RequestParam("deleteOnlyThis") Boolean deleteOnlyThis);

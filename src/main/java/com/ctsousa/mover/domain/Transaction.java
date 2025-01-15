@@ -1,6 +1,7 @@
 package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.*;
+import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.core.util.HashUtil;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
@@ -12,8 +13,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 import static java.util.UUID.randomUUID;
@@ -42,6 +42,37 @@ public class Transaction extends DomainModel<TransactionEntity> {
     private String transactionType;
     private Boolean paid;
     private Boolean predicted;
+
+    @Getter
+    public static class Filter {
+
+        private final LocalDate dtInitial;
+        private final LocalDate dtFinal;
+        private final List<Long> accountsId;
+        private final String text;
+        private final int pageNumber;
+
+        public Filter(final String uri) {
+            String [] filters = uri.split(";");
+            String monthAndYear = filters[0];
+
+            dtInitial = DateUtil.getFirstDay(monthAndYear);
+            dtFinal = DateUtil.getLastDay(monthAndYear);
+            accountsId = buildAccountList(filters);
+            text = filters.length > 2 ? filters[2] : null;
+            pageNumber = Integer.parseInt(filters[3]) - 1;
+        }
+
+        private List<Long> buildAccountList(String [] filters) {
+            List<Long> accountsId = new ArrayList<>();
+            if (filters.length > 1 && !filters[1].isEmpty()) {
+                String [] listId = filters[1].split(",");
+                Arrays.stream(listId)
+                        .forEach(id -> accountsId.add(Long.parseLong(id)));
+            }
+            return accountsId;
+        }
+    }
 
     @Override
     public TransactionEntity toEntity() {

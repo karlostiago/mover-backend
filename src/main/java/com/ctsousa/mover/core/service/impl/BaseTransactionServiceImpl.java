@@ -82,21 +82,24 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         transaction.setValue(TransactionType.DEBIT.equals(transactionType) ? invertSignal(transaction.getValue()) : transaction.getValue());
         transaction.setTransactionType(transactionType.name());
 
-        List<TransactionEntity> entities = new ArrayList<>();
+        List<TransactionEntity> entities;
 
         if (isFixed) {
+            int toIndex = 100;
             entities = fixedInstallmentService.generated(transaction);
+            entities.subList(0, toIndex).forEach(repository::save);
+            InsertTransactionScheduler.queue.add(entities.subList(toIndex, entities.size()));
         }
         else if (hasInstallment) {
             entities = installmentService.generated(transaction);
+            entities.forEach(repository::save);
         }
         else {
             TransactionEntity entity = transaction.toEntity();
             entity.setTransactionType(transactionType.name());
-            entities.add(entity);
+            repository.save(entity);
+            return entity;
         }
-
-        InsertTransactionScheduler.buffers.add(entities);
 
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Ocorreu um erro ao salvar o lançamento."));
