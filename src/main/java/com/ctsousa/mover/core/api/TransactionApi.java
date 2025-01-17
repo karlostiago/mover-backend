@@ -1,7 +1,9 @@
 package com.ctsousa.mover.core.api;
 
+import com.ctsousa.mover.request.TransactionRequest;
 import com.ctsousa.mover.response.BalanceResponse;
 import com.ctsousa.mover.response.TransactionResponse;
+import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +22,12 @@ public interface TransactionApi {
     @PutMapping("/{id}/refund")
     ResponseEntity<TransactionResponse> refund(@PathVariable Long id);
 
-    @GetMapping("/balances")
-    ResponseEntity<BalanceResponse> balance(@RequestParam("search") String uri);
-
-    @DeleteMapping("/remove/{id}")
-    void delete(@PathVariable Long id, @RequestParam("deleteOnlyThis") Boolean deleteOnlyThis);
+//    @GetMapping("/balances")
+//    ResponseEntity<BalanceResponse> balance(@RequestParam("search") String uri);
+//
+//    @DeleteMapping("/batch-delete/{id}")
+//    void delete(@PathVariable Long id, @RequestParam("batchDelete") Boolean batchDelete);
+//
+//    @PutMapping("/batch-update/{id}")
+//    void batchUpdate(@PathVariable Long id, @Valid  @RequestBody TransactionRequest request);
 }

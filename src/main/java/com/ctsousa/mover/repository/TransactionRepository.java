@@ -197,4 +197,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Deprecated
     @Query(value = "SELECT SUM(t.value) AS RECEITA FROM tb_transaction t WHERE t.category_type = 'INCOME'", nativeQuery = true)
     BigDecimal incomeBalance();
+
+    @Query("SELECT t.signature FROM TransactionEntity t WHERE t.id = :id")
+    String findBySignature(@Param("id") Long id);
 }

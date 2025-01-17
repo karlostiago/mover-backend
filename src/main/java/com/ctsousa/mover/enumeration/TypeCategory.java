@@ -8,16 +8,18 @@ import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 @Getter
 public enum TypeCategory {
 
-    INCOME(1, "RECEITA"),
-    EXPENSE(2, "DESPESA"),
-    INVESTMENT(3, "INVESTIMENTO"),
-    TRANSFER(4, "TRANSFERÊNCIA"),
-    CORPORATE_CAPITAL(5, "CAPITAL SOCIETÁRIO");
+    INCOME(1, "RECEITA", TransactionType.CREDIT),
+    EXPENSE(2, "DESPESA", TransactionType.DEBIT),
+    INVESTMENT(3, "INVESTIMENTO", TransactionType.DEBIT),
+    TRANSFER(4, "TRANSFERÊNCIA", TransactionType.DEBIT),
+    CORPORATE_CAPITAL(5, "CAPITAL SOCIETÁRIO", TransactionType.CREDIT);
 
     private final Integer code;
     private final String description;
+    private final TransactionType transactionType;
 
-    TypeCategory(int code, String description) {
+    TypeCategory(int code, String description, TransactionType transactionType) {
+        this.transactionType = transactionType;
         this.description = description;
         this.code = code;
     }

@@ -5,8 +5,8 @@ import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.BankIcon;
+import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.request.TransactionRequest;
-import com.ctsousa.mover.response.BalanceResponse;
 import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,15 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<TransactionResponse> update(Long id, TransactionRequest request) {
         transactionService.existsById(id);
         Transaction domain = toMapper(request, Transaction.class);
-        return ResponseEntity.ok(transactionService.update(id, domain));
+        TransactionEntity entity = transactionService.update(domain);
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<TransactionResponse> findById(Long id) {
+        TransactionEntity entity = transactionService.findById(id);
+        TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
+        return ResponseEntity.ok(toMapper(transactionService.filterById(id, type), TransactionResponse.class));
     }
 
     @Override
@@ -63,23 +71,30 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
         TransactionEntity entity = transactionService.refund(id);
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
-
-    @Override
-    public ResponseEntity<TransactionResponse> findById(Long id) {
-        return ResponseEntity.ok(transactionService.searchById(id));
-    }
-
-    @Override
-    public void delete(Long id, Boolean deleteOnlyThis) {
-        transactionService.deleteById(id, deleteOnlyThis);
-    }
-
+//
+//    @Override
+//    public ResponseEntity<TransactionResponse> findById(Long id) {
+//        return ResponseEntity.ok(transactionService.searchById(id));
+//    }
+//
+//    @Override
+//    public void delete(Long id, Boolean deleteOnlyThis) {
+//        transactionService.deleteById(id, deleteOnlyThis);
+//    }
+//
+//    @Override
+//    public void batchUpdate(Long id, TransactionRequest request) {
+//        transactionService.existsById(id);
+//        Transaction domain = toMapper(request, Transaction.class);
+//        transactionService.batchUpdate(domain);
+//    }
+//
     @Override
     public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
 
         var filter = new Transaction.Filter(uri);
 
-        Page<TransactionEntity> page = transactionService.find(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(),
+        Page<TransactionEntity> page = transactionService.search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(),
                 filter.getText(), PageRequest.of(filter.getPageNumber(), 100));
 
         REMAINING_PAGE = BigDecimal.valueOf(page.getTotalPages() - (page.getNumber() + 1)).longValue();
@@ -90,22 +105,22 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
 
         return ResponseEntity.ok(responses);
     }
-
-    @Override
-    public ResponseEntity<BalanceResponse> balance(String uri) {
-        var filter = new Transaction.Filter(uri);
-        BalanceResponse response = new BalanceResponse();
-        Page<TransactionEntity> page = transactionService.find(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(),
-                filter.getText(), PageRequest.of(0, Integer.MAX_VALUE));
-
-        response.setCurrentAccount(transactionService.accountBalace(filter.getAccountsId()));
-        response.setIncome(transactionService.incomeBalance(page.stream().toList()));
-        response.setExpense(transactionService.expenseBalance(page.stream().toList()));
-        response.setGeneralBalance(response.getIncome().subtract(response.getExpense()));
-
-        return ResponseEntity.ok(response);
-    }
-
+//
+//    @Override
+//    public ResponseEntity<BalanceResponse> balance(String uri) {
+//        var filter = new Transaction.Filter(uri);
+//        BalanceResponse response = new BalanceResponse();
+//        Page<TransactionEntity> page = transactionService.find(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(),
+//                filter.getText(), PageRequest.of(0, Integer.MAX_VALUE));
+//
+//        response.setCurrentAccount(transactionService.accountBalace(filter.getAccountsId()));
+//        response.setIncome(transactionService.incomeBalance(page.stream().toList()));
+//        response.setExpense(transactionService.expenseBalance(page.stream().toList()));
+//        response.setGeneralBalance(response.getIncome().subtract(response.getExpense()));
+//
+//        return ResponseEntity.ok(response);
+//    }
+//
     @Override
     public void updateResponse(List<TransactionResponse> response, List<TransactionEntity> entities) {
         Map<Long, TransactionResponse> responseMap = response.stream()

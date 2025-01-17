@@ -2,19 +2,20 @@ package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.util.DateUtil;
-import com.ctsousa.mover.core.util.HashUtil;
+import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 import static java.util.UUID.randomUUID;
 
@@ -22,7 +23,6 @@ import static java.util.UUID.randomUUID;
 @Setter
 public class Transaction extends DomainModel<TransactionEntity> {
 
-    private Long id;
     private String description;
     private SubCategory subcategory;
     private Integer installment;
@@ -42,6 +42,12 @@ public class Transaction extends DomainModel<TransactionEntity> {
     private String transactionType;
     private Boolean paid;
     private Boolean predicted;
+
+    public Transaction() {}
+
+    public Transaction(Long id) {
+        setId(id);
+    }
 
     @Getter
     public static class Filter {
@@ -88,11 +94,16 @@ public class Transaction extends DomainModel<TransactionEntity> {
         TypeCategory typeCategory = TypeCategory.toDescription(this.getCategoryType());
         entity.setCategoryType(typeCategory.name());
 
-        entity.setTransactionType(TransactionType.DEBIT.name());
+        entity.setTransactionType(typeCategory.getTransactionType().name());
 
         entity.setDueDate(this.getDueDate());
         entity.setPaymentDate(this.getPaymentDate());
         entity.setValue(this.getValue());
+
+        if ("DEBIT".equals(entity.getTransactionType())) {
+            entity.setValue(invertSignal(this.getValue()));
+        }
+
         entity.setAccount(new AccountEntity(this.getAccount().getId()));
 
         if (this.getCard() != null && (this.getCard().getId() != null && this.getCard().getId() > 0)) {

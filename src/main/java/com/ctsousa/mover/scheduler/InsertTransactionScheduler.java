@@ -2,6 +2,8 @@ package com.ctsousa.mover.scheduler;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.util.NumberUtil;
+import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 
 @Slf4j
 @Component
@@ -47,6 +51,7 @@ public class InsertTransactionScheduler implements Scheduler {
         if(entity.getPaid()) {
             updateBalance(entity.getAccount(), entity.getValue());
         }
+
         repository.save(entity);
     }
 

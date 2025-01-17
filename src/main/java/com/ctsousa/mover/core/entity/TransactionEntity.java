@@ -83,4 +83,7 @@ public class TransactionEntity extends AbstractEntity {
 
     @Column(name = "hour", nullable = false)
     private LocalTime hour;
+
+    @Transient
+    private AccountEntity destinationAccount;
 }

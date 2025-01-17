@@ -176,11 +176,11 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         }
     }
 
-    private void validatedSave(Transaction transaction) {
-        if ("FIXED".equals(transaction.getPaymentType()) && transaction.getFrequency().isEmpty()) {
+    protected void validatedSave(Transaction transaction) {
+        if ("FIXED".equals(transaction.getPaymentType()) && (transaction.getFrequency() == null || transaction.getFrequency().isEmpty())) {
             throw new NotificationException("Erro ao salvar, para lançamento fixo é necessário informar a frenquência.");
         }
-        if ("IN_INSTALLMENTS".equals(transaction.getPaymentType()) && (transaction.getFrequency().isEmpty() || Integer.valueOf(0).equals(transaction.getInstallment()))) {
+        if ("IN_INSTALLMENTS".equals(transaction.getPaymentType()) && (transaction.getFrequency() == null || transaction.getFrequency().isEmpty() || Integer.valueOf(0).equals(transaction.getInstallment()))) {
             throw new NotificationException("Erro ao salvar, para lançamento parcelado é necessário informar a frenquência e o número de parcelas.");
         }
     }

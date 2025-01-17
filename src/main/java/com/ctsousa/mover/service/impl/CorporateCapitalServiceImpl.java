@@ -6,10 +6,7 @@ import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
-import com.ctsousa.mover.service.AccountService;
-import com.ctsousa.mover.service.FixedInstallmentService;
-import com.ctsousa.mover.service.IncomeService;
-import com.ctsousa.mover.service.InstallmentService;
+import com.ctsousa.mover.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +16,7 @@ import java.time.LocalTime;
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 
 @Component
-public class IncomeServiceImpl extends BaseTransactionServiceImpl implements IncomeService {
+public class CorporateCapitalServiceImpl extends BaseTransactionServiceImpl implements CorporateCapitalService {
 
     @Autowired
     private final AccountService accountService;
@@ -27,7 +24,7 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
     private final InstallmentService installmentService;
     private final FixedInstallmentService fixedInstallmentService;
 
-    public IncomeServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService, FixedInstallmentService fixedInstallmentService) {
+    public CorporateCapitalServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService, FixedInstallmentService fixedInstallmentService) {
         super(repository, accountService, null, null);
         this.accountService = accountService;
         this.installmentService = installmentService;
@@ -54,7 +51,7 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
         return repository.save(entity);
     }
 
-    //    @Override
+//    @Override
 //    public TransactionEntity update(Transaction transaction) {
 //        TransactionEntity originalTransaction = findById(transaction.getId());
 //        String signature = originalTransaction.getSignature();
@@ -92,8 +89,14 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
 
     @Override
     public TransactionEntity filterById(Long id) {
-        return repository.findById(id)
+        TransactionEntity entity = repository.findById(id)
                 .orElseThrow(() -> new NotificationException("Transação não encontrada"));
+
+        if ("DEBIT".equals(entity.getTransactionType())) {
+            entity.setValue(invertSignal(entity.getValue()));
+        }
+
+        return entity;
     }
 
     @Override
