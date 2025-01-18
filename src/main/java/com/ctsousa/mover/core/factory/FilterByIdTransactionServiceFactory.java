@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class PaymentTransactionServiceFactory extends AbstractTransactionServiceFactory {
-    public PaymentTransactionServiceFactory(Map<TypeCategory, TransactionCommand> services) {
+public class FilterByIdTransactionServiceFactory extends AbstractTransactionServiceFactory {
+    public FilterByIdTransactionServiceFactory(Map<TypeCategory, TransactionCommand> services) {
         super(services);
     }
 
     @Override
-    public TransactionEntity execute(final TypeCategory type, final Transaction transaction) {
-        return services.get(type).payment(transaction.getId(), transaction.getPaymentDate());
+    public TransactionEntity execute(TypeCategory type, Transaction transaction) {
+        return services.get(type).filterById(transaction.getId());
     }
 }

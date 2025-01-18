@@ -34,7 +34,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     private UpdateTransactionServiceFactory updateTransactionServiceFactory;
 
     @Autowired
-    private FilterTransactionServiceFactory filterTransactionServiceFactory;
+    private FilterByIdTransactionServiceFactory filterTransactionServiceFactory;
 
     @Autowired
     private PaymentTransactionServiceFactory paymentTransactionServiceFactory;
@@ -107,128 +107,6 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
         return updateTransactionServiceFactory.execute(type, transaction);
     }
 
-    //    @Autowired
-//    private TransactionRepository repository;
-//
-//    @Autowired
-//    private TransferService transferService;
-//
-//    @Autowired
-//    private AccountService accountService;
-//
-//    @Autowired
-//    private CardService cardService;
-//
-//    @Autowired
-//    private IncomeService incomeService;
-//
-//    @Autowired
-//    private InstallmentService installmentService;
-//
-//    @Autowired
-//    private FixedInstallmentService fixedInstallmentService;
-//
-//    public TransactionServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService, FixedInstallmentService fixedInstallmentService) {
-//        super(repository, accountService, installmentService, fixedInstallmentService);
-//    }
-//
-//    @Override
-//    public TransactionEntity save(TransactionEntity entity) {
-//        throw new NotificationException("Operação não suportada!", Severity.ERROR);
-//    }
-//
-//    @Override
-//    public TransactionEntity save(Transaction transaction) {
-//        return switch (getTypeCategory(transaction.getCategoryType())) {
-//            case INCOME, CORPORATE_CAPITAL -> save(transaction, TransactionType.CREDIT);
-//            case TRANSFER -> transferService.betweenAccount(transaction);
-//            case EXPENSE, INVESTMENT -> save(transaction, TransactionType.DEBIT);
-//        };
-//    }
-//
-//    @Override
-//    public TransactionEntity pay(Long id, LocalDate paymentDate) {
-//        TransactionEntity entity = findById(id);
-//        entity.setPaymentDate(paymentDate);
-//
-//        switch (getTypeCategory(entity.getCategoryType())) {
-//            case TRANSFER -> transferService.payOrRefund(entity, true);
-//            case CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> pay(entity);
-//            default -> throw new NotificationException("Transação não suportada!");
-//        }
-//        return entity;
-//    }
-//
-//    @Override
-//    public TransactionEntity refund(Long id) {
-//        TransactionEntity entity = findById(id);
-//        switch (getTypeCategory(entity.getCategoryType())) {
-//            case TRANSFER -> transferService.payOrRefund(entity, false);
-//            case CORPORATE_CAPITAL, INCOME, EXPENSE, INVESTMENT -> refund(entity);
-//            default -> throw new NotificationException("Transação não suportada!");
-//        }
-//        return entity;
-//    }
-//
-//    @Override
-//    public BigDecimal accountBalace(final List<Long> listAccountId) {
-//        List<Long> listId = new ArrayList<>(accountService.findAll()
-//                .stream().map(AccountEntity::getId)
-//                .toList());
-//        return repository.accountBalance(listAccountId.isEmpty() ? listId : listAccountId);
-//    }
-//
-//    @Override
-//    public BigDecimal incomeBalance(final List<TransactionEntity> entities) {
-//        return entities.stream().filter(t -> "INCOME".equals(t.getCategoryType()))
-//                .map(t -> getValueOrZero(t.getValue()))
-//                .reduce(BigDecimal.ZERO, BigDecimal::add);
-//    }
-//
-//    @Override
-//    public BigDecimal expenseBalance(final List<TransactionEntity> entities) {
-//        return entities.stream().filter(t -> "EXPENSE".equals(t.getCategoryType()))
-//                .map(t -> getValueOrZero(t.getValue()))
-//                .reduce(BigDecimal.ZERO, BigDecimal::add)
-//                .abs();
-//    }
-//
-//    @Override
-//    public TransactionResponse update(Long id, Transaction transaction) {
-//        return switch (getTypeCategory(transaction.getCategoryType())) {
-//            case INCOME, CORPORATE_CAPITAL -> toMapper(update(transaction, TransactionType.CREDIT), TransactionResponse.class);
-//            case TRANSFER -> toMapper(transferService.update(transaction), TransactionResponse.class);
-//            case EXPENSE, INVESTMENT -> toMapper(incomeService.update(transaction), TransactionResponse.class);
-//        };
-//    }
-//
-//    @Override
-//    public TransactionResponse searchById(Long id) {
-//        TransactionEntity entity = findById(id);
-//        entity.setValue(isDebit(entity) ? entity.getValue().abs() : entity.getValue());
-//        return switch (getTypeCategory(entity.getCategoryType())) {
-//            case INCOME, CORPORATE_CAPITAL, EXPENSE, INVESTMENT -> toMapper(entity, TransactionResponse.class);
-//            case TRANSFER -> transferService.searchById(id);
-//        };
-//    }
-//
-//    @Override
-//    public void deleteById(Long id, Boolean deleteOnlyThis) {
-//        TransactionEntity entity = findById(id);
-//        switch (getTypeCategory(entity.getCategoryType())) {
-//            case TRANSFER -> transferService.delete(entity, deleteOnlyThis);
-//            case CORPORATE_CAPITAL, EXPENSE, INCOME, INVESTMENT -> delete(entity, deleteOnlyThis);
-//            default -> throw new NotificationException(entity.getCategoryType() + " :: Operação não suportada");
-//        }
-//    }
-//
-//    @Override
-//    public List<TransactionEntity> findAll() {
-//        return repository.findAll().stream()
-//                .filter(this::isNotIgnoreTransaction)
-//                .toList();
-//    }
-//
     @Override
     public Page<TransactionEntity> search(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable) {
         var value = parseMonetary(text);
@@ -264,32 +142,6 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
         return new PageImpl<>(entities, pageable, page.getTotalElements());
     }
 
-//    @Override
-//    public void batchUpdate(Transaction transaction) {
-//        TransactionEntity entity = transaction.toEntity();
-//        entity.setSignature(repository.findBySignature(entity.getId()));
-//
-//        if (TransactionType.DEBIT.name().equals(transaction.getTransactionType())) {
-//            entity.setValue(invertSignal(entity.getValue()));
-//        }
-//
-//        repository.save(entity);
-//
-//        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
-//                .stream().filter(t -> t.getInstallment() > transaction.getInstallment())
-//                .toList();
-//
-//        entities.forEach(t -> t.setValue(transaction.getValue()));
-//
-//        if ("FIXED".equals(transaction.getPaymentType())) {
-//            int index = 99;
-//            entities.subList(0, index).forEach(repository::save);
-//            InsertTransactionScheduler.queue.add(entities.subList(index, entities.size()));
-//        }
-//
-//        repository.saveAll(entities);
-//    }
-//
     private boolean hasAccountAndText(List<Long> accountListId, String text) {
         return !accountListId.isEmpty() && isNotEmpty(text);
     }
@@ -316,9 +168,5 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
 
     private boolean isNotIgnoreTransaction(TransactionEntity entity) {
         return !isIgnoreTransaction(entity);
-    }
-
-    private TypeCategory getTypeCategory(String type) {
-        return TypeCategory.toDescription(type);
     }
 }
