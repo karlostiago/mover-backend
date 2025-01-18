@@ -8,9 +8,18 @@ import java.time.LocalDate;
 public interface TransactionCommand {
 
     TransactionEntity save(Transaction transaction);
+
     TransactionEntity update(Transaction transaction);
+
+    TransactionEntity batchUpdate(Transaction transaction);
+
     TransactionEntity filterById(Long id);
+
     TransactionEntity payment(Long id, LocalDate paymentDate);
+
     TransactionEntity refund(Long id);
+
     void delete(Long id);
+
+    void batchDelete(Long id);
 }

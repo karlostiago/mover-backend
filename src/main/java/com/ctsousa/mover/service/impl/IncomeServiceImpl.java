@@ -4,8 +4,8 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
 import com.ctsousa.mover.domain.Transaction;
-import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
+import com.ctsousa.mover.scheduler.InsertTransactionScheduler;
 import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.FixedInstallmentService;
 import com.ctsousa.mover.service.IncomeService;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-
-import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class IncomeServiceImpl extends BaseTransactionServiceImpl implements IncomeService {
@@ -38,12 +38,30 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
     public TransactionEntity save(Transaction transaction) {
         validatedSave(transaction);
         TransactionEntity entity = transaction.toEntity();
-        TransactionEntity entitySaved = repository.save(entity);
+        transaction.setTransactionType(entity.getTransactionType());
 
         boolean hasInstallment = installmentService.hasInstallment(transaction);
         boolean isFixed = fixedInstallmentService.isFixed(transaction);
 
-        return entitySaved;
+        List<TransactionEntity> entities = new ArrayList<>();
+
+        if (isFixed) {
+            int toIndex = 100;
+            entities = fixedInstallmentService.generated(transaction);
+            entities.subList(0, toIndex).forEach(repository::save);
+            InsertTransactionScheduler.queue.add(entities.subList(toIndex, entities.size()));
+        }
+        else if (hasInstallment) {
+            entities = installmentService.generated(transaction);
+            entities.forEach(repository::save);
+        }
+        else {
+            TransactionEntity entitySaved = repository.save(entity);
+            entities.add(entitySaved);
+        }
+
+        return entities.stream().findFirst()
+                .orElseThrow(() -> new NotificationException("Erro ao salvar lançamento."));
     }
 
     @Override
@@ -54,41 +72,10 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
         return repository.save(entity);
     }
 
-    //    @Override
-//    public TransactionEntity update(Transaction transaction) {
-//        TransactionEntity originalTransaction = findById(transaction.getId());
-//        String signature = originalTransaction.getSignature();
-//
-//        boolean wasPaid = originalTransaction.getPaid();
-//        boolean isNowPaid = transaction.getPaid();
-//
-//        TransactionEntity entity = transaction.toEntity();
-//        entity.setTransactionType(TransactionType.DEBIT.name());
-//        entity.setAccount(accountService.findById(transaction.getAccount().getId()));
-//        entity.setSignature(signature);
-//        entity.setValue(invertSignal(transaction.getValue()));
-//
-//        if ("IN_INSTALLMENTS".equals(originalTransaction.getPaymentType())) {
-//            entity.setInstallment(originalTransaction.getInstallment());
-//            entity.setFrequency(originalTransaction.getFrequency());
-//            entity.setPaymentType(originalTransaction.getPaymentType());
-//        }
-//
-//        if ("FIXED".equals(originalTransaction.getPaymentType())) {
-//            entity.setInstallment(originalTransaction.getInstallment());
-//            entity.setFrequency(originalTransaction.getFrequency());
-//            entity.setPaymentType(originalTransaction.getPaymentType());
-//            entity.setPredicted(Boolean.TRUE);
-//        }
-//
-//        if (wasPaid && !isNowPaid) {
-//            updateBalance(entity.getAccount(), transaction.getValue());
-//        } else if (!wasPaid && isNowPaid) {
-//            updateBalance(entity.getAccount(), invertSignal(transaction.getValue()));
-//        }
-//
-//        return repository.save(entity);
-//    }
+    @Override
+    public TransactionEntity batchUpdate(Transaction transaction) {
+        return null;
+    }
 
     @Override
     public TransactionEntity filterById(Long id) {
@@ -124,5 +111,14 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
     @Override
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void batchDelete(Long id) {
+        TransactionEntity entity = findById(id);
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
+                .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
+                .toList();
+        repository.deleteAll(entities);
     }
 }

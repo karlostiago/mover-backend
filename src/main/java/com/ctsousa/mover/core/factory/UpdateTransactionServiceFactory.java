@@ -19,6 +19,8 @@ public class UpdateTransactionServiceFactory implements TransactionExecutor {
     private final CorporateCapitalService corporateCapitalService;
     private final TransferService transferService;
 
+    private Boolean batchUpdate = Boolean.FALSE;
+
     public UpdateTransactionServiceFactory(IncomeService incomeService, ExpenseService expenseService, InvestimentService investimentService, CorporateCapitalService corporateCapitalService, TransferService transferService) {
         this.incomeService = incomeService;
         this.expenseService = expenseService;
@@ -35,6 +37,14 @@ public class UpdateTransactionServiceFactory implements TransactionExecutor {
         mapServicies.put(TypeCategory.INVESTMENT, investimentService);
         mapServicies.put(TypeCategory.CORPORATE_CAPITAL, corporateCapitalService);
         mapServicies.put(TypeCategory.TRANSFER, transferService);
-        return mapServicies.get(type).update(transaction);
+        if (batchUpdate) {
+            return mapServicies.get(type).batchUpdate(transaction);
+        } else {
+            return mapServicies.get(type).update(transaction);
+        }
+    }
+
+    public void batchUpdate(boolean batchUpdate) {
+        this.batchUpdate = batchUpdate;
     }
 }

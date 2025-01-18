@@ -63,6 +63,7 @@ public class FixedInstallmentServiceImpl implements FixedInstallmentService {
             creditEntity.setInstallment(installment + 1);
             creditEntity.setDueDate(calculateDueDate(creditEntity.getDueDate(), creditEntity.getFrequency(), installment));
             creditEntity.setSignature(signature);
+            creditEntity.setValue(transaction.getValue().abs());
             creditEntity.setPredicted(Boolean.TRUE);
 
             removePaymentDateAndPaidAfterFirstInstallment(installment, creditEntity);

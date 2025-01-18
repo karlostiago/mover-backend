@@ -25,9 +25,9 @@ public interface TransactionApi {
 //    @GetMapping("/balances")
 //    ResponseEntity<BalanceResponse> balance(@RequestParam("search") String uri);
 //
-//    @DeleteMapping("/batch-delete/{id}")
-//    void delete(@PathVariable Long id, @RequestParam("batchDelete") Boolean batchDelete);
+    @DeleteMapping("/batch-delete/{id}")
+    void batchDelete(@PathVariable Long id);
 //
-//    @PutMapping("/batch-update/{id}")
-//    void batchUpdate(@PathVariable Long id, @Valid  @RequestBody TransactionRequest request);
+    @PutMapping("/batch-update/{id}")
+    ResponseEntity<TransactionResponse>  batchUpdate(@PathVariable Long id, @Valid  @RequestBody TransactionRequest request);
 }

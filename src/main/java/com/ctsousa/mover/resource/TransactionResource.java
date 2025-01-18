@@ -71,7 +71,21 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
         TransactionEntity entity = transactionService.refund(id);
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
-//
+
+    @Override
+    public void batchDelete(Long id) {
+        transactionService.batchDelete(id);
+    }
+
+    @Override
+    public ResponseEntity<TransactionResponse> batchUpdate(Long id, TransactionRequest request) {
+        transactionService.existsById(id);
+        Transaction domain = toMapper(request, Transaction.class);
+        TransactionEntity entity = transactionService.batchUpdate(id, domain);
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
+    }
+
+    //
 //    @Override
 //    public ResponseEntity<TransactionResponse> findById(Long id) {
 //        return ResponseEntity.ok(transactionService.searchById(id));

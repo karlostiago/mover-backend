@@ -19,6 +19,8 @@ public class DeleteTransactionServiceFactory implements TransactionExecutor {
     private final CorporateCapitalService corporateCapitalService;
     private final TransferService transferService;
 
+    private Boolean batchDelete = Boolean.FALSE;
+
     public DeleteTransactionServiceFactory(IncomeService incomeService, ExpenseService expenseService, InvestimentService investimentService, CorporateCapitalService corporateCapitalService, TransferService transferService) {
         this.incomeService = incomeService;
         this.expenseService = expenseService;
@@ -35,7 +37,15 @@ public class DeleteTransactionServiceFactory implements TransactionExecutor {
         mapServicies.put(TypeCategory.INVESTMENT, investimentService);
         mapServicies.put(TypeCategory.CORPORATE_CAPITAL, corporateCapitalService);
         mapServicies.put(TypeCategory.TRANSFER, transferService);
-        mapServicies.get(type).delete(transaction.getId());
+        if (batchDelete) {
+            mapServicies.get(type).batchDelete(transaction.getId());
+        } else {
+            mapServicies.get(type).delete(transaction.getId());
+        }
         return new TransactionEntity();
+    }
+
+    public void batchDelete(boolean batchDelete) {
+        this.batchDelete = batchDelete;
     }
 }

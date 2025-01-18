@@ -22,6 +22,10 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
 
     TransactionEntity refund(final Long id);
 
+    void batchDelete(final Long id);
+
+    TransactionEntity batchUpdate(final Long id, Transaction transaction);
+
 //    BigDecimal accountBalace(final List<Long> listAccountId);
 //
 //    BigDecimal incomeBalance(final List<TransactionEntity> entities);

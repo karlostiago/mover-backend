@@ -7,12 +7,15 @@ import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
+import com.ctsousa.mover.scheduler.InsertTransactionScheduler;
 import com.ctsousa.mover.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 
@@ -36,12 +39,30 @@ public class ExpenseServiceImpl extends BaseTransactionServiceImpl implements Ex
     public TransactionEntity save(Transaction transaction) {
         validatedSave(transaction);
         TransactionEntity entity = transaction.toEntity();
-        TransactionEntity entitySaved = repository.save(entity);
+        transaction.setTransactionType(entity.getTransactionType());
 
         boolean hasInstallment = installmentService.hasInstallment(transaction);
         boolean isFixed = fixedInstallmentService.isFixed(transaction);
 
-        return entitySaved;
+        List<TransactionEntity> entities = new ArrayList<>();
+
+        if (isFixed) {
+            int toIndex = 100;
+            entities = fixedInstallmentService.generated(transaction);
+            entities.subList(0, toIndex).forEach(repository::save);
+            InsertTransactionScheduler.queue.add(entities.subList(toIndex, entities.size()));
+        }
+        else if (hasInstallment) {
+            entities = installmentService.generated(transaction);
+            entities.forEach(repository::save);
+        }
+        else {
+            TransactionEntity entitySaved = repository.save(entity);
+            entities.add(entitySaved);
+        }
+
+        return entities.stream().findFirst()
+                .orElseThrow(() -> new NotificationException("Erro ao salvar lançamento."));
     }
 
     @Override
@@ -52,41 +73,10 @@ public class ExpenseServiceImpl extends BaseTransactionServiceImpl implements Ex
         return repository.save(entity);
     }
 
-//    @Override
-//    public TransactionEntity update(Transaction transaction) {
-//        TransactionEntity originalTransaction = findById(transaction.getId());
-//        String signature = originalTransaction.getSignature();
-//
-//        boolean wasPaid = originalTransaction.getPaid();
-//        boolean isNowPaid = transaction.getPaid();
-//
-//        TransactionEntity entity = transaction.toEntity();
-//        entity.setTransactionType(TransactionType.DEBIT.name());
-//        entity.setAccount(accountService.findById(transaction.getAccount().getId()));
-//        entity.setSignature(signature);
-//        entity.setValue(invertSignal(transaction.getValue()));
-//
-//        if ("IN_INSTALLMENTS".equals(originalTransaction.getPaymentType())) {
-//            entity.setInstallment(originalTransaction.getInstallment());
-//            entity.setFrequency(originalTransaction.getFrequency());
-//            entity.setPaymentType(originalTransaction.getPaymentType());
-//        }
-//
-//        if ("FIXED".equals(originalTransaction.getPaymentType())) {
-//            entity.setInstallment(originalTransaction.getInstallment());
-//            entity.setFrequency(originalTransaction.getFrequency());
-//            entity.setPaymentType(originalTransaction.getPaymentType());
-//            entity.setPredicted(Boolean.TRUE);
-//        }
-//
-//        if (wasPaid && !isNowPaid) {
-//            updateBalance(entity.getAccount(), transaction.getValue());
-//        } else if (!wasPaid && isNowPaid) {
-//            updateBalance(entity.getAccount(), invertSignal(transaction.getValue()));
-//        }
-//
-//        return repository.save(entity);
-//    }
+    @Override
+    public TransactionEntity batchUpdate(Transaction transaction) {
+        return null;
+    }
 
     @Override
     public TransactionEntity filterById(Long id) {
@@ -128,5 +118,14 @@ public class ExpenseServiceImpl extends BaseTransactionServiceImpl implements Ex
     @Override
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public void batchDelete(Long id) {
+        TransactionEntity entity = findById(id);
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
+                .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
+                .toList();
+        repository.deleteAll(entities);
     }
 }

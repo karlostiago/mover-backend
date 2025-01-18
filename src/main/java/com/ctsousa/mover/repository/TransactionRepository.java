@@ -118,7 +118,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "LEFT JOIN FETCH t.vehicle " +
             "LEFT JOIN FETCH t.contract " +
             "LEFT JOIN FETCH t.partner " +
-            "WHERE t.signature = :signature ORDER BY t.id DESC ")
+            "WHERE t.signature = :signature ORDER BY t.installment ASC ")
     List<TransactionEntity> findBySignature(@Param("signature") String signature);
 
     @NonNull

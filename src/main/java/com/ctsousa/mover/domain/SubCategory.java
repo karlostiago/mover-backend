@@ -15,6 +15,12 @@ public class SubCategory extends DomainModel<SubCategoryEntity> {
     private Long categoryId;
     private Boolean active;
 
+    public SubCategory() { }
+
+    public SubCategory(Long id) {
+        setId(id);
+    }
+
     @Override
     public SubCategoryEntity toEntity() {
         SubCategoryEntity entity = new SubCategoryEntity();

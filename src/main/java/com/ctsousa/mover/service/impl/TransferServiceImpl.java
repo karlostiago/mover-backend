@@ -3,14 +3,11 @@ package com.ctsousa.mover.service.impl;
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
-import com.ctsousa.mover.core.mapper.Transform;
 import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
-import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.domain.Account;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
-import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.scheduler.InsertTransactionScheduler;
 import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.FixedInstallmentService;
@@ -19,13 +16,10 @@ import com.ctsousa.mover.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 
@@ -50,43 +44,18 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
     }
 
     @Override
-    public void delete(TransactionEntity entity, Boolean deleteOnlyThis) {
-        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
-        List<TransactionEntity> entitiesToDelete = new ArrayList<>(entities.size());
-
-        Map<String, TransactionEntity> mapTransactions = buildTransactionsCreditAndDebit(entities);
-
-        TransactionEntity credit = mapTransactions.get(CREDIT_LABEL + entity.getInstallment());
-        entitiesToDelete.add(credit);
-
-        TransactionEntity debit = mapTransactions.get(DEBIT_LABEL + entity.getInstallment());
-        entitiesToDelete.add(debit);
-
-        if (Boolean.FALSE.equals(deleteOnlyThis)) {
-            for (TransactionEntity e : entities) {
-                if (entitiesToDelete.contains(e)) continue;
-                if (e.getInstallment() > entity.getInstallment()) {
-                    credit = mapTransactions.get(CREDIT_LABEL + e.getInstallment());
-                    debit = mapTransactions.get(DEBIT_LABEL + e.getInstallment());
-                    entitiesToDelete.add(credit);
-                    entitiesToDelete.add(debit);
-                }
-            }
-        }
-
-        entitiesToDelete.forEach(this::deleteAndUpdateBalance);
-    }
-
-    @Override
     public TransactionEntity save(Transaction transaction) {
         List<TransactionEntity> entities = new ArrayList<>();
-        boolean hasBeenSaved = false;
 
         if (fixedInstallmentService.isFixed(transaction)) {
+            int toIndex = 100;
             entities = fixedInstallmentService.generated(transaction);
+            entities.subList(0, toIndex).forEach(repository::save);
+            InsertTransactionScheduler.queue.add(entities.subList(toIndex, entities.size()));
         }
         else if (installmentService.hasInstallment(transaction)) {
             entities = installmentService.generated(transaction);
+            entities.forEach(repository::save);
         }
         else {
             AccountEntity creditAccount = new AccountEntity(transaction.getDestinationAccount().getId());
@@ -105,11 +74,6 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
             entities.add(debitEntity);
 
             repository.saveAll(entities);
-            hasBeenSaved = true;
-        }
-
-        if (!hasBeenSaved) {
-            InsertTransactionScheduler.queue.add(entities);
         }
 
         return entities.stream().findFirst()
@@ -141,31 +105,51 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
     }
 
     @Override
+    public TransactionEntity batchUpdate(Transaction transaction) {
+        String signature = repository.findBySignature(transaction.getId());
+        TransactionEntity entity = transaction.toEntity();
+        entity.setSignature(signature);
+
+        List<TransactionEntity> entities = repository.findBySignature(signature)
+                .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
+                .toList();
+
+        for (TransactionEntity entityUpdated : entities) {
+            entityUpdated.setValue("CREDIT".equals(entityUpdated.getTransactionType()) ? invertSignal(entity.getValue()) : entity.getValue());
+            entityUpdated.setDescription(entity.getDescription());
+            entityUpdated.setSubcategory(entity.getSubcategory());
+            entityUpdated.setAccount("CREDIT".equals(entityUpdated.getTransactionType())
+                    ? new AccountEntity(transaction.getDestinationAccount().getId()) : new AccountEntity(transaction.getAccount().getId()));
+
+            if (entity.getInstallment() == entityUpdated.getInstallment()) {
+                entityUpdated.setPaid(transaction.getPaid());
+                entityUpdated.setDueDate(entity.getDueDate());
+                entityUpdated.setPaymentDate(entity.getPaymentDate());
+            }
+        }
+
+        repository.saveAll(entities);
+
+        return entities.stream().filter(t -> t.getId().equals(entity.getId()))
+                .findFirst()
+                .orElseThrow(() -> new NotificationException("Lançamento não encontrado ID. " + entity.getId()));
+    }
+
+    @Override
     public void delete(Long id) {
         String sginature = repository.findBySignature(id);
         List<TransactionEntity> entities = repository.findBySignature(sginature);
         repository.deleteAll(entities);
     }
 
-    //    @Override
-//    public TransactionEntity update(Transaction transaction) {
-//        TransactionEntity entity = findById(transaction.getId());
-//
-//        Map<TransactionType, TransactionEntity> transactions = getTransactions(entity.getSignature(), entity.getInstallment());
-//        List<TransactionEntity> entitiesToUpdate = new ArrayList<>();
-//        entitiesToUpdate.add(transactions.get(TransactionType.DEBIT));
-//        entitiesToUpdate.add(transactions.get(TransactionType.CREDIT));
-//
-//        AccountEntity creditAccount = accountService.findById(transaction.getDestinationAccount().getId());
-//        AccountEntity debitAccount = accountService.findById(transaction.getAccount().getId());
-//
-//        for (TransactionEntity e : entitiesToUpdate) {
-//            updateTransaction(e, transaction, debitAccount, creditAccount);
-//            updateBalance(entity, e, transaction.getValue());
-//        }
-//
-//        return entity;
-//    }
+    @Override
+    public void batchDelete(Long id) {
+        TransactionEntity entity = findById(id);
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
+                .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
+                .toList();
+        repository.deleteAll(entities);
+    }
 
     @Override
     public TransactionEntity filterById(Long id) {
@@ -231,82 +215,5 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
         return entities.stream().filter(t -> t.getId().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new NotificationException("Erro nao realizar o estorno! Lançamento não encontrado."));
-    }
-
-    @Deprecated
-    @Override
-    public TransactionResponse searchById(Long id) {
-        TransactionEntity entity = findById(id);
-        Map<TransactionType, TransactionEntity> transactions = getTransactions(entity.getSignature(), entity.getInstallment());
-        TransactionEntity creditTransaction = transactions.get(TransactionType.CREDIT);
-        TransactionResponse response = Transform.toMapper(entity, TransactionResponse.class);
-        response.setValue(invertSignal(entity.getValue()));
-        response.setDestinationAccountId(creditTransaction.getAccount().getId());
-        return response;
-    }
-
-    @Override
-    public void payOrRefund(TransactionEntity entity, Boolean pay) {
-        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature());
-        Map<String, TransactionEntity> mapTransactions = buildTransactionsCreditAndDebit(entities);
-        TransactionEntity credit = mapTransactions.get(CREDIT_LABEL + entity.getInstallment());
-        TransactionEntity debit = mapTransactions.get(DEBIT_LABEL + entity.getInstallment());
-        if (Boolean.TRUE.equals(pay)) {
-            super.pay(credit);
-            super.pay(debit);
-        } else {
-            super.refund(credit);
-            super.refund(debit);
-        }
-    }
-
-    private Map<TransactionType, TransactionEntity> getTransactions(final String signature, final int installment) {
-        List<TransactionEntity> transactions = repository.findBySignature(signature);
-        Map<String, TransactionEntity> mapTransactions = buildTransactionsCreditAndDebit(transactions);
-        Map<TransactionType, TransactionEntity> map = new HashMap<>();
-        map.put(TransactionType.CREDIT,  mapTransactions.get(CREDIT_LABEL + installment));
-        map.put(TransactionType.DEBIT,  mapTransactions.get(DEBIT_LABEL + installment));
-        return map;
-    }
-
-    private Map<String, TransactionEntity> buildTransactionsCreditAndDebit(List<TransactionEntity> entities) {
-        Map<String, TransactionEntity> transactionMap = new HashMap<>();
-        for (TransactionEntity e : entities) {
-            if ("CREDIT".equals(e.getTransactionType())) {
-                transactionMap.put(TransactionType.CREDIT + "_" + e.getInstallment(), e);
-            } else {
-                transactionMap.put(TransactionType.DEBIT + "_" + e.getInstallment(), e);
-            }
-        }
-        return transactionMap;
-    }
-
-    private void updateBalance(TransactionEntity originalTransaction, TransactionEntity updatedTransaction, BigDecimal balance) {
-        boolean wasPaid = originalTransaction.getPaid();
-        boolean isNowPaid = updatedTransaction.getPaid();
-        if (!wasPaid && isNowPaid) {
-            updateBalance(updatedTransaction.getAccount(), updatedTransaction.getValue());
-        } else if (wasPaid && !isNowPaid) {
-            var value = isDebit(updatedTransaction) ? balance : invertSignal(balance);
-            updateBalance(updatedTransaction.getAccount(), value);
-        }
-    }
-
-    private void updateTransaction(TransactionEntity entity, Transaction transaction, AccountEntity debitAccount, AccountEntity creditAccount) {
-        entity.setDescription(transaction.getDescription());
-        entity.setDueDate(transaction.getDueDate());
-        entity.setPaymentDate(transaction.getPaymentDate());
-        entity.setPaid(transaction.getPaid());
-        entity.setHour(LocalTime.now());
-
-        if (isDebit(entity)) {
-            entity.setAccount(debitAccount);
-            entity.setValue(invertSignal(transaction.getValue()));
-        } else {
-            entity.setAccount(creditAccount);
-            entity.setValue(transaction.getValue());
-        }
-
-        repository.save(entity);
     }
 }

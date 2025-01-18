@@ -62,10 +62,10 @@ public class TransactionEntity extends AbstractEntity {
     @JoinColumn(name = "contract_id")
     private ContractEntity contract;
 
-    @JoinColumn(name = "signature", nullable = false)
+    @Column(name = "signature", nullable = false)
     private String signature;
 
-    @JoinColumn(name = "transaction_type", nullable = false)
+    @Column(name = "transaction_type", nullable = false)
     private String transactionType;
 
     @ManyToOne(fetch = FetchType.LAZY)

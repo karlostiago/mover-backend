@@ -58,6 +58,7 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     @Override
     public TransactionEntity update(Transaction transaction) {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
+        updateTransactionServiceFactory.batchUpdate(false);
         return updateTransactionServiceFactory.execute(type, transaction);
     }
 
@@ -87,7 +88,23 @@ public class TransactionServiceImpl extends BaseTransactionServiceImpl implement
     public void deleteById(Long id) {
         TransactionEntity entity = findById(id);
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
+        deleteTransactionServiceFactory.batchDelete(false);
         deleteTransactionServiceFactory.execute(type, new Transaction(id));
+    }
+
+    @Override
+    public void batchDelete(Long id) {
+        TransactionEntity entity = findById(id);
+        TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
+        deleteTransactionServiceFactory.batchDelete(true);
+        deleteTransactionServiceFactory.execute(type, new Transaction(id));
+    }
+
+    @Override
+    public TransactionEntity batchUpdate(Long id, Transaction transaction) {
+        TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
+        updateTransactionServiceFactory.batchUpdate(true);
+        return updateTransactionServiceFactory.execute(type, transaction);
     }
 
     //    @Autowired
