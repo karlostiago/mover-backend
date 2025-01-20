@@ -34,7 +34,7 @@ public class InsertTransactionScheduler implements Scheduler {
     }
 
     @Override
-    @Scheduled(cron = "0/10 * * * * *")
+    @Scheduled(cron = "0/1 * * * * *")
     public void process() {
 
         if (queue.isEmpty()) return;
@@ -48,17 +48,17 @@ public class InsertTransactionScheduler implements Scheduler {
     }
 
     private void saveAndUpdateBalance(TransactionEntity entity) {
-        if(entity.getPaid()) {
-            updateBalance(entity.getAccount(), entity.getValue());
-        }
+//        if(entity.getPaid()) {
+//            updateBalance(entity.getAccount(), entity.getValue());
+//        }
 
         repository.save(entity);
     }
 
-    private void updateBalance(final AccountEntity account, BigDecimal value) {
-        AccountEntity accountFound = accountService.findById(account.getId());
-        BigDecimal balance = accountFound.getAvailableBalance().add(value);
-        accountFound.setAvailableBalance(balance);
-        accountService.save(accountFound);
-    }
+//    private void updateBalance(final AccountEntity account, BigDecimal value) {
+//        AccountEntity accountFound = accountService.findById(account.getId());
+//        BigDecimal balance = accountFound.getAvailableBalance().add(value);
+//        accountFound.setAvailableBalance(balance);
+//        accountService.save(accountFound);
+//    }
 }

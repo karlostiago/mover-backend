@@ -1,16 +1,12 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.factory.*;
-import com.ctsousa.mover.core.service.impl.BaseTransactionServiceImpl;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
-import com.ctsousa.mover.service.AccountService;
-import com.ctsousa.mover.service.FixedInstallmentService;
-import com.ctsousa.mover.service.InstallmentService;
 import com.ctsousa.mover.service.TransactionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,28 +21,56 @@ import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Component
-public class TransactionServiceImpl extends BaseTransactionServiceImpl implements TransactionService {
+public class TransactionServiceImpl implements TransactionService {
 
-    @Autowired
-    private CreateTransactionServiceFactory createTransactionServiceFactory;
+    private final CreateTransactionServiceFactory createTransactionServiceFactory;
 
-    @Autowired
-    private UpdateTransactionServiceFactory updateTransactionServiceFactory;
+    private final UpdateTransactionServiceFactory updateTransactionServiceFactory;
 
-    @Autowired
-    private FilterByIdTransactionServiceFactory filterTransactionServiceFactory;
+    private final FilterByIdTransactionServiceFactory filterTransactionServiceFactory;
 
-    @Autowired
-    private PaymentTransactionServiceFactory paymentTransactionServiceFactory;
+    private final PaymentTransactionServiceFactory paymentTransactionServiceFactory;
 
-    @Autowired
-    private RefundTransactionServiceFactory refundTransactionServiceFactory;
+    private final RefundTransactionServiceFactory refundTransactionServiceFactory;
 
-    @Autowired
-    private DeleteTransactionServiceFactory deleteTransactionServiceFactory;
+    private final DeleteTransactionServiceFactory deleteTransactionServiceFactory;
 
-    public TransactionServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService, FixedInstallmentService fixedInstallmentService) {
-        super(repository, accountService, installmentService, fixedInstallmentService);
+    private final TransactionRepository repository;
+
+    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, TransactionRepository repository) {
+        this.createTransactionServiceFactory = createTransactionServiceFactory;
+        this.updateTransactionServiceFactory = updateTransactionServiceFactory;
+        this.filterTransactionServiceFactory = filterTransactionServiceFactory;
+        this.paymentTransactionServiceFactory = paymentTransactionServiceFactory;
+        this.refundTransactionServiceFactory = refundTransactionServiceFactory;
+        this.deleteTransactionServiceFactory = deleteTransactionServiceFactory;
+        this.repository = repository;
+    }
+
+    @Override
+    public TransactionEntity save(TransactionEntity entity) {
+        throw new NotificationException("Método não suportado");
+    }
+
+    @Override
+    public TransactionEntity findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotificationException("Lançamento não encontrado."));
+    }
+
+    @Override
+    public List<TransactionEntity> findAll() {
+        throw new NotificationException("Método não suportado");
+    }
+
+    @Override
+    public TransactionEntity update(TransactionEntity entity) {
+        throw new NotificationException("Método não suportado");
+    }
+
+    @Override
+    public void existsById(Long id) {
+        findById(id);
     }
 
     @Override

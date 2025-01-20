@@ -33,11 +33,10 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
     private final AccountService accountService;
 
     private final InstallmentService installmentService;
-
     private final FixedInstallmentService fixedInstallmentService;
 
     public TransferServiceImpl(TransactionRepository repository, AccountService accountService, InstallmentService installmentService, FixedInstallmentService fixedInstallmentService) {
-        super(repository, accountService, installmentService, fixedInstallmentService);
+        super(repository, installmentService, fixedInstallmentService);
         this.accountService = accountService;
         this.installmentService = installmentService;
         this.fixedInstallmentService = fixedInstallmentService;
@@ -48,10 +47,8 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
         List<TransactionEntity> entities = new ArrayList<>();
 
         if (fixedInstallmentService.isFixed(transaction)) {
-            int toIndex = 100;
             entities = fixedInstallmentService.generated(transaction);
-            entities.subList(0, toIndex).forEach(repository::save);
-            InsertTransactionScheduler.queue.add(entities.subList(toIndex, entities.size()));
+            InsertTransactionScheduler.queue.add(entities);
         }
         else if (installmentService.hasInstallment(transaction)) {
             entities = installmentService.generated(transaction);
