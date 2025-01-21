@@ -20,6 +20,12 @@ public class Account extends DomainModel<AccountEntity> {
     private BigDecimal InitialBalance;
     private Boolean caution;
 
+    public Account() {}
+
+    public Account(Long id) {
+        setId(id);
+    }
+
     @Override
     public AccountEntity toEntity() {
         AccountEntity entity = new AccountEntity();
