@@ -85,24 +85,6 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 
-    //
-//    @Override
-//    public ResponseEntity<TransactionResponse> findById(Long id) {
-//        return ResponseEntity.ok(transactionService.searchById(id));
-//    }
-//
-//    @Override
-//    public void delete(Long id, Boolean deleteOnlyThis) {
-//        transactionService.deleteById(id, deleteOnlyThis);
-//    }
-//
-//    @Override
-//    public void batchUpdate(Long id, TransactionRequest request) {
-//        transactionService.existsById(id);
-//        Transaction domain = toMapper(request, Transaction.class);
-//        transactionService.batchUpdate(domain);
-//    }
-//
     @Override
     public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
 
@@ -119,22 +101,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
 
         return ResponseEntity.ok(responses);
     }
-//
-//    @Override
-//    public ResponseEntity<BalanceResponse> balance(String uri) {
-//        var filter = new Transaction.Filter(uri);
-//        BalanceResponse response = new BalanceResponse();
-//        Page<TransactionEntity> page = transactionService.find(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(),
-//                filter.getText(), PageRequest.of(0, Integer.MAX_VALUE));
-//
-//        response.setCurrentAccount(transactionService.accountBalace(filter.getAccountsId()));
-//        response.setIncome(transactionService.incomeBalance(page.stream().toList()));
-//        response.setExpense(transactionService.expenseBalance(page.stream().toList()));
-//        response.setGeneralBalance(response.getIncome().subtract(response.getExpense()));
-//
-//        return ResponseEntity.ok(response);
-//    }
-//
+
     @Override
     public void updateResponse(List<TransactionResponse> response, List<TransactionEntity> entities) {
         Map<Long, TransactionResponse> responseMap = response.stream()

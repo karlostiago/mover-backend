@@ -47,6 +47,7 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
         }
         else if (installmentService.hasInstallment(transaction)) {
             entities = installmentService.generated(transaction);
+            transaction.setValue(entities.get(0).getValue());
             entities.forEach(repository::save);
         }
         else {

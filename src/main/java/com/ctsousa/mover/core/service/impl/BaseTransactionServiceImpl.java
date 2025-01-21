@@ -55,6 +55,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         }
         else if (hasInstallment) {
             entities = installmentService.generated(transaction);
+            transaction.setValue(entities.get(0).getValue());
             entities.forEach(repository::save);
         }
         else {

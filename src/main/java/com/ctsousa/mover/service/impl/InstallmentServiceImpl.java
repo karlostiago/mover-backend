@@ -96,6 +96,7 @@ public class InstallmentServiceImpl implements InstallmentService {
             debitEntity.setSignature(creditEntity.getSignature());
             debitEntity.setInstallment(creditEntity.getInstallment());
             debitEntity.setDescription(creditEntity.getDescription());
+            debitEntity.setPaid(creditEntity.getPaid());
             entities.add(debitEntity);
         }
 

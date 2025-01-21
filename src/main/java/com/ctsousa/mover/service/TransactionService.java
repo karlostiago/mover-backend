@@ -26,17 +26,5 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
 
     TransactionEntity batchUpdate(final Long id, Transaction transaction);
 
-//    BigDecimal accountBalace(final List<Long> listAccountId);
-//
-//    BigDecimal incomeBalance(final List<TransactionEntity> entities);
-//
-//    BigDecimal expenseBalance(final List<TransactionEntity> entities);
-//
-//    TransactionResponse searchById(final Long id);
-//
-//    void deleteById(Long id, Boolean deleteOnlyThis);
-//
-//    void batchUpdate(Transaction transaction);
-//
     Page<TransactionEntity> search(final LocalDate dtInitial, final LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable);
 }

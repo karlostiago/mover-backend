@@ -147,57 +147,6 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "WHERE t.id = :id ORDER BY t.id DESC ")
     Optional<TransactionEntity> findById(@NonNull Long id);
 
-    @Query(value = """
-            SELECT
-            	SUM(TEMP.BALANCE) AS BALANCE
-            FROM (
-            	SELECT
-            	    c.name AS NAME,
-            	    COALESCE(c.initial_balance, 0) + COALESCE((
-            	        SELECT SUM(t.value)
-            	        FROM tb_transaction t
-            	        WHERE t.account_id = c.id
-            	          AND t.card_id IS NULL
-            	          AND t.paid
-            	    ), 0) AS BALANCE
-            	FROM
-            	    tb_account c
-            	WHERE
-            	    c.id IN (:accounts)
-            ) AS TEMP
-            """, nativeQuery = true)
-    BigDecimal accountBalance(@Param("accounts") List<Long> accounts);
-
-    @Deprecated
-    @Query(value = """
-            SELECT
-            	SUM(TEMP.BALANCE) AS BALANCE
-            FROM (
-            	SELECT\s
-            	    c.name AS NAME,
-            	    COALESCE(c.limit, 0) + COALESCE((
-            	        SELECT SUM(t.value)
-            	        FROM tb_transaction t
-            	        WHERE t.account_id = c.account_id
-            	          AND t.card_id = c.id
-            	          AND t.paid
-            	    ), 0) AS BALANCE
-            	FROM\s
-            	    tb_card c
-            	WHERE\s
-            	    c.id IN (:cards)
-            ) AS TEMP
-            """, nativeQuery = true)
-    BigDecimal creditBalance(@Param("cards") List<Long> cards);
-
-    @Deprecated
-    @Query(value = "SELECT SUM(t.value * -1) AS DESPESA FROM tb_transaction t WHERE t.category_type = 'EXPENSE'", nativeQuery = true)
-    BigDecimal expenseBalance();
-
-    @Deprecated
-    @Query(value = "SELECT SUM(t.value) AS RECEITA FROM tb_transaction t WHERE t.category_type = 'INCOME'", nativeQuery = true)
-    BigDecimal incomeBalance();
-
     @Query("SELECT t.signature FROM TransactionEntity t WHERE t.id = :id")
     String findBySignature(@Param("id") Long id);
 }

@@ -31,6 +31,7 @@ public class FixedInstallmentServiceImpl implements FixedInstallmentService {
             for (int installment = 0; installment < quantityInstallment; installment++) {
                 TransactionEntity entity = transaction.toEntity();
                 signature = signature == null ? entity.getSignature() : signature;
+                entity.setDescription(entity.getDescription().concat(" (F) "));
                 entity.setInstallment(installment + 1);
                 entity.setDueDate(calculateDueDate(entity.getDueDate(), transaction.getFrequency(), installment));
                 entity.setSignature(signature);

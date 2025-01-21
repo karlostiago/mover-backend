@@ -12,6 +12,9 @@ import com.ctsousa.mover.service.InstallmentService;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class IncomeServiceImpl extends BaseTransactionServiceImpl implements IncomeService {
@@ -26,6 +29,7 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
                 .orElseThrow(() -> new NotificationException("Transação não encontrada"));
     }
 
+    @Override
     public void delete(Long id) {
         TransactionEntity entity = findById(id);
 
@@ -36,6 +40,25 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
         }
 
         repository.deleteById(id);
+    }
+
+    @Override
+    public void batchDelete(Long id) {
+        TransactionEntity entity = findById(id);
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
+                .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
+                .toList();
+
+        Map<AccountEntity, BigDecimal> accumulatedBalance = entities.stream()
+                .filter(TransactionEntity::getPaid)
+                .collect(Collectors.groupingBy(
+                        TransactionEntity::getAccount,
+                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
+                ));
+
+        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().subtract(balance)));
+
+        repository.deleteAll(entities);
     }
 
     @Override
