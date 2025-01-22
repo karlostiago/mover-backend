@@ -43,7 +43,7 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
 
         if (fixedInstallmentService.isFixed(transaction)) {
             entities = fixedInstallmentService.generated(transaction);
-            InsertTransactionScheduler.queue.add(entities);
+            InsertTransactionScheduler.add(entities);
         }
         else if (installmentService.hasInstallment(transaction)) {
             entities = installmentService.generated(transaction);

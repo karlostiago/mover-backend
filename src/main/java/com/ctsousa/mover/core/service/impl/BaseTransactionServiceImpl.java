@@ -51,7 +51,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
         if (isFixed) {
             entities = fixedInstallmentService.generated(transaction);
-            InsertTransactionScheduler.queue.add(entities);
+            InsertTransactionScheduler.add(entities);
         }
         else if (hasInstallment) {
             entities = installmentService.generated(transaction);
@@ -102,7 +102,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             }
         }
 
-        InsertTransactionScheduler.queue.add(entities);
+        InsertTransactionScheduler.add(entities);
 
         updateAvailableBalance(transaction, entity.getAccount().getId());
 
