@@ -126,7 +126,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
             }
 
             BankIcon icon = BankIcon.toName(entity.getAccount().getIcon());
-            transactionResponse.setIcon(icon.getImage());
+            transactionResponse.setIcon(icon.getUrlImage());
         }
     }
 

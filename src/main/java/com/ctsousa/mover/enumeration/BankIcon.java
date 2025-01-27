@@ -43,13 +43,13 @@ public enum BankIcon {
     private final Integer code;
     private final String prefix;
     private final String bankName;
-    private final String image;
+    private final String urlImage;
 
-    BankIcon(Integer code, String prefix, String bankName, String image) {
+    BankIcon(Integer code, String prefix, String bankName, String urlImage) {
         this.prefix = prefix;
         this.code = code;
         this.bankName = bankName;
-        this.image = image;
+        this.urlImage = urlImage;
     }
 
     public static BankIcon toCode(Integer code) {

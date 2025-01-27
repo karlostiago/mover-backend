@@ -8,7 +8,6 @@ import com.ctsousa.mover.enumeration.BankIcon;
 import com.ctsousa.mover.request.AccountRequest;
 import com.ctsousa.mover.response.AccountResponse;
 import com.ctsousa.mover.response.BankIconResponse;
-import com.ctsousa.mover.response.BrandResponse;
 import com.ctsousa.mover.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

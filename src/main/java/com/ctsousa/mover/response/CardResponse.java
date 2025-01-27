@@ -25,7 +25,7 @@ public class CardResponse {
     public void setIcon(String nameIcon) {
         BankIcon icon = BankIcon.toName(nameIcon);
         this.icon = icon.name();
-        this.imageIcon = icon.getImage();
+        this.imageIcon = icon.getUrlImage();
         this.codeIcon = icon.getCode();
     }
 

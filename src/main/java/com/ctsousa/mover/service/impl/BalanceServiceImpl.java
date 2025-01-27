@@ -33,12 +33,12 @@ public class BalanceServiceImpl implements BalanceService {
         }
 
         if (!entities.isEmpty()) {
-            BigDecimal expenseBalance = entities.stream().filter(t -> "EXPENSE".equals(t.getCategoryType()))
+            BigDecimal expenseBalance = entities.stream().filter(this::isExpense)
                     .map(TransactionEntity::getValue)
                     .reduce(BigDecimal.ZERO, BigDecimal::add)
                     .abs();
 
-            BigDecimal incomeBalance = entities.stream().filter(t -> "INCOME".equals(t.getCategoryType()))
+            BigDecimal incomeBalance = entities.stream().filter(this::isIncome)
                     .map(TransactionEntity::getValue)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -49,5 +49,15 @@ public class BalanceServiceImpl implements BalanceService {
 
         response.setCurrentAccount(balanceRepository.accountBalance(listAccountId));
         return response;
+    }
+
+    private boolean isExpense(TransactionEntity entity) {
+        return "EXPENSE".equals(entity.getCategoryType())
+                || "INVESTMENT".equals(entity.getCategoryType());
+    }
+
+    private boolean isIncome(TransactionEntity entity) {
+        return "CORPORATE_CAPITAL".equals(entity.getCategoryType())
+                || "INCOME".equals(entity.getCategoryType());
     }
 }

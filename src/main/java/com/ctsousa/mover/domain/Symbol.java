@@ -27,8 +27,7 @@ public class Symbol implements MapperToEntity<SymbolEntity> {
     public void setDescription(String description) {
         if (StringUtils.isBlank(description)) throw new NotificationException("");
         if (StringUtils.equalsIgnoreCase(description, "undefined")) throw new NotificationException("Informe uma descrição para o símbolo.");
-        this.description = description.replace(",", "Informe uma descrição para o símbolo.")
-                .trim().toUpperCase();
+        this.description = description.replace(",", "").trim().toUpperCase();
     }
 
     public void setImageBase64(String imageBase64) {
