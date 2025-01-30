@@ -3,56 +3,58 @@ package com.ctsousa.mover.enumeration;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
 @Getter
 public enum PaymentFrequency {
     WEEKLY(1, "SEMANAL") {
         @Override
-        public long days() {
-            return 7L;
+        public LocalDate nextDate(LocalDate date) {
+            return date.plusDays(7);
         }
     },
     BIWEEKLY(2, "QUINZENAL") {
         @Override
-        public long days() {
-            return 15L;
+        public LocalDate nextDate(LocalDate date) {
+            return date.plusDays(15);
         }
     },
     MONTHLY(3, "MENSAL") {
         @Override
-        public long days() {
-            return 30L;
+        public LocalDate nextDate(LocalDate date) {
+            return date.plusMonths(1);
         }
     },
     DAILY(4, "DIÁRIO") {
         @Override
-        public long days() {
-            return 1L;
+        public LocalDate nextDate(LocalDate date) {
+            return date.plusDays(1);
         }
     },
     BIMONTHLY(5, "BIMESTRAL") {
         @Override
-        public long days() {
-            return 60L;
+        public LocalDate nextDate(LocalDate date) {
+            return date.plusMonths(2);
         }
     },
     QUARTERLY(6, "TRIMESTRAL") {
         @Override
-        public long days() {
-            return 90L;
+        public LocalDate nextDate(LocalDate date) {
+            return date.plusMonths(3);
         }
     },
     SEMIANNUAL(7, "SIMESTRAL") {
         @Override
-        public long days() {
-            return 180L;
+        public LocalDate nextDate(LocalDate date) {
+            return date.plusMonths(6);
         }
     },
     ANNUAL(8, "ANUAL") {
         @Override
-        public long days() {
-            return 360L;
+        public LocalDate nextDate(LocalDate date) {
+            return  date.plusYears(1);
         }
     };
 
@@ -79,5 +81,5 @@ public enum PaymentFrequency {
         throw new NotificationException("Código frequência de pagamento não suportada :: " + code);
     }
 
-    public abstract long days();
+    public abstract LocalDate nextDate(LocalDate date);
 }

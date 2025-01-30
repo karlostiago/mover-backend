@@ -53,8 +53,8 @@ public class FipeServiceImpl implements FipeService {
             return new SummaryFipeResponse(BigDecimal.ZERO, null, BigDecimal.ZERO, null);
         }
 
-        String referenceAcquisition = fipeAcquisition.getReferenceMonth() + " / " + fipeAcquisition.getReferenceYear();
-        String referenceMonthCurrent = fipeMonthCurrent.getReferenceMonth() + " / " + fipeMonthCurrent.getReferenceYear();
+        String referenceAcquisition = fipeAcquisition.getReferenceMonth().substring(0 ,3) + " / " + fipeAcquisition.getReferenceYear();
+        String referenceMonthCurrent = fipeMonthCurrent.getReferenceMonth().substring(0, 3) + " / " + fipeMonthCurrent.getReferenceYear();
 
         return calculatedSummaryFipe(new SummaryFipeResponse(fipeAcquisition.getPrice(), referenceAcquisition, fipeMonthCurrent.getPrice(), referenceMonthCurrent));
     }

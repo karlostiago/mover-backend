@@ -40,4 +40,13 @@ public class AccountServiceImpl extends BaseServiceImpl<AccountEntity, Long> imp
         if (search == null || search.isEmpty()) return accountRepository.findAll();
         return accountRepository.findBy(search);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        try {
+            super.deleteById(id);
+        } catch (Exception e) {
+            throw new NotificationException("Essa conta já esta em uso e não pode ser excluída.", Severity.ERROR);
+        }
+    }
 }

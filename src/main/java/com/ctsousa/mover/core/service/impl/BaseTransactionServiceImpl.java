@@ -3,6 +3,7 @@ package com.ctsousa.mover.core.service.impl;
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.repository.TransactionRepository;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ctsousa.mover.core.util.DateUtil.newInstanceToLocalDate;
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 
 public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntity, Long> {
@@ -195,7 +197,13 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             final long FIRST_INSTALLMENT = 0;
             if (installment == FIRST_INSTALLMENT) return dueDate;
             PaymentFrequency paymentFrequency = PaymentFrequency.toDescription(frequency);
-            return dueDate.plusDays(paymentFrequency.days() * installment);
+
+            LocalDate newDueDate = newInstanceToLocalDate(dueDate);
+            for (int i = 0; i < installment; i++) {
+                newDueDate = paymentFrequency.nextDate(newDueDate);
+            }
+
+            return newDueDate;
         } catch (NotificationException e) {
             throw new NotificationException("Não há suporte para calcular a data de vencimento para a frequência informada.");
         }

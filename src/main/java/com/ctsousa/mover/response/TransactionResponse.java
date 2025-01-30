@@ -41,6 +41,7 @@ public class TransactionResponse {
     private Long partnerId;
     private Long vehicleId;
     private Long contractId;
+    private Long cardId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate date;

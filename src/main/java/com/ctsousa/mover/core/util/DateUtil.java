@@ -120,6 +120,10 @@ public final class DateUtil {
         return YearMonth.of(year, month).atEndOfMonth();
     }
 
+    public static LocalDate newInstanceToLocalDate(LocalDate date) {
+        return LocalDate.of(date.getYear(), date.getMonth(), date.getDayOfMonth());
+    }
+
     private static List<DateTimeFormatter> formatters() {
         return Arrays.asList(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"),

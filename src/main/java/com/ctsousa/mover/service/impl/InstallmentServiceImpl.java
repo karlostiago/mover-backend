@@ -2,6 +2,7 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
@@ -38,7 +39,8 @@ public class InstallmentServiceImpl implements InstallmentService {
                 TransactionEntity entity = transaction.toEntity();
                 signature = signature == null ? entity.getSignature() : signature;
 
-                entity.setValue(calculateInstallmentValue(quantityInstallment, differentValue, installmentValue, installment));
+                var calculatedValue = calculateInstallmentValue(quantityInstallment, differentValue, installmentValue, installment);
+                entity.setValue("DEBIT".equals(entity.getTransactionType()) ? NumberUtil.invertSignal(calculatedValue) : calculatedValue);
                 entity.setDueDate(calculateDueDate(entity.getDueDate(), entity.getFrequency(), installment));
                 entity.setTransactionType(transaction.getTransactionType());
                 entity.setInstallment(installment + 1);
