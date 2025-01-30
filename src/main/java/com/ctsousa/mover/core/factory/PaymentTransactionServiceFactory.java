@@ -16,6 +16,6 @@ public class PaymentTransactionServiceFactory extends AbstractTransactionService
 
     @Override
     public TransactionEntity execute(final TypeCategory type, final Transaction transaction) {
-        return services.get(type).payment(transaction.getId(), transaction.getPaymentDate());
+        return execute(type).payment(transaction.getId(), transaction.getPaymentDate());
     }
 }

@@ -16,6 +16,6 @@ public class FilterByIdTransactionServiceFactory extends AbstractTransactionServ
 
     @Override
     public TransactionEntity execute(TypeCategory type, Transaction transaction) {
-        return services.get(type).filterById(transaction.getId());
+        return execute(type).filterById(transaction.getId());
     }
 }

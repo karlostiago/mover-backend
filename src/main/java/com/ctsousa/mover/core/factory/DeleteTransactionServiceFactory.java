@@ -20,9 +20,9 @@ public class DeleteTransactionServiceFactory extends AbstractTransactionServiceF
     @Override
     public TransactionEntity execute(final TypeCategory type, final Transaction transaction) {
         if (batchDelete) {
-            services.get(type).batchDelete(transaction.getId());
+            execute(type).batchDelete(transaction.getId());
         } else {
-            services.get(type).delete(transaction.getId());
+            execute(type).delete(transaction.getId());
         }
         return new TransactionEntity();
     }

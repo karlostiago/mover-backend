@@ -20,9 +20,9 @@ public class UpdateTransactionServiceFactory extends AbstractTransactionServiceF
     @Override
     public TransactionEntity execute(final TypeCategory type, final Transaction transaction) {
         if (batchUpdate) {
-            return services.get(type).batchUpdate(transaction);
+            return execute(type).batchUpdate(transaction);
         } else {
-            return services.get(type).update(transaction);
+            return execute(type).update(transaction);
         }
     }
 

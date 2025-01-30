@@ -17,6 +17,6 @@ public class CreateTransactionServiceFactory extends AbstractTransactionServiceF
 
     @Override
     public TransactionEntity execute(final TypeCategory type, final Transaction transaction) {
-        return services.get(type).save(transaction);
+        return execute(type).save(transaction);
     }
 }

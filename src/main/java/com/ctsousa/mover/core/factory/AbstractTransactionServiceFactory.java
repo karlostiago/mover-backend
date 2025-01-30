@@ -8,10 +8,14 @@ import java.util.Map;
 
 public abstract class AbstractTransactionServiceFactory implements TransactionExecutor {
 
-    protected final Map<TypeCategory, TransactionCommand> services;
+    private final Map<TypeCategory, TransactionCommand> services;
 
     @Autowired
     public AbstractTransactionServiceFactory(Map<TypeCategory, TransactionCommand> services) {
         this.services = services;
+    }
+
+    protected TransactionCommand execute(TypeCategory type) {
+        return this.services.get(type);
     }
 }

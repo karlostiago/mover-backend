@@ -17,6 +17,6 @@ public class RefundTransactionServiceFactory extends AbstractTransactionServiceF
 
     @Override
     public TransactionEntity execute(final TypeCategory type, final Transaction transaction) {
-        return services.get(type).refund(transaction.getId());
+        return execute(type).refund(transaction.getId());
     }
 }
