@@ -14,11 +14,13 @@ public class CategoryResponse {
     private Long id;
     private String description;
     private String type;
+    private String originalType;
     private Boolean active;
 
     private List<SubCategory> subcategories = new ArrayList<>();
 
     public void setType(TypeCategory type) {
         this.type = type.getDescription();
+        this.originalType = type.name();
     }
 }
