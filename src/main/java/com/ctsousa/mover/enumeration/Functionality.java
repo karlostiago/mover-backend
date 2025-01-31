@@ -72,7 +72,21 @@ public enum Functionality {
     REGISTER_PARAMETERS(28, Menu.CONFIGURATION, "Cadastro de parâmetros"),
     UPDATE_PARAMETERS(29, Menu.CONFIGURATION, "Atualizar parâmetros"),
     DELETE_PARAMETERS(30, Menu.CONFIGURATION, "Deletar parâmetros"),
-    FILTER_PARAMETERS(31, Menu.CONFIGURATION, "Consultar parâmetros");
+    FILTER_PARAMETERS(31, Menu.CONFIGURATION, "Consultar parâmetros"),
+
+    REGISTER_USERS(1, Menu.SECURITY, "Cadastro de usuários"),
+    UPDATE_USERS(2, Menu.SECURITY, "Atualizar usuários"),
+    DELETE_USERS(3, Menu.SECURITY, "Deletar usuários"),
+    FILTER_USERS(4, Menu.SECURITY, "Consultar usuários"),
+
+    REGISTER_PROFILES(5, Menu.SECURITY, "Cadastro de perfil"),
+    UPDATE_PROFILES(6, Menu.SECURITY, "Atualizar perfil"),
+    DELETE_PROFILES(7, Menu.SECURITY, "Deletar perfil"),
+    FILTER_PROFILES(8, Menu.SECURITY, "Consultar perfil"),
+
+    FILTER_PERMISSIONS(9, Menu.SECURITY, "Consultar de permissões"),
+    ACTIVATE_PERMISSIONS(10, Menu.SECURITY, "Ativar permissões"),
+    DISABLED_PERMISSIONS(11, Menu.SECURITY, "Desativar permissões");
 
     private final Menu menu;
     private final Integer code;
