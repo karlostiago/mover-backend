@@ -45,7 +45,7 @@ public class InstallmentServiceImpl implements InstallmentService {
                 entity.setTransactionType(transaction.getTransactionType());
                 entity.setInstallment(installment + 1);
                 entity.setSignature(signature);
-                entity.setDescription(entity.getDescription() + " (" + entity.getInstallment() + ")");
+                entity.setDescription(String.format("%s (%d/%d)",entity.getDescription(), entity.getInstallment(), quantityInstallment));
 
                 removePaymentDateAndPaidAfterFirstInstallment(installment, entity);
 
