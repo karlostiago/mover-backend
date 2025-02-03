@@ -83,7 +83,7 @@ public class InstallmentServiceImpl implements InstallmentService {
             creditEntity.setInstallment(installment + 1);
             creditEntity.setValue(calculateInstallmentValue(quantityInstallment, differentValue, installmentValue, installment));
             creditEntity.setDueDate(calculateDueDate(creditEntity.getDueDate(), creditEntity.getFrequency(), installment));
-            creditEntity.setDescription(creditEntity.getDescription() + " (" + creditEntity.getInstallment() + ")");
+            creditEntity.setDescription(String.format("%s (%d/%d)",creditEntity.getDescription(), creditEntity.getInstallment(), quantityInstallment));
             creditEntity.setSignature(signature);
             creditEntity.setValue(transaction.getValue().abs());
 
