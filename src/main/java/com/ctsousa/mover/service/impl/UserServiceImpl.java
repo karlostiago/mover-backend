@@ -9,6 +9,11 @@ import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.UserRepository;
 import com.ctsousa.mover.service.UserService;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -38,5 +43,18 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
         return userEntities.stream()
                 .findFirst()
                 .orElseThrow(() -> new NotificationException("Cpf ou senha incorretos."));
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserEntity entity = userRepository.findByLogin(username)
+                .orElseThrow(() -> new NotificationException("Usuário não encontrado."));
+
+        String [] autorities = { "ROLE_ADMIN" };
+
+        return User.withUsername(entity.getLogin())
+                .password(entity.getPassword())
+                .authorities(autorities)
+                .build();
     }
 }
