@@ -29,8 +29,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/auth/login").permitAll()
-                                .requestMatchers("/vehicles").hasRole("SEARCH_VEHICLES")
-                                .requestMatchers("/vehicles/**").hasAnyRole("UPDATE_VEHICLES", "INSERT_VEHICLES")
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

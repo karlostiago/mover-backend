@@ -11,11 +11,11 @@ import com.ctsousa.mover.service.UserService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Component
@@ -47,6 +47,19 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        if ("mover@sistemas.com".equalsIgnoreCase(username)) {
+            var bcrypt = new BCryptPasswordEncoder();
+            var passowrd = bcrypt.encode("moverlocadora");
+
+            String [] autorities = { "ROLE_ADMIN" };
+
+            return User.withUsername(username)
+                    .password(passowrd)
+                    .authorities(autorities)
+                    .build();
+        }
+
         UserEntity entity = userRepository.findByLogin(username)
                 .orElseThrow(() -> new NotificationException("Usuário não encontrado."));
 

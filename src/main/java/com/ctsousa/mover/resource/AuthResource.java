@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.util.JwtUtil;
 import com.ctsousa.mover.request.AuthRequest;
 import com.ctsousa.mover.response.AuthResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,13 +18,12 @@ public class AuthResource {
 
     private final AuthenticationManager authenticationManager;
 
-
     public AuthResource(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
