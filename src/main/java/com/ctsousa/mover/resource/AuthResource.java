@@ -1,7 +1,8 @@
 package com.ctsousa.mover.resource;
 
-import com.ctsousa.mover.core.JwtToken;
+import com.ctsousa.mover.core.token.JwtToken;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.token.Token;
 import com.ctsousa.mover.request.AuthRequest;
 import com.ctsousa.mover.response.AuthResponse;
 import jakarta.validation.Valid;
@@ -39,7 +40,7 @@ public class AuthResource {
         }
 
         JwtToken jwtToken = new JwtToken(secretKey);
-        String token = jwtToken.generateToken(request.getUsername());
-        return ResponseEntity.ok(new AuthResponse(token));
+        Token token = jwtToken.generateToken(request.getUsername());
+        return ResponseEntity.ok(new AuthResponse(token.getToken(), token.getExpiration()));
     }
 }

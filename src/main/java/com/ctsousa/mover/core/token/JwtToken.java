@@ -1,4 +1,4 @@
-package com.ctsousa.mover.core;
+package com.ctsousa.mover.core.token;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,13 +15,14 @@ public class JwtToken {
         JwtToken.SECRET_KEY = secretKey;
     }
 
-    public String generateToken(final String username) {
-        return Jwts.builder()
+    public Token generateToken(final String username) {
+        Date expiresInOneHour = expiresInOneHour();
+        return new Token(Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(expiresInOneHour())
+                .setExpiration(expiresInOneHour)
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
-                .compact();
+                .compact(), expiresInOneHour);
     }
 
     public static String extractUsername(final String token) {

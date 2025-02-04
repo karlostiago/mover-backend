@@ -49,6 +49,10 @@ public class InstallmentServiceImpl implements InstallmentService {
 
                 removePaymentDateAndPaidAfterFirstInstallment(installment, entity);
 
+                if (entity.getInstallment() == quantityInstallment) {
+                    entity.setLastInstallment(Boolean.TRUE);
+                }
+
                 entities.add(entity);
             }
         }
@@ -88,6 +92,11 @@ public class InstallmentServiceImpl implements InstallmentService {
             creditEntity.setValue(transaction.getValue().abs());
 
             removePaymentDateAndPaidAfterFirstInstallment(installment, creditEntity);
+
+            if (creditEntity.getInstallment() == quantityInstallment) {
+                creditEntity.setLastInstallment(Boolean.TRUE);
+            }
+
             entities.add(creditEntity);
 
             TransactionEntity debitEntity = transaction.toEntity();
@@ -99,6 +108,7 @@ public class InstallmentServiceImpl implements InstallmentService {
             debitEntity.setInstallment(creditEntity.getInstallment());
             debitEntity.setDescription(creditEntity.getDescription());
             debitEntity.setPaid(creditEntity.getPaid());
+            debitEntity.setLastInstallment(creditEntity.getLastInstallment());
             entities.add(debitEntity);
         }
 

@@ -1,4 +1,4 @@
-package com.ctsousa.mover.core;
+package com.ctsousa.mover.core.token;
 
 import com.ctsousa.mover.service.UserService;
 import jakarta.servlet.FilterChain;

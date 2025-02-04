@@ -84,6 +84,9 @@ public class TransactionEntity extends AbstractEntity {
     @Column(name = "hour", nullable = false)
     private LocalTime hour;
 
+    @Column(name = "last_installment", nullable = false)
+    private Boolean lastInstallment;
+
     @Transient
     private AccountEntity destinationAccount;
 }

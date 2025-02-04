@@ -1,6 +1,6 @@
 package com.ctsousa.mover.core.config;
 
-import com.ctsousa.mover.core.JwtFilter;
+import com.ctsousa.mover.core.token.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

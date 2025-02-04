@@ -42,6 +42,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
     private String transactionType;
     private Boolean paid;
     private Boolean predicted;
+    private Boolean lastInstallment;
 
     public Transaction() {}
 
@@ -123,6 +124,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setActive(this.getActive());
         entity.setPredicted(Boolean.FALSE);
         entity.setRefund(Boolean.FALSE);
+        entity.setLastInstallment(Boolean.FALSE);
 
         if (entity.getId() == null || entity.getId() == 0) {
             entity.setSignature(String.valueOf(randomUUID()));

@@ -2,15 +2,10 @@ package com.ctsousa.mover.core.util;
 
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class DateUtil {
 
@@ -57,6 +52,12 @@ public final class DateUtil {
         int year = Integer.parseInt(splitDate[3]);
 
         return LocalDate.of(year, month, day);
+    }
+
+    public static LocalDateTime toLocalDateTime(Date date) {
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 
     public static String toDateFromBr(String dateStr) {
