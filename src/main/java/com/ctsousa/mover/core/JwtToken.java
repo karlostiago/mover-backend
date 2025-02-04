@@ -1,4 +1,4 @@
-package com.ctsousa.mover.core.util;
+package com.ctsousa.mover.core;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -7,13 +7,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Date;
 
-public final class JwtUtil {
+public class JwtToken {
 
-    private static final String SECRET_KEY = "2e8d2c1fe8ff758f0427887984fa7ab501265633f51a3fc77874df667d433266"; //"mover sistemas de frotas";
+    private static String SECRET_KEY;
 
-    private JwtUtil() { }
+    public JwtToken(final String secretKey) {
+        JwtToken.SECRET_KEY = secretKey;
+    }
 
-    public static String generateToken(final String username) {
+    public String generateToken(final String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())

@@ -38,3 +38,6 @@ spring:
           socketFactory:
             port: 1100
             class: javax.net.ssl.SSLSocketFactory
+
+mover:
+  secret-key: ${SECRET_KEY}

@@ -39,4 +39,5 @@ spring:
             class: javax.net.ssl.SSLSocketFactory
 
 
-# carlo4284.c44.integrator.host
+mover:
+  secret-key: ${SECRET_KEY}

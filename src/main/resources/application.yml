@@ -3,3 +3,5 @@ server:
   servlet:
     context-path: /mover/api
 
+mover:
+  secret-key: ${SECRET_KEY}

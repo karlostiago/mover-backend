@@ -41,3 +41,6 @@ spring:
           socketFactory:
             port: 465
             class: javax.net.ssl.SSLSocketFactory
+
+mover:
+  secret-key: ${SECRET_KEY}

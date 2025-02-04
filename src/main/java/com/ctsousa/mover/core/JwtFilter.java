@@ -1,6 +1,5 @@
 package com.ctsousa.mover.core;
 
-import com.ctsousa.mover.core.util.JwtUtil;
 import com.ctsousa.mover.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,13 +31,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer")) {
             token = authorizationHeader.substring(7);
-            username = JwtUtil.extractUsername(token);
+            username = JwtToken.extractUsername(token);
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userService.loadUserByUsername(username);
 
-            if (JwtUtil.validateToken(token, userDetails)) {
+            if (JwtToken.validateToken(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
