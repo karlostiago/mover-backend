@@ -1,6 +1,7 @@
 package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.JwtToken;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.request.AuthRequest;
 import com.ctsousa.mover.response.AuthResponse;
 import jakarta.validation.Valid;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,9 +30,13 @@ public class AuthResource {
 
     @PostMapping(value = "/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request) {
-        authenticationManager.authenticate(
+        try {
+            authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+            );
+        } catch (AuthenticationException e) {
+            throw new NotificationException(e.getMessage());
+        }
 
         JwtToken jwtToken = new JwtToken(secretKey);
         String token = jwtToken.generateToken(request.getUsername());
