@@ -102,6 +102,12 @@ public enum Functionality {
         this.description = description;
     }
 
+    public static Functionality find(final String name) {
+        List<Functionality> features = List.of(Functionality.values());
+        return features.stream().filter(f -> f.name().equalsIgnoreCase(name))
+                .findFirst().orElseThrow(() -> new NotificationException("Funcionalidade não encontrada."));
+    }
+
     public static Functionality find(final int codeMenu, final int code) {
         List<Functionality> features = findByCodeMenu(codeMenu);
         return features.stream().filter(f -> f.code == code )

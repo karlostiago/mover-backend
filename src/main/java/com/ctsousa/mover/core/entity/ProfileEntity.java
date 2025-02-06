@@ -20,7 +20,7 @@ public class ProfileEntity extends AbstractEntity {
     @Column(name = "description", nullable = false, unique = true)
     private String description;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "tb_profile_permission",
             joinColumns = @JoinColumn(name = "profile_id"),

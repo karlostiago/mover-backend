@@ -7,8 +7,9 @@ import com.ctsousa.mover.response.FuncionalityResponse;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
 import java.util.List;
+
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
 @Getter
 @Setter
@@ -20,19 +21,20 @@ public class Profile extends DomainModel<ProfileEntity> {
     public ProfileEntity toEntity() {
         ProfileEntity entity = new ProfileEntity();
         entity.setId(this.getId());
-        entity.setDescription(this.getDescription().toUpperCase());
+        entity.setDescription(toUppercase(this.getDescription()));
         entity.setActive(this.active);
 
-        for (FuncionalityResponse permission : permissions) {
-            Functionality functionality = Functionality.find(permission.getCodeMenu(), permission.getId());
-            PermissionEntity permissionEntity = new PermissionEntity();
-            permissionEntity.setName(functionality.name());
-            permissionEntity.setDescription(functionality.getDescription().toUpperCase());
-            permissionEntity.setMenu(functionality.getMenu().getDescription().toUpperCase());
-            permissionEntity.setActive(this.getActive());
-            entity.getPermissions().add(permissionEntity);
-        }
+        List<PermissionEntity> permissions = this.permissions.stream()
+                .map(this::createPermissionEntity)
+                .toList();
+
+        entity.setPermissions(permissions);
 
         return entity;
+    }
+
+    private PermissionEntity createPermissionEntity(FuncionalityResponse permission) {
+        Functionality functionality = Functionality.find(permission.getCodeMenu(), permission.getId());
+        return new PermissionEntity(functionality.name(), toUppercase(functionality.getMenu().getDescription()), toUppercase(functionality.getDescription()));
     }
 }
