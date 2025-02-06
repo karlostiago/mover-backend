@@ -5,9 +5,11 @@ import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.PermissionEntity;
 import com.ctsousa.mover.domain.Permission;
 import com.ctsousa.mover.enumeration.Functionality;
+import com.ctsousa.mover.enumeration.PermissionType;
 import com.ctsousa.mover.request.PermissionRequest;
 import com.ctsousa.mover.response.FuncionalityResponse;
 import com.ctsousa.mover.response.PermissionResponse;
+import com.ctsousa.mover.response.PermissionTypeResponse;
 import com.ctsousa.mover.scheduler.ModelScheduler;
 import com.ctsousa.mover.service.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,12 @@ public class PermissionResource extends BaseResource<PermissionResponse, Permiss
             return funcionalityResponse;
         }).toList();
         return ResponseEntity.ok(toCollection(response, FuncionalityResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<List<PermissionTypeResponse>> findAllPermissionTypes() {
+        List<PermissionType> permissionTypes = List.of(PermissionType.values());
+        return ResponseEntity.ok(toCollection(permissionTypes, PermissionTypeResponse.class));
     }
 
     @Override

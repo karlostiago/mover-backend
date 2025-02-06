@@ -10,7 +10,6 @@ import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.ContractRepository;
 import com.ctsousa.mover.service.ClientService;
 import com.ctsousa.mover.service.ContractService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-
 public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> implements ContractService {
 
     private final ContractRepository repository;

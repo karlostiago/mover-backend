@@ -3,7 +3,6 @@ package com.ctsousa.mover.core.service.impl;
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
-import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.repository.TransactionRepository;
@@ -243,7 +242,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         return isPaymentStatusChanged(transaction.getId(), transaction.getPaid());
     }
 
-    protected boolean isPaymentStatusChanged(final Long id, Boolean paid) {
+    private boolean isPaymentStatusChanged(final Long id, Boolean paid) {
         if (id == null) {
             return paid;
         }

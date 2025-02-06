@@ -1,6 +1,10 @@
 package com.ctsousa.mover.enumeration;
 
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Getter
 public enum Functionality {
@@ -96,5 +100,17 @@ public enum Functionality {
         this.code = code;
         this.menu = menu;
         this.description = description;
+    }
+
+    public static Functionality find(final int codeMenu, final int code) {
+        List<Functionality> features = findByCodeMenu(codeMenu);
+        return features.stream().filter(f -> f.code == code )
+                .findFirst().orElseThrow(() -> new NotificationException("Funcionalidade não encontrada."));
+    }
+
+    private static List<Functionality> findByCodeMenu(final int code) {
+        return Arrays.stream(Functionality.values())
+                .filter(feature -> feature.getMenu().getCode() == code)
+                .toList();
     }
 }

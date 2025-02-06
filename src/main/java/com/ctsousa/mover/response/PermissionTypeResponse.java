@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PermissionResponse {
-    private Long id;
-    private Boolean active;
+public class PermissionTypeResponse {
+    private Integer code;
+    private String description;
 }
