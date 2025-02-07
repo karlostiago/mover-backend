@@ -13,4 +13,12 @@ public class ProfileResponse {
     private String description;
     private List<FuncionalityResponse> permissions = new ArrayList<>();
     private Boolean active;
+
+    public ProfileResponse() { }
+
+    public ProfileResponse(final Long id, final String description, final Boolean active) {
+        this.id = id;
+        this.description = description;
+        this.active = active;
+    }
 }

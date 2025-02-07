@@ -1,10 +1,19 @@
 package com.ctsousa.mover.domain;
 
+import com.ctsousa.mover.core.entity.ProfileEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
+import com.ctsousa.mover.core.validation.EmailValidator;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
 @Getter
 @Setter
@@ -16,40 +25,32 @@ public class User implements MapperToEntity<UserEntity> {
     private String login;
     private String password;
     private Long clientId;
-
-    public void setName(String name) {
-        if (StringUtils.isBlank(name)) throw new RuntimeException("Name cannot be blank");
-        if (StringUtils.equalsIgnoreCase(name, "undefined")) throw new RuntimeException("Name cannot be 'undefined'");
-        this.name = name.toUpperCase();
-    }
-
-    public void setEmail(String email) {
-        if (StringUtils.isBlank(email)) throw new RuntimeException("Email cannot be blank");
-        if (StringUtils.equalsIgnoreCase(email, "undefined")) throw new RuntimeException("Email cannot be 'undefined'");
-        this.email = email.toUpperCase();
-    }
-
-    public void setLogin(String login) {
-        if (StringUtils.isBlank(login)) throw new RuntimeException("Login cannot be blank");
-        if (StringUtils.equalsIgnoreCase(login, "undefined")) throw new RuntimeException("Login cannot be 'undefined'");
-        this.login = login;
-    }
-
-    public void setPassword(String password) {
-        if (StringUtils.isBlank(password)) throw new RuntimeException("Password cannot be blank");
-        if (StringUtils.equalsIgnoreCase(password, "undefined")) throw new RuntimeException("Password cannot be 'undefined'");
-        this.password = password;
-    }
+    private List<Profile> profiles;
 
     @Override
     public UserEntity toEntity() {
+
+        if (this.password.length() < 6) throw new NotificationException("A senha não pode ter menos de 6 caracteres.");
+
+        EmailValidator.valid(this.getEmail());
+
         UserEntity entity = new UserEntity();
         entity.setId(this.getId());
-        entity.setName(this.getName());
-        entity.setEmail(this.getEmail());
+        entity.setName(toUppercase(this.getName()));
+        entity.setEmail(toUppercase(this.getEmail()));
         entity.setLogin(this.getLogin());
-        entity.setPassword(this.getPassword());
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        entity.setPassword(encoder.encode(this.getPassword()));
         entity.setClientId(this.getClientId());
+        entity.setProfiles(getProfiles());
+
         return entity;
+    }
+
+    private Set<ProfileEntity> getProfiles() {
+        return profiles.stream()
+                .map(p -> new ProfileEntity(p.getId()))
+                .collect(Collectors.toSet());
     }
 }

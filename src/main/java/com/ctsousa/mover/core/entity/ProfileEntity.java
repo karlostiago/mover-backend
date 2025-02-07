@@ -27,4 +27,8 @@ public class ProfileEntity extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private List<PermissionEntity> permissions = new ArrayList<>();
+
+    public ProfileEntity(final Long id) {
+        super(id);
+    }
 }

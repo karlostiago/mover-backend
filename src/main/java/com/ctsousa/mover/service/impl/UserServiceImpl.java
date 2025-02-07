@@ -8,7 +8,7 @@ import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.UserRepository;
 import com.ctsousa.mover.service.UserService;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,15 +18,30 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
+
 @Component
 public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implements UserService {
-    private final UserRepository userRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private final ClientRepository clientRepository;
 
-    public UserServiceImpl(JpaRepository<UserEntity, Long> repository, UserRepository userRepository, ClientRepository clientRepository) {
-        super(repository);
-        this.userRepository = userRepository;
+    public UserServiceImpl(UserRepository userRepository, ClientRepository clientRepository) {
+        super(userRepository);
         this.clientRepository = clientRepository;
+    }
+
+    @Override
+    public UserEntity save(UserEntity entity) {
+        if (entity.isNew()) {
+            if (userRepository.existsUserEntityByEmail(toUppercase(entity.getEmail())) ||
+                    userRepository.existsUserEntityByLogin(entity.getLogin())) {
+                throw new NotificationException("Já existe um usuário com o email informado.");
+            }
+        }
+        return super.save(entity);
     }
 
     @Override

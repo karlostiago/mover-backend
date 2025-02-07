@@ -34,11 +34,11 @@ public class UserEntity extends AbstractEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_profile",
+            name = "tb_user_profile",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "profile_id")
     )
-    private Set<ProfileEntity> perfis = new HashSet<>();
+    private Set<ProfileEntity> profiles = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

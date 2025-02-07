@@ -124,6 +124,15 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
         return clientRepository.onlyAvailable();
     }
 
+    @Override
+    public void deleteById(Long id) {
+        try {
+            super.deleteById(id);
+        } catch (Exception e) {
+            throw new NotificationException("Esse cliente já esta em uso e não pode ser excluído.", Severity.ERROR);
+        }
+    }
+
     private void associateClientWithUser(ClientEntity client, String password) {
         UserEntity user = client.getUser();
         if (user == null) {
