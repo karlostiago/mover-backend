@@ -26,6 +26,8 @@ public class ProfileServiceImpl extends BaseServiceImpl<ProfileEntity, Long> imp
 
     @Override
     public ProfileEntity save(ProfileEntity entity) {
+        if (entity.getPermissions().isEmpty()) throw new NotificationException("Necessário adicionar pelo menos uma permissão");
+
         if (entity.isNew()) {
             exists(entity.getDescription());
         }
