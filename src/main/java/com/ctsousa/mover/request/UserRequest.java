@@ -21,7 +21,6 @@ public class UserRequest {
     @NotEmpty(message = "Login não pode ser vázio")
     private String login;
 
-    @NotEmpty(message = "Senha não pode ser vázio")
     private String password;
 
     private Long clientId;

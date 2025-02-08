@@ -40,8 +40,14 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
                     userRepository.existsUserEntityByLogin(entity.getLogin())) {
                 throw new NotificationException("Já existe um usuário com o email informado.");
             }
+            return super.save(entity);
+        } else {
+            userRepository.updateNameAndEmail(entity.getId(), entity.getName(), entity.getEmail());
+            UserEntity entityFound = findById(entity.getId());
+            entityFound.setProfiles(entity.getProfiles());
+            userRepository.save(entityFound);
+            return entityFound;
         }
-        return super.save(entity);
     }
 
     @Override
@@ -58,6 +64,18 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
         return userEntities.stream()
                 .findFirst()
                 .orElseThrow(() -> new NotificationException("Cpf ou senha incorretos."));
+    }
+
+    @Override
+    public List<UserEntity> filterBy(String search) {
+        List<UserEntity> entities = userRepository.findAll();
+
+        if (search == null || search.isEmpty()) return entities;
+
+        return entities.stream()
+                .filter(user -> user.getName().contains(toUppercase(search)) ||
+                        user.getEmail().contains(toUppercase(search)))
+                .toList();
     }
 
     @Override

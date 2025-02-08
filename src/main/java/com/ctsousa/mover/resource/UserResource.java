@@ -2,13 +2,11 @@ package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.api.UserApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
-import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.domain.User;
 import com.ctsousa.mover.request.UserRequest;
 import com.ctsousa.mover.response.ProfileResponse;
-import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.response.UserResponse;
 import com.ctsousa.mover.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ctsousa.mover.core.mapper.Transform.toCollection;
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
@@ -40,8 +39,12 @@ public class UserResource extends BaseResource<UserResponse, UserRequest, UserEn
     }
 
     @Override
-    public ResponseEntity<UserResponse> update(Long id, UserRequest requestBody) {
-        return null;
+    public ResponseEntity<UserResponse> update(Long id, UserRequest request) {
+        userService.existsById(id);
+        User domain = toMapper(request, User.class);
+        UserEntity entity = domain.toEntity();
+        userService.save(entity);
+        return ResponseEntity.ok(toMapper(entity, UserResponse.class));
     }
 
     @Override
@@ -49,6 +52,12 @@ public class UserResource extends BaseResource<UserResponse, UserRequest, UserEn
         String formattedCpf = CpfValidator.validateAndFormatCpf(cpf);
         UserEntity entity = userService.login(formattedCpf, password);
         return ResponseEntity.ok(toMapper(entity, UserResponse.class));
+    }
+
+    @Override
+    public ResponseEntity<List<UserResponse>> filterBy(String search) {
+        List<UserEntity> entities = userService.filterBy(search);
+        return ResponseEntity.ok(toCollection(entities, UserResponse.class));
     }
 
     @Override

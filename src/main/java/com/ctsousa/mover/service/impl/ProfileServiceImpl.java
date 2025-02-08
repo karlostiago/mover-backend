@@ -11,6 +11,10 @@ import com.ctsousa.mover.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
+
 @Component
 public class ProfileServiceImpl extends BaseServiceImpl<ProfileEntity, Long> implements ProfileService {
 
@@ -42,6 +46,17 @@ public class ProfileServiceImpl extends BaseServiceImpl<ProfileEntity, Long> imp
         } catch (Exception e) {
             throw new NotificationException("Esse perfil já esta em uso e não pode ser excluído.", Severity.ERROR);
         }
+    }
+
+    @Override
+    public List<ProfileEntity> filterBy(String search) {
+        List<ProfileEntity> entities = repository.findAll();
+
+        if (search == null || search.isEmpty()) return entities;
+
+        return entities.stream()
+                .filter(profile -> profile.getDescription().contains(toUppercase(search)))
+                .toList();
     }
 
     private void permissionUpdate(ProfileEntity entity) {

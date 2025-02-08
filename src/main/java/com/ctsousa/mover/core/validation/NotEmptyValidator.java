@@ -3,7 +3,9 @@ package com.ctsousa.mover.core.validation;
 import com.ctsousa.mover.core.annotation.NotEmpty;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.apache.commons.lang3.StringUtils;
+
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class NotEmptyValidator implements ConstraintValidator<NotEmpty, Object> {
     @Override
@@ -26,9 +28,13 @@ public class NotEmptyValidator implements ConstraintValidator<NotEmpty, Object> 
         }
 
         if (value instanceof String string) {
-            return !StringUtils.isBlank(string) && (!StringUtils.equalsIgnoreCase(string, "undefined"));
+            return !isBlank(string) && (!equalsIgnoreCase(string, "undefined"));
         }
 
         return true;
+    }
+
+    public static boolean isValid(Object value) {
+        return new NotEmptyValidator().isValid(value, null);
     }
 }

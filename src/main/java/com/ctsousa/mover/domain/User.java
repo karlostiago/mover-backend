@@ -5,6 +5,7 @@ import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
 import com.ctsousa.mover.core.validation.EmailValidator;
+import com.ctsousa.mover.core.validation.NotEmptyValidator;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,18 +31,26 @@ public class User implements MapperToEntity<UserEntity> {
     @Override
     public UserEntity toEntity() {
 
-        if (this.password.length() < 6) throw new NotificationException("A senha não pode ter menos de 6 caracteres.");
-
         EmailValidator.valid(this.getEmail());
 
         UserEntity entity = new UserEntity();
         entity.setId(this.getId());
+
+        if (entity.isNew() && !NotEmptyValidator.isValid(this.password)) {
+            throw new NotificationException("Senha não pode ser vázio");
+        }
+
         entity.setName(toUppercase(this.getName()));
         entity.setEmail(toUppercase(this.getEmail()));
         entity.setLogin(this.getLogin());
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        entity.setPassword(encoder.encode(this.getPassword()));
+        if (NotEmptyValidator.isValid(this.password)) {
+            if (this.password.length() < 6) throw new NotificationException("A senha não pode ter menos de 6 caracteres.");
+
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            entity.setPassword(encoder.encode(this.getPassword()));
+        }
+
         entity.setClientId(this.getClientId());
         entity.setProfiles(getProfiles());
 

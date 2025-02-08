@@ -3,11 +3,13 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.ProfileApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.ProfileEntity;
+import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.domain.Profile;
 import com.ctsousa.mover.enumeration.Functionality;
 import com.ctsousa.mover.request.ProfileRequest;
 import com.ctsousa.mover.response.FuncionalityResponse;
 import com.ctsousa.mover.response.ProfileResponse;
+import com.ctsousa.mover.response.UserResponse;
 import com.ctsousa.mover.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ctsousa.mover.core.mapper.Transform.toCollection;
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 
@@ -63,6 +66,12 @@ public class ProfileResource extends BaseResource<ProfileResponse, ProfileReques
                permission.setMenuName(functionality.getMenu().getDescription());
            }
         }
+    }
+
+    @Override
+    public ResponseEntity<List<ProfileResponse>> filterBy(String search) {
+        List<ProfileEntity> entities = profileService.filterBy(search);
+        return ResponseEntity.ok(toCollection(entities, ProfileResponse.class));
     }
 
     @Override
