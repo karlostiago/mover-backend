@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.UserApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.UserEntity;
+import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.domain.User;
 import com.ctsousa.mover.request.UserRequest;
@@ -10,6 +11,7 @@ import com.ctsousa.mover.response.ProfileResponse;
 import com.ctsousa.mover.response.UserResponse;
 import com.ctsousa.mover.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,6 +34,7 @@ public class UserResource extends BaseResource<UserResponse, UserRequest, UserEn
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.User.REGISTER_USERS)
     public ResponseEntity<UserResponse> add(UserRequest request) {
         User user = toMapper(request, User.class);
         UserEntity entity = userService.save(user.toEntity());
@@ -39,6 +42,7 @@ public class UserResource extends BaseResource<UserResponse, UserRequest, UserEn
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.User.UPDATE_USERS)
     public ResponseEntity<UserResponse> update(Long id, UserRequest request) {
         userService.existsById(id);
         User domain = toMapper(request, User.class);
@@ -48,6 +52,7 @@ public class UserResource extends BaseResource<UserResponse, UserRequest, UserEn
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.User.LOGIN_MOBILE)
     public ResponseEntity<UserResponse> login(String cpf, String password) {
         String formattedCpf = CpfValidator.validateAndFormatCpf(cpf);
         UserEntity entity = userService.login(formattedCpf, password);
@@ -55,9 +60,22 @@ public class UserResource extends BaseResource<UserResponse, UserRequest, UserEn
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.User.FILTER_USERS)
     public ResponseEntity<List<UserResponse>> filterBy(String search) {
         List<UserEntity> entities = userService.filterBy(search);
         return ResponseEntity.ok(toCollection(entities, UserResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.User.DELETE_USERS)
+    public void delete(Long id) {
+        super.delete(id);
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.User.FILTER_USERS)
+    public ResponseEntity<List<UserResponse>> findAll() {
+        return super.findAll();
     }
 
     @Override

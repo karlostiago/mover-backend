@@ -4,6 +4,7 @@ import com.ctsousa.mover.core.api.ConfigurationApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.ConfigurationEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Configuration;
 import com.ctsousa.mover.enumeration.TypeValueConfiguration;
 import com.ctsousa.mover.request.ConfigurationRequest;
@@ -12,6 +13,7 @@ import com.ctsousa.mover.response.TypeConfigurationResponse;
 import com.ctsousa.mover.service.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,6 +36,7 @@ public class ConfigurationResource extends BaseResource<ConfigurationResponse, C
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Parameter.REGISTER_PARAMETERS)
     public ResponseEntity<ConfigurationResponse> add(ConfigurationRequest request) {
         Configuration configuration = toMapper(request, Configuration.class);
         ConfigurationEntity entity = configurationService.save(configuration.toEntity());
@@ -41,6 +44,7 @@ public class ConfigurationResource extends BaseResource<ConfigurationResponse, C
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Parameter.UPDATE_PARAMETERS)
     public ResponseEntity<ConfigurationResponse> update(Long id, ConfigurationRequest request) {
         ConfigurationEntity entity = configurationService.findById(id);
         Configuration configuration = toMapper(request, Configuration.class);
@@ -55,6 +59,7 @@ public class ConfigurationResource extends BaseResource<ConfigurationResponse, C
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Parameter.DELETE_PARAMETERS)
     public void delete(Long id) {
         ConfigurationEntity entity = configurationService.findById(id);
         boolean verifiedKey = configurationService.verifyKeySystem(entity.getKey());
@@ -63,6 +68,7 @@ public class ConfigurationResource extends BaseResource<ConfigurationResponse, C
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Parameter.FILTER_PARAMETERS)
     public ResponseEntity<List<TypeConfigurationResponse>> findAllTypes() {
         List<TypeValueConfiguration> types = Stream.of(TypeValueConfiguration.values())
                 .sorted(Comparator.comparing(TypeValueConfiguration::getCode))
@@ -71,9 +77,16 @@ public class ConfigurationResource extends BaseResource<ConfigurationResponse, C
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Parameter.FILTER_PARAMETERS)
     public ResponseEntity<List<ConfigurationResponse>> filterBy(String search) {
         List<ConfigurationEntity> entities = configurationService.filterBy(search);
         return ResponseEntity.ok(toCollection(entities, ConfigurationResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Parameter.FILTER_PARAMETERS)
+    public ResponseEntity<List<ConfigurationResponse>> findAll() {
+        return super.findAll();
     }
 
     @Override

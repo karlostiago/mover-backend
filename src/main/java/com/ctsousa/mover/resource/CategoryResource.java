@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.CategoryApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.CategoryEntity;
+import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Category;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.request.CategoryRequest;
@@ -11,6 +12,7 @@ import com.ctsousa.mover.response.TypeCategoryResponse;
 import com.ctsousa.mover.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +35,7 @@ public class CategoryResource extends BaseResource<CategoryResponse, CategoryReq
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Category.REGISTER_CATEGORIES)
     public ResponseEntity<CategoryResponse> add(CategoryRequest request) {
         Category category = toMapper(request, Category.class);
         CategoryEntity entity = categoryService.save(category.toEntity());
@@ -40,6 +43,7 @@ public class CategoryResource extends BaseResource<CategoryResponse, CategoryReq
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Category.UPDATE_CATEGORIES)
     public ResponseEntity<CategoryResponse> update(Long id, CategoryRequest request) {
         CategoryEntity entity = categoryService.findById(id);
         Category category = toMapper(request, Category.class);
@@ -48,12 +52,14 @@ public class CategoryResource extends BaseResource<CategoryResponse, CategoryReq
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Category.DELETE_CATEGORIES)
     public void delete(Long id) {
         categoryService.existsById(id);
         super.delete(id);
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Category.FILTER_CATEGORIES)
     public ResponseEntity<List<TypeCategoryResponse>> findAllTypes() {
         List<TypeCategory> types = Stream.of(TypeCategory.values())
                 .sorted(Comparator.comparing(TypeCategory::getCode))
@@ -62,16 +68,24 @@ public class CategoryResource extends BaseResource<CategoryResponse, CategoryReq
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Category.FILTER_CATEGORIES)
     public ResponseEntity<List<CategoryResponse>> findBy(String search) {
         List<CategoryEntity> entities = categoryService.filterBy(search);
         return ResponseEntity.ok(toCollection(entities, CategoryResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Category.FILTER_CATEGORIES)
     public ResponseEntity<List<CategoryResponse>> findByTypeCategory(String type) {
         TypeCategory typeCategory = TypeCategory.toDescription(type);
         List<CategoryEntity> entities = categoryService.filterBy(typeCategory);
         return ResponseEntity.ok(toCollection(entities, CategoryResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Category.FILTER_CATEGORIES)
+    public ResponseEntity<List<CategoryResponse>> findAll() {
+        return super.findAll();
     }
 
     @Override

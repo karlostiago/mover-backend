@@ -15,6 +15,6 @@ public interface ProfileRepository extends JpaRepository<ProfileEntity, Long> {
 
     @NonNull
     @Override
-    @Query("SELECT p FROM ProfileEntity p JOIN FETCH p.permissions WHERE p.id = :id")
-    Optional<ProfileEntity> findById(@NonNull Long id);
+    @Query("SELECT p FROM ProfileEntity p JOIN FETCH p.permissions WHERE p.id = :permissionId")
+    Optional<ProfileEntity> findById(@NonNull Long permissionId);
 }

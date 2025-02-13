@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.VehicleApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.VehicleEntity;
+import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Vehicle;
 import com.ctsousa.mover.enumeration.FuelType;
 import com.ctsousa.mover.enumeration.Situation;
@@ -16,6 +17,7 @@ import com.ctsousa.mover.service.ModelService;
 import com.ctsousa.mover.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,6 +42,7 @@ public class VehicleResource extends BaseResource<VehicleResponse, VehicleReques
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Vehicle.REGISTER_VEHICLES)
     public ResponseEntity<VehicleResponse> add(VehicleRequest request) {
         Vehicle domain = toMapper(request, Vehicle.class);
         VehicleEntity entity = domain.toEntity();
@@ -51,6 +54,7 @@ public class VehicleResource extends BaseResource<VehicleResponse, VehicleReques
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Vehicle.UPDATE_VEHICLES)
     public ResponseEntity<VehicleResponse> update(Long id, VehicleRequest request) {
         vehicleService.existsById(id);
         Vehicle domain = toMapper(request, Vehicle.class);
@@ -63,27 +67,43 @@ public class VehicleResource extends BaseResource<VehicleResponse, VehicleReques
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Vehicle.FILTER_VEHICLES)
     public ResponseEntity<List<VehicleResponse>> findBy(String search) {
         List<VehicleEntity> entities = vehicleService.findBy(search);
         return ResponseEntity.ok(toCollection(entities, VehicleResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Vehicle.FILTER_VEHICLES)
     public ResponseEntity<List<FuelTypeResponse>> findAllFuelType() {
         List<FuelType> types = List.of(FuelType.values());
         return ResponseEntity.ok(toCollection(types, FuelTypeResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Vehicle.FILTER_VEHICLES)
     public ResponseEntity<List<SituationResponse>> findAllSituation() {
         List<Situation> situations = List.of(Situation.IN_FLEET, Situation.SOLD, Situation.TOTAL_LOSS, Situation.IN_ACQUISITION);
         return ResponseEntity.ok(toCollection(situations, SituationResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Vehicle.FILTER_VEHICLES)
     public ResponseEntity<List<VehicleResponse>> onlyAvailable() {
         List<VehicleEntity> entities = vehicleService.onlyAvailable();
         return ResponseEntity.ok(toCollection(entities, VehicleResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Vehicle.DELETE_VEHICLES)
+    public void delete(Long id) {
+        super.delete(id);
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Vehicle.FILTER_VEHICLES)
+    public ResponseEntity<List<VehicleResponse>> findAll() {
+        return super.findAll();
     }
 
     @Override

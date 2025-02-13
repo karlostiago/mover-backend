@@ -78,6 +78,10 @@ public enum Functionality {
     DELETE_PARAMETERS(30, Menu.CONFIGURATION, "Permite deletar parâmetros"),
     FILTER_PARAMETERS(31, Menu.CONFIGURATION, "Permite consultar parâmetros"),
 
+    SEARCH_CARDS_ICONS(32, Menu.CONFIGURATION, "Permite consultar icones cartões"),
+    SEARCH_ACCOUNTS_ICONS(33, Menu.CONFIGURATION, "Permite consultar icones contas"),
+    UPLOAD_BRANDS(34, Menu.CONFIGURATION, "Permite carregar arquivos de marcas"),
+
     REGISTER_USERS(1, Menu.SECURITY, "Permite salvar usuários"),
     UPDATE_USERS(2, Menu.SECURITY, "Permite atualizar usuários"),
     DELETE_USERS(3, Menu.SECURITY, "Permite deletar usuários"),
@@ -90,7 +94,9 @@ public enum Functionality {
 
     FILTER_PERMISSIONS(9, Menu.SECURITY, "Permite consultar permissões"),
     ACTIVATE_PERMISSIONS(10, Menu.SECURITY, "Permite ativar permissões"),
-    DISABLED_PERMISSIONS(11, Menu.SECURITY, "Permite desativar permissões");
+    DISABLED_PERMISSIONS(11, Menu.SECURITY, "Permite desativar permissões"),
+
+    LOGIN_MOBILE(12, Menu.SECURITY, "Permite login para dispositivos moveis");
 
     private final Menu menu;
     private final Integer code;

@@ -4,6 +4,7 @@ import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.api.BrandApi;
 import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.entity.SymbolEntity;
+import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Brand;
 import com.ctsousa.mover.domain.Symbol;
 import com.ctsousa.mover.request.BrandRequest;
@@ -13,6 +14,7 @@ import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.SymbolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,12 +40,14 @@ public class BrandResource extends BaseResource<BrandResponse, BrandRequest, Bra
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Brand.FILTER_BRANDS)
     public ResponseEntity<List<BrandResponse>> filterByName(String name) {
         List<BrandEntity> entities = brandService.filterByName(name);
         return ResponseEntity.ok(toCollection(entities, BrandResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Brand.REGISTER_BRANDS)
     public ResponseEntity<BrandResponse> add(BrandRequest request) {
         Brand brand = toMapper(request, Brand.class);
         BrandEntity entity = brandService.save(brand.toEntity());
@@ -52,6 +56,7 @@ public class BrandResource extends BaseResource<BrandResponse, BrandRequest, Bra
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Brand.UPDATE_BRANDS)
     public ResponseEntity<BrandResponse> update(Long id, BrandRequest request) {
         brandService.existsById(id);
         Brand domain = toMapper(request, Brand.class);
@@ -61,6 +66,19 @@ public class BrandResource extends BaseResource<BrandResponse, BrandRequest, Bra
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Brand.DELETE_BRANDS)
+    public void delete(Long id) {
+        super.delete(id);
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Brand.FILTER_BRANDS)
+    public ResponseEntity<List<BrandResponse>> findAll() {
+        return super.findAll();
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Brand.UPLOAD_BRANDS)
     public ResponseEntity<Void> upload(MultipartFile file, String filename) {
         BufferedImage image = brandService.upload(file);
         String imageBase64 = brandService.toBase64(image);

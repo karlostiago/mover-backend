@@ -5,10 +5,13 @@ import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.core.validation.CpfValidator;
+import com.ctsousa.mover.enumeration.Functionality;
 import com.ctsousa.mover.repository.ClientRepository;
+import com.ctsousa.mover.repository.PermissionRepository;
 import com.ctsousa.mover.repository.UserRepository;
 import com.ctsousa.mover.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,10 +30,12 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
     private UserRepository userRepository;
 
     private final ClientRepository clientRepository;
+    private final PermissionRepository permissionRepository;
 
-    public UserServiceImpl(UserRepository userRepository, ClientRepository clientRepository) {
-        super(userRepository);
+    public UserServiceImpl(JpaRepository<UserEntity, Long> repository, ClientRepository clientRepository, PermissionRepository permissionRepository) {
+        super(repository);
         this.clientRepository = clientRepository;
+        this.permissionRepository = permissionRepository;
     }
 
     @Override
@@ -80,13 +85,16 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        final String preffix = "ROLE_";
+        var bcrypt = new BCryptPasswordEncoder();
+        String [] autorities = new String[Functionality.values().length];
 
         if ("mover@sistemas.com".equalsIgnoreCase(username)) {
-            var bcrypt = new BCryptPasswordEncoder();
-            var passowrd = bcrypt.encode("moverlocadora");
 
-            String [] autorities = { "ROLE_ADMIN" };
-
+            var passowrd = bcrypt.encode("$meucarro$");
+            for (int i = 0; i < autorities.length; i++) {
+                autorities[i] = preffix.concat(Functionality.values()[i].name());
+            }
             return User.withUsername(username)
                     .password(passowrd)
                     .authorities(autorities)
@@ -96,7 +104,12 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
         UserEntity entity = userRepository.findByLogin(username)
                 .orElseThrow(() -> new NotificationException("Usuário não encontrado."));
 
-        String [] autorities = { "ROLE_ADMIN" };
+        List<String> permissions = permissionRepository.findByUser(entity.getId());
+        autorities = new String[permissions.size()];
+
+        for (int i = 0; i < permissions.size(); i++) {
+            autorities[i] = preffix.concat(permissions.get(i));
+        }
 
         return User.withUsername(entity.getLogin())
                 .password(entity.getPassword())

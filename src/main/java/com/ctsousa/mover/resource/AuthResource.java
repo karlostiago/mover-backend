@@ -1,8 +1,10 @@
 package com.ctsousa.mover.resource;
 
-import com.ctsousa.mover.core.token.JwtToken;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.token.JwtToken;
 import com.ctsousa.mover.core.token.Token;
+import com.ctsousa.mover.repository.PermissionRepository;
+import com.ctsousa.mover.repository.UserRepository;
 import com.ctsousa.mover.request.AuthRequest;
 import com.ctsousa.mover.response.AuthResponse;
 import jakarta.validation.Valid;
@@ -21,12 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthResource {
 
     private final AuthenticationManager authenticationManager;
+    private final PermissionRepository permissionRepository;
+    private final UserRepository userRepository;
 
     @Value("${mover.secret-key}")
     private String secretKey;
 
-    public AuthResource(AuthenticationManager authenticationManager) {
+    public AuthResource(AuthenticationManager authenticationManager, UserRepository userRepository, PermissionRepository permissionRepository) {
         this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.permissionRepository = permissionRepository;
     }
 
     @PostMapping(value = "/login")
@@ -39,7 +45,7 @@ public class AuthResource {
             throw new NotificationException(e.getMessage());
         }
 
-        JwtToken jwtToken = new JwtToken(secretKey);
+        JwtToken jwtToken = new JwtToken(secretKey, permissionRepository, userRepository);
         Token token = jwtToken.generateToken(request.getUsername());
         return ResponseEntity.ok(new AuthResponse(token.getToken(), token.getExpiration()));
     }

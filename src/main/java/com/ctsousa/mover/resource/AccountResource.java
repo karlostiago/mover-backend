@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.AccountApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.AccountEntity;
+import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Account;
 import com.ctsousa.mover.enumeration.BankIcon;
 import com.ctsousa.mover.request.AccountRequest;
@@ -11,6 +12,7 @@ import com.ctsousa.mover.response.BankIconResponse;
 import com.ctsousa.mover.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +35,7 @@ public class AccountResource extends BaseResource<AccountResponse, AccountReques
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Account.REGISTER_ACCOUNTS)
     public ResponseEntity<AccountResponse> add(AccountRequest request) {
         Account account = toMapper(request, Account.class);
         AccountEntity entity = accountService.save(account.toEntity());
@@ -40,6 +43,7 @@ public class AccountResource extends BaseResource<AccountResponse, AccountReques
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Account.UPDATE_ACCOUNTS)
     public ResponseEntity<AccountResponse> update(Long id, AccountRequest request) {
         accountService.existsById(id);
         Account account = toMapper(request, Account.class);
@@ -49,6 +53,13 @@ public class AccountResource extends BaseResource<AccountResponse, AccountReques
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Account.DELETE_ACCOUNTS)
+    public void delete(Long id) {
+        super.delete(id);
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Account.SEARCH_ACCOUNTS_ICONS)
     public ResponseEntity<List<BankIconResponse>> findAllIcons() {
         List<BankIcon> icons = Stream.of(BankIcon.values())
                 .sorted(Comparator.comparing(BankIcon::getBankName))
@@ -57,6 +68,7 @@ public class AccountResource extends BaseResource<AccountResponse, AccountReques
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Account.FILTER_ACCOUNTS)
     public ResponseEntity<List<AccountResponse>> filterBy(String search) {
         List<AccountEntity> entities = accountService.filterBy(search);
         return ResponseEntity.ok(toCollection(entities, AccountResponse.class));

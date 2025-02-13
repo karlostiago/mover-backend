@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.ClientApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.ClientEntity;
+import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Client;
 import com.ctsousa.mover.domain.Contact;
 import com.ctsousa.mover.domain.User;
@@ -16,6 +17,7 @@ import com.ctsousa.mover.response.TypePersonResponse;
 import com.ctsousa.mover.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,6 +39,7 @@ public class ClientResource extends BaseResource<ClientResponse, ClientRequest, 
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Client.REGISTER_CLIENTS)
     public ResponseEntity<ClientResponse> add(ClientRequest request) {
         Client domain = toMapper(request, Client.class);
         ClientEntity entity = clientService.save(domain.toEntity());
@@ -45,6 +48,7 @@ public class ClientResource extends BaseResource<ClientResponse, ClientRequest, 
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Client.UPDATE_CLIENTS)
     public ResponseEntity<ClientResponse> update(Long id, ClientRequest request) {
         clientService.existsById(id);
         Client clientDomain = toMapper(request, Client.class);
@@ -54,18 +58,21 @@ public class ClientResource extends BaseResource<ClientResponse, ClientRequest, 
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Client.FILTER_CLIENTS)
     public ResponseEntity<List<BrazilianStatesResponse>> findAllBrazilianStates() {
         List<BrazilianStates> states = List.of(BrazilianStates.values());
         return ResponseEntity.ok(toCollection(states, BrazilianStatesResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Client.FILTER_CLIENTS)
     public ResponseEntity<List<TypePersonResponse>> findAllTypePerson() {
         List<TypePerson> types = List.of(TypePerson.values());
         return ResponseEntity.ok(toCollection(types, TypePersonResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Client.FILTER_CLIENTS)
     public ResponseEntity<ClientResponse> findAddress(Integer postalCode) {
         ClientEntity entity = clientService.findByAddress(postalCode);
         if (entity == null) return ResponseEntity.noContent().build();
@@ -73,18 +80,21 @@ public class ClientResource extends BaseResource<ClientResponse, ClientRequest, 
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Client.FILTER_CLIENTS)
     public ResponseEntity<List<ClientResponse>> filterBy(String search) {
         List<ClientEntity> entities = clientService.filterBy(search);
         return ResponseEntity.ok(toCollection(entities, ClientResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Client.FILTER_CLIENTS)
     public ResponseEntity<ClientResponse> existingCpfRegister(String cpf) {
         ClientEntity entity = clientService.existsCpfRegistered(cpf);
         return ResponseEntity.ok(toMapper(entity, ClientResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Client.REGISTER_CLIENTS)
     public ResponseEntity<ClientResponse> registerClientAndUser(ClientRequest request) {
         Client domain = toMapper(request, Client.class);
         String password = domain.getUser() != null ? domain.getUser().getPassword() : defaultPasswordMover();
@@ -93,9 +103,22 @@ public class ClientResource extends BaseResource<ClientResponse, ClientRequest, 
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Client.FILTER_CLIENTS)
     public ResponseEntity<List<ClientResponse>> onlyAvailable() {
         List<ClientEntity> entities = clientService.onlyAvailable();
         return ResponseEntity.ok(toCollection(entities, ClientResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Client.FILTER_CLIENTS)
+    public ResponseEntity<List<ClientResponse>> findAll() {
+        return super.findAll();
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Client.DELETE_CLIENTS)
+    public void delete(Long id) {
+        super.delete(id);
     }
 
     @Override

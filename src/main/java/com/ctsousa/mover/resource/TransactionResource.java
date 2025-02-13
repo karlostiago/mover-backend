@@ -3,6 +3,7 @@ package com.ctsousa.mover.resource;
 import com.ctsousa.mover.core.api.TransactionApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.BankIcon;
 import com.ctsousa.mover.enumeration.TypeCategory;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,6 +41,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.REGISTER_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> add(TransactionRequest request) {
         Transaction domain = toMapper(request, Transaction.class);
         TransactionEntity entity = transactionService.save(domain);
@@ -46,6 +49,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.UPDATE_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> update(Long id, TransactionRequest request) {
         transactionService.existsById(id);
         Transaction domain = toMapper(request, Transaction.class);
@@ -54,6 +58,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> findById(Long id) {
         TransactionEntity entity = transactionService.findById(id);
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
@@ -61,23 +66,27 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.PAYMENT_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> pay(Long id, LocalDate paymentDate) {
         TransactionEntity entity = transactionService.pay(id, paymentDate);
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.REFUND_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> refund(Long id) {
         TransactionEntity entity = transactionService.refund(id);
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.DELETE_TRANSACTIONS)
     public void batchDelete(Long id) {
         transactionService.batchDelete(id);
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.UPDATE_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> batchUpdate(Long id, TransactionRequest request) {
         transactionService.existsById(id);
         Transaction domain = toMapper(request, Transaction.class);
@@ -86,6 +95,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
     public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
 
         var filter = new Transaction.Filter(uri);
@@ -100,6 +110,12 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
         updateResponse(responses, entities);
 
         return ResponseEntity.ok(responses);
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
+    public ResponseEntity<List<TransactionResponse>> findAll() {
+        return super.findAll();
     }
 
     @Override
