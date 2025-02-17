@@ -47,4 +47,8 @@ public class UserEntity extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<PermissionEntity> permissions = new HashSet<>();
+
+    public UserEntity(String name) {
+        this.name = name;
+    }
 }

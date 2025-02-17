@@ -79,6 +79,14 @@ public class UserResource extends BaseResource<UserResponse, UserRequest, UserEn
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.User.UPDATE_CHANGEPASSWORD_USERS)
+    public ResponseEntity<Void> changePassword(UserRequest request) {
+        User domain = toMapper(request, User.class);
+        userService.changePassword(domain.toEntity());
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     public void updateResponse(List<UserResponse> response, List<UserEntity> entities) {
         Map<Long, UserResponse> responseMap = response.stream()
                 .collect(Collectors.toMap(UserResponse::getId, r -> r));

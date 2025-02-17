@@ -32,6 +32,7 @@ public class JwtToken {
         return new Token(Jwts.builder()
                 .setSubject(username)
                 .claim("permissions", getPermissions(username))
+                .claim("login", username)
                 .setIssuedAt(new Date())
                 .setExpiration(expiresInOneHour)
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)

@@ -13,12 +13,19 @@ public enum Functionality {
     UPDATE_CLIENTS(2, Menu.MY_CLIENTS, "Permite atualizar clientes"),
     DELETE_CLIENTS(3, Menu.MY_CLIENTS, "Permite deletar clientes"),
     FILTER_CLIENTS(4, Menu.MY_CLIENTS, "Permite consultar clientes"),
+    FILTER_TYPE_PERSON_CLIENTS(5, Menu.MY_CLIENTS, "Permite carregar tipos de pessoa clientes"),
+    FILTER_BRAZILIAN_STATES_CLIENTS(6, Menu.MY_CLIENTS, "Permite carregar estados clientes"),
 
     REGISTER_CONTRACTS(5, Menu.MY_CLIENTS, "Permite salvar contratos"),
     UPDATE_CONTRACTS(6, Menu.MY_CLIENTS, "Permite atualizar contratos"),
     DELETE_CONTRACTS(7, Menu.MY_CLIENTS, "Permite deletar contratos"),
     TERMINATION_CONTRACTS(8, Menu.MY_CLIENTS, "Permite encerrar contratos"),
     FILTER_CONTRACTS(9, Menu.MY_CLIENTS, "Permite consultar contratos"),
+
+    VIEW_ADDRESS_CLIENTS(10, Menu.MY_CLIENTS, "Permite consultar endereço de clientes"),
+    REGISTER_ADDRESS_CLIENTS(11, Menu.MY_CLIENTS, "Permite salvar endereço de clientes"),
+    UPDATE_ADDRESS_CLIENTS(12, Menu.MY_CLIENTS, "Permite salvar endereço de clientes"),
+    DELETE_ADDRESS_CLIENTS(13, Menu.MY_CLIENTS, "Permite salvar endereço de clientes"),
 
     REGISTER_VEHICLES(1, Menu.MY_FLEETS, "Permite salvar veículos"),
     UPDATE_VEHICLES(2, Menu.MY_FLEETS,"Permite atualizar veículos"),
@@ -36,8 +43,15 @@ public enum Functionality {
     DELETE_TRANSACTIONS(3, Menu.MY_MONEY,"Permite deletar lançamentos"),
     PAYMENT_TRANSACTIONS(4, Menu.MY_MONEY,"Permite pagar lançamentos"),
     REFUND_TRANSACTIONS(5, Menu.MY_MONEY,"Permite estornar lançamentos"),
-    ENABLED_INSTALLMENT_TRANSACTIONS(6, Menu.MY_MONEY,"Ativa repetição de lançamentos"),
+    ENABLED_INSTALLMENT_TRANSACTIONS(6, Menu.MY_MONEY,"Permite ativa repetição de lançamentos"),
     FILTER_TRANSACTIONS(7, Menu.MY_MONEY,"Permite consultar lançamentos"),
+    FILTER_TYPE_CATEGORIES_TRANSACTIONS(8, Menu.MY_MONEY,"Permite carregar os tipo de categoria de lançamentos"),
+    FILTER_CATEGORIES_TRANSACTIONS(9, Menu.MY_MONEY,"Permite carregar as categorias de lançamentos"),
+    FILTER_VEHICLES_TRANSACTIONS(10, Menu.MY_MONEY,"Permite carregar os veículois de lançamentos"),
+    FILTER_CONTRACTS_TRANSACTIONS(11, Menu.MY_MONEY,"Permite carregar os contratos de lançamentos"),
+    FILTER_ACCOUNT_TRANSACTIONS(12, Menu.MY_MONEY,"Permite carregar as contas de lançamentos"),
+    FILTER_CARDS_TRANSACTIONS(13, Menu.MY_MONEY,"Permite carregar os cartões de lançamentos"),
+    FILTER_PARTNES_TRANSACTIONS(14, Menu.MY_MONEY,"Permite carregar os sócios de lançamentos"),
 
     REGISTER_ACCOUNTS(1, Menu.CONFIGURATION, "Permite salvar contas"),
     UPDATE_ACCOUNTS(2, Menu.CONFIGURATION, "Permite atualizar contas"),
@@ -55,7 +69,7 @@ public enum Functionality {
     FILTER_CATEGORIES(12, Menu.CONFIGURATION, "Permite consultar categorias"),
 
     REGISTER_SUBCATEGORIES(13, Menu.CONFIGURATION, "Permite salvar subcategorias"),
-    UPDATE_SUBCATEGORIES(1, Menu.CONFIGURATION, "Permite deletar subcategorias"),
+    UPDATE_SUBCATEGORIES(14, Menu.CONFIGURATION, "Permite deletar subcategorias"),
     DELETE_SUBCATEGORIES(15, Menu.CONFIGURATION, "Permite atualizar subcategorias"),
 
     REGISTER_BRANDS(16, Menu.CONFIGURATION, "Permite salvar marcas"),
@@ -96,7 +110,10 @@ public enum Functionality {
     ACTIVATE_PERMISSIONS(10, Menu.SECURITY, "Permite ativar permissões"),
     DISABLED_PERMISSIONS(11, Menu.SECURITY, "Permite desativar permissões"),
 
-    LOGIN_MOBILE(12, Menu.SECURITY, "Permite login para dispositivos moveis");
+    LOGIN_MOBILE(12, Menu.SECURITY, "Permite login para dispositivos moveis"),
+
+    FILTER_CHANGEPASSWORD_USERS(13, Menu.SECURITY, "Permite consultar usuarios para alteração de senha"),
+    UPDATE_CHANGEPASSWORD_USERS(14, Menu.SECURITY, "Permite alterar senha de usuário");
 
     private final Menu menu;
     private final Integer code;

@@ -10,4 +10,8 @@ public interface UserService extends BaseService<UserEntity, Long>, UserDetailsS
    UserEntity login(String cpf, String password);
 
    List<UserEntity> filterBy(String search);
+
+   UserEntity findByLogin(String login);
+
+   void changePassword(final UserEntity entity);
 }

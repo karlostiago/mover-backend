@@ -26,4 +26,6 @@ public class UserRequest {
     private Long clientId;
 
     private List<ProfileResponse> profiles;
+
+    private Boolean active;
 }

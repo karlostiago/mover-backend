@@ -19,7 +19,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.NumberUtil.toBigDecimal;
 import static com.ctsousa.mover.core.util.StringUtil.removeLastPoint;

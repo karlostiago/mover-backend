@@ -1,7 +1,6 @@
 package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.api.FipeApi;
-import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.response.FipeValueResponse;
 import com.ctsousa.mover.response.HistoryFipeResponse;

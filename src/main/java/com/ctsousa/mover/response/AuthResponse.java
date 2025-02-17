@@ -13,11 +13,12 @@ import java.util.Date;
 @NoArgsConstructor
 public class AuthResponse {
     private String token;
-
     private Long expiration;
+    private String username;
 
-    public AuthResponse(String token, Date expiration) {
+    public AuthResponse(String token, Date expiration, String username) {
         this.token = token;
         this.expiration = expiration.getTime();
+        this.username = username;
     }
 }

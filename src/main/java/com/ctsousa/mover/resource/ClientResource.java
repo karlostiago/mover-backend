@@ -5,12 +5,9 @@ import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Client;
-import com.ctsousa.mover.domain.Contact;
-import com.ctsousa.mover.domain.User;
 import com.ctsousa.mover.enumeration.BrazilianStates;
 import com.ctsousa.mover.enumeration.TypePerson;
 import com.ctsousa.mover.request.ClientRequest;
-import com.ctsousa.mover.request.ContactRequest;
 import com.ctsousa.mover.response.BrazilianStatesResponse;
 import com.ctsousa.mover.response.ClientResponse;
 import com.ctsousa.mover.response.TypePersonResponse;
@@ -58,14 +55,14 @@ public class ClientResource extends BaseResource<ClientResponse, ClientRequest, 
     }
 
     @Override
-    @PreAuthorize(Security.PreAutorize.Client.FILTER_CLIENTS)
+    @PreAuthorize(Security.PreAutorize.Client.FILTER_BRAZILIAN_STATES_CLIENTS)
     public ResponseEntity<List<BrazilianStatesResponse>> findAllBrazilianStates() {
         List<BrazilianStates> states = List.of(BrazilianStates.values());
         return ResponseEntity.ok(toCollection(states, BrazilianStatesResponse.class));
     }
 
     @Override
-    @PreAuthorize(Security.PreAutorize.Client.FILTER_CLIENTS)
+    @PreAuthorize(Security.PreAutorize.Client.FILTER_TYPE_PERSON_CLIENTS)
     public ResponseEntity<List<TypePersonResponse>> findAllTypePerson() {
         List<TypePerson> types = List.of(TypePerson.values());
         return ResponseEntity.ok(toCollection(types, TypePersonResponse.class));

@@ -27,6 +27,7 @@ public class User implements MapperToEntity<UserEntity> {
     private String password;
     private Long clientId;
     private List<Profile> profiles;
+    private Boolean active;
 
     @Override
     public UserEntity toEntity() {
@@ -53,6 +54,7 @@ public class User implements MapperToEntity<UserEntity> {
 
         entity.setClientId(this.getClientId());
         entity.setProfiles(getProfiles());
+        entity.setActive(this.getActive());
 
         return entity;
     }

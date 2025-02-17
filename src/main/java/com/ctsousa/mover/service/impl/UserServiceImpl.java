@@ -39,6 +39,12 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
     }
 
     @Override
+    public void changePassword(UserEntity entity) {
+        existsById(entity.getId());
+        userRepository.updatePassword(entity.getId(), entity.getPassword());
+    }
+
+    @Override
     public UserEntity save(UserEntity entity) {
         if (entity.isNew()) {
             if (userRepository.existsUserEntityByEmail(toUppercase(entity.getEmail())) ||
@@ -47,7 +53,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
             }
             return super.save(entity);
         } else {
-            userRepository.updateNameAndEmail(entity.getId(), entity.getName(), entity.getEmail());
+            userRepository.updateNameAndEmail(entity.getId(), entity.getName(), entity.getEmail(), entity.getActive());
             UserEntity entityFound = findById(entity.getId());
             entityFound.setProfiles(entity.getProfiles());
             userRepository.save(entityFound);
@@ -115,5 +121,14 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
                 .password(entity.getPassword())
                 .authorities(autorities)
                 .build();
+    }
+
+    @Override
+    public UserEntity findByLogin(String login) {
+        if ("mover@sistemas.com".equalsIgnoreCase(login)) {
+            return new UserEntity("MOVER SISTEMAS");
+        }
+        return userRepository.findByLogin(login)
+                .orElseThrow(() -> new NotificationException("Usuário não encontrado."));
     }
 }

@@ -59,6 +59,12 @@ public class AccountResource extends BaseResource<AccountResponse, AccountReques
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Account.FILTER_ACCOUNTS)
+    public ResponseEntity<List<AccountResponse>> findAll() {
+        return super.findAll();
+    }
+
+    @Override
     @PreAuthorize(Security.PreAutorize.Account.SEARCH_ACCOUNTS_ICONS)
     public ResponseEntity<List<BankIconResponse>> findAllIcons() {
         List<BankIcon> icons = Stream.of(BankIcon.values())
