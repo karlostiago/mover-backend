@@ -1,10 +1,6 @@
 package com.ctsousa.mover.core.token;
 
-import com.ctsousa.mover.core.entity.UserEntity;
-import com.ctsousa.mover.core.exception.notification.NotificationException;
-import com.ctsousa.mover.enumeration.Functionality;
-import com.ctsousa.mover.repository.PermissionRepository;
-import com.ctsousa.mover.repository.UserRepository;
+import com.ctsousa.mover.service.CustomUserDetailService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -12,19 +8,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class JwtToken {
 
     private static String SECRET_KEY;
 
-    private final PermissionRepository permissionRepository;
-    private final UserRepository userRepository;
+    private final CustomUserDetailService customUserDetailService;
 
-    public JwtToken(final String secretKey, PermissionRepository permissionRepository, UserRepository userRepository) {
+    public JwtToken(final String secretKey, CustomUserDetailService customUserDetailService) {
         JwtToken.SECRET_KEY = secretKey;
-        this.permissionRepository = permissionRepository;
-        this.userRepository = userRepository;
+        this.customUserDetailService = customUserDetailService;
     }
 
     public Token generateToken(final String username) {
@@ -54,20 +47,7 @@ public class JwtToken {
     }
 
     private List<String> getPermissions(final String username) {
-        List<String> permissions;
-        if ("mover@sistemas.com".equalsIgnoreCase(username)) {
-            permissions = Stream.of(Functionality.values())
-                    .map(p -> "ROLE_" + p.name())
-                    .toList();
-        } else {
-            UserEntity entity = userRepository.findByLogin(username)
-                    .orElseThrow(() -> new NotificationException("Usuário não encontrado."));
-
-            permissions = permissionRepository.findByUser(entity.getId())
-                    .stream().map(p -> "ROLE_" + p)
-                    .toList();
-        }
-        return permissions;
+        return customUserDetailService.getPermissions(username);
     }
 
     private static boolean isTokenExpired(final String token) {

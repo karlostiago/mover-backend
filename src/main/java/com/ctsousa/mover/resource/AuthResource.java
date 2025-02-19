@@ -1,13 +1,11 @@
 package com.ctsousa.mover.resource;
 
-import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.token.JwtToken;
 import com.ctsousa.mover.core.token.Token;
-import com.ctsousa.mover.repository.PermissionRepository;
-import com.ctsousa.mover.repository.UserRepository;
 import com.ctsousa.mover.request.AuthRequest;
 import com.ctsousa.mover.response.AuthResponse;
+import com.ctsousa.mover.service.CustomUserDetailService;
 import com.ctsousa.mover.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,18 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthResource {
 
     private final AuthenticationManager authenticationManager;
-    private final PermissionRepository permissionRepository;
-    private final UserRepository userRepository;
     private final UserService userService;
+    private final CustomUserDetailService customUserDetailService;
 
     @Value("${mover.secret-key}")
     private String secretKey;
 
-    public AuthResource(AuthenticationManager authenticationManager, UserRepository userRepository, PermissionRepository permissionRepository, UserService userService) {
+    public AuthResource(AuthenticationManager authenticationManager, UserService userService, CustomUserDetailService customUserDetailService) {
         this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.permissionRepository = permissionRepository;
         this.userService = userService;
+        this.customUserDetailService = customUserDetailService;
     }
 
     @PostMapping(value = "/login")
@@ -49,9 +45,8 @@ public class AuthResource {
             throw new NotificationException(e.getMessage());
         }
 
-        JwtToken jwtToken = new JwtToken(secretKey, permissionRepository, userRepository);
+        JwtToken jwtToken = new JwtToken(secretKey, customUserDetailService);
         Token token = jwtToken.generateToken(request.getUsername());
-        UserEntity entity = userService.findByLogin(request.getUsername());
-        return ResponseEntity.ok(new AuthResponse(token.getToken(), token.getExpiration(), entity.getName()));
+        return ResponseEntity.ok(new AuthResponse(token.getToken(), token.getExpiration(), userService.getUser().getName()));
     }
 }

@@ -43,4 +43,6 @@ spring:
             class: javax.net.ssl.SSLSocketFactory
 
 mover:
+  root-user: ${ROOT_USER}
+  root-user-password: ${ROOT_USER_PASSWORD}
   secret-key: ${SECRET_KEY}

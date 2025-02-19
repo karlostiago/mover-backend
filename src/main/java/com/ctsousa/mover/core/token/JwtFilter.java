@@ -1,12 +1,12 @@
 package com.ctsousa.mover.core.token;
 
-import com.ctsousa.mover.service.UserService;
+import com.ctsousa.mover.service.CustomUserDetailService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,8 +19,11 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private UserService userService;
+    private final CustomUserDetailService customUserDetailService;
+
+    public JwtFilter(@Lazy CustomUserDetailService customUserDetailService) {
+        this.customUserDetailService = customUserDetailService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -35,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userService.loadUserByUsername(username);
+            UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
 
             if (JwtToken.validateToken(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authentication =
