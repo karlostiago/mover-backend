@@ -1,10 +1,10 @@
 package com.ctsousa.mover.resource;
 
-import com.ctsousa.mover.core.api.UserApi;
+import com.ctsousa.mover.core.api.ChangePasswordApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.UserEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.security.Security;
-import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.domain.User;
 import com.ctsousa.mover.request.UserRequest;
 import com.ctsousa.mover.response.ProfileResponse;
@@ -19,63 +19,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.ctsousa.mover.core.mapper.Transform.toCollection;
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
-@RequestMapping("/users")
-public class UserResource extends BaseResource<UserResponse, UserRequest, UserEntity> implements UserApi {
+@RequestMapping("/changepasswords")
+public class ChangePasswordResource extends BaseResource<UserResponse, UserRequest, UserEntity> implements ChangePasswordApi {
 
     private final UserService userService;
 
-    public UserResource(UserService userService) {
+    public ChangePasswordResource(UserService userService) {
         super(userService);
         this.userService = userService;
     }
 
     @Override
-    @PreAuthorize(Security.PreAutorize.User.REGISTER_USERS)
     public ResponseEntity<UserResponse> add(UserRequest request) {
-        User user = toMapper(request, User.class);
-        UserEntity entity = userService.save(user.toEntity());
-        return ResponseEntity.ok(toMapper(entity, UserResponse.class));
+        throw new NotificationException("Não suportado.");
     }
 
     @Override
-    @PreAuthorize(Security.PreAutorize.User.UPDATE_USERS)
     public ResponseEntity<UserResponse> update(Long id, UserRequest request) {
-        userService.existsById(id);
-        User domain = toMapper(request, User.class);
-        UserEntity entity = domain.toEntity();
-        userService.save(entity);
-        return ResponseEntity.ok(toMapper(entity, UserResponse.class));
+        throw new NotificationException("Não suportado.");
     }
 
     @Override
-    @PreAuthorize(Security.PreAutorize.User.LOGIN_MOBILE)
-    public ResponseEntity<UserResponse> login(String cpf, String password) {
-        String formattedCpf = CpfValidator.validateAndFormatCpf(cpf);
-        UserEntity entity = userService.login(formattedCpf, password);
-        return ResponseEntity.ok(toMapper(entity, UserResponse.class));
-    }
-
-    @Override
-    @PreAuthorize(Security.PreAutorize.User.FILTER_USERS)
-    public ResponseEntity<List<UserResponse>> filterBy(String search) {
-        List<UserEntity> entities = userService.filterBy(search);
-        return ResponseEntity.ok(toCollection(entities, UserResponse.class));
-    }
-
-    @Override
-    @PreAuthorize(Security.PreAutorize.User.DELETE_USERS)
-    public void delete(Long id) {
-        super.delete(id);
-    }
-
-    @Override
-    @PreAuthorize(Security.PreAutorize.User.FILTER_USERS)
+    @PreAuthorize(Security.PreAutorize.ChangePassword.FILTER_USERS)
     public ResponseEntity<List<UserResponse>> findAll() {
         return super.findAll();
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.ChangePassword.UPDATE_CHANGEPASSWORD_USERS)
+    public ResponseEntity<Void> changePassword(UserRequest request) {
+        User domain = toMapper(request, User.class);
+        userService.changePassword(domain.toEntity());
+        return ResponseEntity.ok().build();
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import lombok.Getter;
 
 @Getter
-public enum TypeValueConfiguration {
+public enum TypeValueParameter {
 
     DECIMAL(1, "DECIMAL"),
     PERCENT(2, "PERCENTUAL"),
@@ -16,21 +16,21 @@ public enum TypeValueConfiguration {
     private final Integer code;
     private final String description;
 
-    TypeValueConfiguration(int code, String description) {
+    TypeValueParameter(int code, String description) {
         this.code = code;
         this.description = description;
     }
 
-    public static TypeValueConfiguration toDescription(String description) {
-        for (TypeValueConfiguration configuration : TypeValueConfiguration.values()) {
+    public static TypeValueParameter toDescription(String description) {
+        for (TypeValueParameter configuration : TypeValueParameter.values()) {
             if (configuration.name().equalsIgnoreCase(description)
                     || configuration.description.equals(description)) return configuration;
         }
         throw new NotificationException("Configuração não suportada :: " + description);
     }
 
-    public static TypeValueConfiguration toCode(Integer code) {
-        for (TypeValueConfiguration configuration : TypeValueConfiguration.values()) {
+    public static TypeValueParameter toCode(Integer code) {
+        for (TypeValueParameter configuration : TypeValueParameter.values()) {
             if (configuration.code.equals(code)) return configuration;
         }
         throw new NotificationException("Código configuração não suportada :: " + code);

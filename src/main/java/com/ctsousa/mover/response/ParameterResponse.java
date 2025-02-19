@@ -1,12 +1,12 @@
 package com.ctsousa.mover.response;
 
-import com.ctsousa.mover.enumeration.TypeValueConfiguration;
+import com.ctsousa.mover.enumeration.TypeValueParameter;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ConfigurationResponse {
+public class ParameterResponse {
     private Long id;
     private String key;
     private String value;
@@ -14,6 +14,6 @@ public class ConfigurationResponse {
     private Boolean active;
 
     public void setTypeValue(String typeValue) {
-        this.typeValue = String.valueOf(TypeValueConfiguration.toDescription(typeValue).getCode());
+        this.typeValue = String.valueOf(TypeValueParameter.toDescription(typeValue).getCode());
     }
 }

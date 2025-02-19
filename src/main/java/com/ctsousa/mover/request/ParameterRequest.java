@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ConfigurationRequest {
+public class ParameterRequest {
     private Long id;
 
     @NotEmpty(message = "Chave não pode ser vázio")

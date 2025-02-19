@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TypeConfigurationResponse {
+public class TypeParameterResponse {
     private Integer code;
     private String description;
 }

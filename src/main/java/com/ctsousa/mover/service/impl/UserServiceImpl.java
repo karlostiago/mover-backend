@@ -110,6 +110,10 @@ public class UserServiceImpl extends BaseServiceImpl<UserEntity, Long> implement
         UserEntity entity = userRepository.findByLogin(username)
                 .orElseThrow(() -> new NotificationException("Usuário não encontrado."));
 
+        if (!entity.getActive()) {
+            throw new NotificationException("Usuário não esta ativo.");
+        }
+
         List<String> permissions = permissionRepository.findByUser(entity.getId());
         autorities = new String[permissions.size()];
 

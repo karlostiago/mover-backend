@@ -7,8 +7,12 @@ public abstract class Security {
             public final static String REGISTER_USERS = "hasAnyRole('ROLE_REGISTER_USERS')";
             public final static String UPDATE_USERS = "hasAnyRole('ROLE_UPDATE_USERS')";
             public final static String DELETE_USERS = "hasAnyRole('ROLE_DELETE_USERS')";
-            public final static String FILTER_USERS = "hasAnyRole('ROLE_FILTER_USERS', 'ROLE_FILTER_CHANGEPASSWORD_USERS')";
+            public final static String FILTER_USERS = "hasAnyRole('ROLE_FILTER_USERS')";
             public final static String LOGIN_MOBILE = "hasAnyRole('ROLE_LOGIN_MOBILE')";
+        }
+
+        public static class ChangePassword {
+            public final static String FILTER_USERS = "hasAnyRole('ROLE_FILTER_CHANGEPASSWORD_USERS')";
             public final static String UPDATE_CHANGEPASSWORD_USERS = "hasAnyRole('ROLE_UPDATE_CHANGEPASSWORD_USERS')";
         }
 

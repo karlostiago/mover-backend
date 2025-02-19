@@ -11,8 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tb_configuration")
-public class ConfigurationEntity extends AbstractEntity {
+@Table(name = "tb_parameter")
+public class ParameterEntity extends AbstractEntity {
 
     @Column(name = "`key`", nullable = false)
     private String key;
