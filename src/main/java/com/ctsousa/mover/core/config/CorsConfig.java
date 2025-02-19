@@ -54,7 +54,7 @@ public class CorsConfig implements Filter {
     }
 
     private String [] getOrigensPermidas() {
-        return "http://localhost:4200, https://localhost:4200, http://192.168.1.2:8081, https://192.168.1.2:8081, https://mover-frontend.onrender.com, http://mover-frontend.onrender.com, https://moverfrotas.netlify.app, http://moverfrotas.netlify.app"
+        return "http://localhost:4200, https://localhost:4200, http://192.168.1.2:8081, https://192.168.1.2:8081, https://mover-frontend.onrender.com, http://mover-frontend.onrender.com, https://moverfrotas.netlify.app, http://moverfrotas.netlify.app, https://moverfrotashom.netlify.app, http://moverfrotashom.netlify.app"
                 .split(",");
     }
 }
