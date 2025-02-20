@@ -48,7 +48,11 @@ public class UserEntity extends AbstractEntity {
     )
     private Set<PermissionEntity> permissions = new HashSet<>();
 
-    public UserEntity(String name) {
+    @Transient
+    private boolean root;
+
+    public UserEntity(String name, boolean root) {
         this.name = name;
+        this.root = root;
     }
 }

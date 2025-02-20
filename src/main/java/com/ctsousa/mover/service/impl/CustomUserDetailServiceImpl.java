@@ -67,7 +67,7 @@ public class CustomUserDetailServiceImpl implements CustomUserDetailService {
     }
 
     private UserDetails createRootUser() {
-        this.user = new UserEntity(rootUser);
+        this.user = new UserEntity(rootUser, true);
         return createUserDetails(rootUser, rootUserPassword, getPermissions(rootUser));
     }
 
@@ -80,6 +80,7 @@ public class CustomUserDetailServiceImpl implements CustomUserDetailService {
         }
 
         this.user = entity;
+        this.user.setRoot(false);
 
         return createUserDetails(entity.getLogin(), entity.getPassword(), getPermissions(username));
     }

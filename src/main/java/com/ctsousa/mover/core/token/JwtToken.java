@@ -1,5 +1,6 @@
 package com.ctsousa.mover.core.token;
 
+import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.service.CustomUserDetailService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,10 +23,12 @@ public class JwtToken {
 
     public Token generateToken(final String username) {
         Date expiresInOneHour = expiresInOneHour();
+        UserEntity entity = customUserDetailService.getUser();
         return new Token(Jwts.builder()
                 .setSubject(username)
                 .claim("permissions", getPermissions(username))
                 .claim("login", username)
+                .claim("root", entity.isRoot())
                 .setIssuedAt(new Date())
                 .setExpiration(expiresInOneHour)
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
