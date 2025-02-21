@@ -10,6 +10,7 @@ import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.request.TransactionRequest;
 import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.service.TransactionService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +30,7 @@ import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
 @RequestMapping("/transactions")
+@Slf4j
 public class TransactionResource extends BaseResource<TransactionResponse, TransactionRequest, TransactionEntity> implements TransactionApi {
 
     private static Long REMAINING_PAGE = 0L;
@@ -97,6 +99,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     @Override
     @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
     public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
+        log.info("filter search transaction {}", uri);
 
         var filter = new Transaction.Filter(uri);
 
