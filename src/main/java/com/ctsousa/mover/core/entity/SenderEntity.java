@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tbl_sender")
+@Table(name = "tb_sender")
 public class SenderEntity extends AbstractEntity {
 
     @Column(name = "client_id")

@@ -1,6 +1,7 @@
 package com.ctsousa.mover.core.token;
 
 import com.ctsousa.mover.core.entity.UserEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.service.CustomUserDetailService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,6 +23,7 @@ public class JwtToken {
     }
 
     public Token generateToken(final String username) {
+        verfiySecretKeyIsNull();
         Date expiresInOneHour = expiresInOneHour();
         UserEntity entity = customUserDetailService.getUser();
         return new Token(Jwts.builder()
@@ -36,6 +38,7 @@ public class JwtToken {
     }
 
     public static String extractUsername(final String token) {
+        verfiySecretKeyIsNull();
         return Jwts.parserBuilder()
                 .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
                 .build()
@@ -47,6 +50,12 @@ public class JwtToken {
     public static boolean validateToken(final String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equalsIgnoreCase(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    private static void verfiySecretKeyIsNull() {
+        if (SECRET_KEY == null) {
+            throw new NotificationException("Secret key is null, login to recover automatically.");
+        }
     }
 
     private List<String> getPermissions(final String username) {

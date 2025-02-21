@@ -1,0 +1,20 @@
+CREATE TABLE `tb_maintenance` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `active` bit(1) DEFAULT NULL,
+  `date` date NOT NULL,
+  `detail` longtext NOT NULL,
+  `establishment` varchar(255) NOT NULL,
+  `mileage` bigint NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `value` decimal(38,2) NOT NULL,
+  `account_id` bigint NOT NULL,
+  `card_id` bigint DEFAULT NULL,
+  `vehicle_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_maintenance_account_id` (`account_id`),
+  KEY `fk_maintenance_card_id` (`card_id`),
+  KEY `fk_maintenance_vehicle_id` (`vehicle_id`),
+  CONSTRAINT `fk_maintenance_account_id` FOREIGN KEY (`account_id`) REFERENCES `tb_account` (`id`),
+  CONSTRAINT `fk_maintenance_card_id` FOREIGN KEY (`card_id`) REFERENCES `tb_card` (`id`),
+  CONSTRAINT `fk_maintenance_vehicle_id` FOREIGN KEY (`vehicle_id`) REFERENCES `tb_vehicle` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

@@ -1,0 +1,21 @@
+CREATE TABLE `tb_contract` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `active` bit(1) DEFAULT NULL,
+  `billing_start_date` date NOT NULL,
+  `deposit_amount` decimal(38,2) NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `initial_date` date NOT NULL,
+  `number` varchar(255) NOT NULL,
+  `payment_day` enum('FRIDAY','MONDAY','SATURDAY','SUNDAY','THURSDAY','TUESDAY','WEDNESDAY') NOT NULL,
+  `payment_frequency` enum('BIWEEKLY','MONTHLY','WEEKLY') NOT NULL,
+  `reason` longtext,
+  `recurrence_value` decimal(38,2) NOT NULL,
+  `situation` enum('AVAILABLE','CLOSED','IN_ACQUISITION','IN_FLEET','IN_PROGRESS','ONGOING','SOLD','TOTAL_LOSS','UNDER_ANALYSIS') NOT NULL,
+  `client_id` bigint NOT NULL,
+  `vehicle_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_contract_client_id` (`client_id`),
+  KEY `fk_contract_vehicle_id` (`vehicle_id`),
+  CONSTRAINT `fk_contract_client_id` FOREIGN KEY (`client_id`) REFERENCES `tb_client` (`id`),
+  CONSTRAINT `fk_contract_vehicle_id` FOREIGN KEY (`vehicle_id`) REFERENCES `tb_vehicle` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

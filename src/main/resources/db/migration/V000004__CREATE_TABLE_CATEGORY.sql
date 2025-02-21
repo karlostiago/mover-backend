@@ -1,0 +1,7 @@
+CREATE TABLE `tb_category` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `active` bit(1) DEFAULT NULL,
+  `description` varchar(255) NOT NULL,
+  `type` enum('EXPENSE','INCOME','INVESTMENT','TRANSFER','CORPORATE_CAPITAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

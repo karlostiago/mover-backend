@@ -21,6 +21,13 @@ spring:
       "[hibernate.dialect]": org.hibernate.dialect.MySQL8Dialect
       "[hibernate.generate_statistics]": false
       "[hibernate.connection.provider_disables_autocommit]": true
+  flyway:
+    enabled: true
+    url: jdbc:mysql://localhost:3306/mover?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    user: root
+    password: 123456
+    locations: classpath:db/migration
+    database: mysql
   mail:
     host: smtp.gmail.com
     port: 465
