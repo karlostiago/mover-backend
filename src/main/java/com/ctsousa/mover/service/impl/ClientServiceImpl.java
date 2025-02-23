@@ -15,7 +15,6 @@ import com.ctsousa.mover.repository.UserRepository;
 import com.ctsousa.mover.service.ClientService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
