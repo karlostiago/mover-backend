@@ -1,6 +1,7 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.ClientEntity;
+import com.ctsousa.mover.core.entity.ContractEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.notification.NotificationNotFoundException;
@@ -8,9 +9,11 @@ import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.enumeration.BrazilianStates;
+import com.ctsousa.mover.enumeration.Situation;
 import com.ctsousa.mover.integration.viacep.entity.ViaCepEntity;
 import com.ctsousa.mover.integration.viacep.gateway.ViaCepGateway;
 import com.ctsousa.mover.repository.ClientRepository;
+import com.ctsousa.mover.repository.ContractRepository;
 import com.ctsousa.mover.repository.UserRepository;
 import com.ctsousa.mover.service.ClientService;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 import static com.ctsousa.mover.core.validation.PasswordValidator.defaultPasswordMover;
@@ -30,11 +36,13 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
     private ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final ViaCepGateway viaCepGateway;
+    private final ContractRepository contractRepository;
 
-    public ClientServiceImpl(ClientRepository clientRepository, UserRepository userRepository, ViaCepGateway viaCepGateway) {
+    public ClientServiceImpl(ClientRepository clientRepository, UserRepository userRepository, ViaCepGateway viaCepGateway, ContractRepository contractRepository) {
         super(clientRepository);
         this.userRepository = userRepository;
         this.viaCepGateway = viaCepGateway;
+        this.contractRepository = contractRepository;
     }
 
     @Override
@@ -120,7 +128,23 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
 
     @Override
     public List<ClientEntity> onlyAvailable() {
-        return clientRepository.onlyAvailable();
+        Map<ClientEntity, ContractEntity> allContractsInProgress = contractRepository.findBy(Situation.ONGOING).stream()
+                .collect(Collectors.toMap(ContractEntity::getClient, contract -> contract));
+
+        List<ClientEntity> clients = clientRepository.findAll()
+                .stream().filter(ClientEntity::getActive)
+                .toList();
+
+        List<ClientEntity> entities = new ArrayList<>(clients.size());
+
+        for (ClientEntity client : clients) {
+            ContractEntity contract = allContractsInProgress.get(client);
+            if (contract == null) {
+                entities.add(client);
+            }
+        }
+
+        return entities;
     }
 
     @Override

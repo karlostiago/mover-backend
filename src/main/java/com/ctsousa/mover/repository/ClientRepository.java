@@ -30,6 +30,6 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Long> {
     @Query("SELECT c FROM ClientEntity c LEFT JOIN FETCH c.contacts LEFT JOIN FETCH c.user WHERE c.id = :id")
     Optional<ClientEntity> findById(@NonNull @Param("id") Long id);
 
-    @Query(value = "SELECT c.* FROM tb_client c LEFT JOIN tb_contract ct ON ct.client_id = c.id WHERE ct.client_id IS NULL OR ct.situation = 'CLOSED'", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT c.* FROM tb_client c LEFT JOIN tb_contract ct ON ct.client_id = c.id WHERE ct.client_id IS NULL OR ct.situation = 'CLOSED' ORDER BY c.name ASC", nativeQuery = true)
     List<ClientEntity> onlyAvailable();
 }

@@ -25,7 +25,7 @@ public enum Situation {
 
     public static Situation toDescription(String description) {
         for (Situation situation : Situation.values()) {
-            if (situation.description.equals(description)) return situation;
+            if (situation.description.equalsIgnoreCase(description)) return situation;
         }
         throw new NotificationException("Situacao não suportada :: " + description);
     }

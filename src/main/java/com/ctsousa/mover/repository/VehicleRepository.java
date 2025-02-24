@@ -38,7 +38,14 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
     @Query("SELECT CASE WHEN COUNT(v.id) > 0 THEN TRUE ELSE FALSE END FROM VehicleEntity v WHERE (v.renavam = :renavam OR v.licensePlate = :licensePlate) AND v.id NOT IN (:id) ")
     boolean existsByLicensePlateOrRenavamNotId(@Param("renavam") String renavam, @Param("licensePlate") String licensePlate, @Param("id") Long id);
 
-    @Query(value = "SELECT v.* FROM tb_vehicle v LEFT JOIN tb_contract c ON v.id = c.vehicle_id WHERE c.vehicle_id is null OR c.situation = 'CLOSED'", nativeQuery = true)
+    @Query(value = """
+           SELECT
+            v.*
+           FROM tb_vehicle v
+           LEFT JOIN tb_contract c ON v.id = c.vehicle_id
+           GROUP BY v.id
+           HAVING SUM(CASE WHEN c.situation ='ONGOING' THEN 1 ELSE 0 END) = 0
+           """, nativeQuery = true)
     List<VehicleEntity> onlyAvailable();
 
     @Query("SELECT CASE WHEN COUNT(v.id) > 0 THEN TRUE ELSE FALSE END FROM VehicleEntity v WHERE v.brand = :brand ")

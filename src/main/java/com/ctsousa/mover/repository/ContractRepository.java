@@ -38,11 +38,18 @@ public interface ContractRepository extends JpaRepository<ContractEntity, Long> 
     List<ContractEntity> findBy(@Param("query") String query);
 
     @Query("SELECT ct FROM ContractEntity ct " +
+            "INNER JOIN FETCH ct.vehicle v " +
+            "INNER JOIN FETCH v.brand b " +
+            "INNER JOIN FETCH v.model m " +
+            "INNER JOIN FETCH ct.client c " +
+            "WHERE ct.situation = :situation")
+    List<ContractEntity> findBy(@Param("situation") Situation situation);
+
+    @Query("SELECT ct FROM ContractEntity ct " +
             "INNER JOIN FETCH ct.client c " +
             "INNER JOIN FETCH ct.vehicle v " +
             "INNER JOIN FETCH v.brand b " +
             "INNER JOIN FETCH v.model m " +
             "WHERE c.id = :clientId")
     Optional<ContractEntity> findContratoByClientId(@Param("clientId") Long clientId);
-
 }

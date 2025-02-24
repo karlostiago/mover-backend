@@ -1,6 +1,7 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.ClientEntity;
+import com.ctsousa.mover.core.entity.ContactEntity;
 import com.ctsousa.mover.core.entity.ContractEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
@@ -50,12 +51,15 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
             if (repository.existsByNumber(entity.getNumber())) {
                 throw new NotificationException("Ocorreu um erro ao salvar o contrato. Numeração em duplicidade!", Severity.ERROR);
             }
-        } else {
-            if (Situation.CLOSED.equals(entity.getSituation())) {
-                return close(entity);
-            }
         }
-        return super.save(entity);
+
+        ContractEntity entitySaved = super.save(entity);
+
+        if (Situation.CLOSED.equals(entity.getSituation())) {
+            return close(entitySaved);
+        }
+
+        return entitySaved;
     }
 
     @Override
@@ -127,6 +131,15 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
     @Override
     public List<ContractEntity> filterBy(String search) {
         if (search == null || search.isEmpty()) return repository.findAll();
+
+        String [] situations = { Situation.CLOSED.getDescription().toLowerCase(), Situation.ONGOING.getDescription().toLowerCase() };
+
+        for (String situation : situations) {
+            if (situation.contains(search)) {
+                return repository.findBy(Situation.toDescription(situation));
+            }
+        }
+
         return repository.findBy(search);
     }
 }
