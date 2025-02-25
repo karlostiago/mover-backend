@@ -2,8 +2,6 @@ package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.util.DateUtil;
-import com.ctsousa.mover.core.util.NumberUtil;
-import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import lombok.Getter;
 import lombok.Setter;

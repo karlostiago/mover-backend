@@ -42,6 +42,7 @@ public enum Functionality {
     UPDATE_TRANSACTIONS(2, Menu.MY_MONEY,"Permite atualizar lançamentos"),
     DELETE_TRANSACTIONS(3, Menu.MY_MONEY,"Permite deletar lançamentos"),
     PAYMENT_TRANSACTIONS(4, Menu.MY_MONEY,"Permite pagar lançamentos"),
+
     REFUND_TRANSACTIONS(5, Menu.MY_MONEY,"Permite estornar lançamentos"),
     ENABLED_INSTALLMENT_TRANSACTIONS(6, Menu.MY_MONEY,"Permite ativa repetição de lançamentos"),
     FILTER_TRANSACTIONS(7, Menu.MY_MONEY,"Permite consultar lançamentos"),

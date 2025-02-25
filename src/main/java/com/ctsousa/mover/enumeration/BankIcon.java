@@ -38,7 +38,8 @@ public enum BankIcon {
     BANK_MERCADO_PAGO(31,"","Mercado Pago", "assets/icons/mercadopago.png"),
     BANK_BANQI(32,"Banco","BanQi", "assets/icons/banqi.png"),
     BANK_BARI(33,"Banco", "Bari", "assets/icons/bari.png"),
-    BANK_GENERIC(34,"Banco","Genérico ", "assets/icons/bit.png");
+    BANK_GENERIC(34,"Banco","Genérico ", "assets/icons/bit.png"),
+    BANK_ASAAS(35,"Banco","Asaas ", "assets/icons/asaas.png");
 
     private final Integer code;
     private final String prefix;
