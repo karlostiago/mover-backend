@@ -1,5 +1,6 @@
 package com.ctsousa.mover.repository;
 
+import com.ctsousa.mover.core.entity.ContractEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +37,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Transactional
     @Query(value = "UPDATE UserEntity u SET u.password = :password WHERE u.id = :id ")
     void updatePassword(@Param("id") Long id, @Param("password") String password);
+
+    @NonNull
+    @Override
+    @Query("SELECT u FROM UserEntity u INNER JOIN FETCH u.profiles  WHERE 1 = 1")
+    List<UserEntity> findAll();
 }

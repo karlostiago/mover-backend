@@ -1,5 +1,6 @@
 package com.ctsousa.mover.core.token;
 
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.service.CustomUserDetailService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -26,17 +28,39 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        String token = null;
-        String username = null;
+        Optional<String> tokenOpt = extractToken(request);
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer")) {
-            token = authorizationHeader.substring(7);
-            username = JwtToken.extractUsername(token);
+        if (tokenOpt.isPresent()) {
+            var token = tokenOpt.get();
+            try {
+                processAuthentication(request, token);
+            } catch (NotificationException e) {
+                if (isSessionExpired(e)) {
+                    handleSessionExpired(response);
+                    return;
+                }
+                if (isServerRestarted(e)) {
+                    handleServerRestarted(response);
+                    return;
+                }
+            }
         }
 
+        filterChain.doFilter(request, response);
+    }
+
+    private Optional<String> extractToken(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer")) {
+            return Optional.of(authorizationHeader.substring(7));
+        }
+        return Optional.empty();
+    }
+
+    private void processAuthentication(HttpServletRequest request, String token) {
+        var username = JwtToken.extractUsername(token);
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
 
@@ -48,7 +72,27 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
+    }
 
-        filterChain.doFilter(request, response);
+    private boolean isSessionExpired(NotificationException e) {
+        return "Sua sessão foi expirada.".equalsIgnoreCase(e.getMessage());
+    }
+
+    private boolean isServerRestarted(NotificationException e) {
+        return "Secret key is null, login to recover automatically.".equalsIgnoreCase(e.getMessage());
+    }
+
+    private void handleSessionExpired(HttpServletResponse response) throws IOException {
+        String message = "Sua sessão foi encerrada. Por motivos de segurança, você precisa fazer login novamente para continua.";
+        response.setStatus(498);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
+    }
+
+    private void handleServerRestarted(HttpServletResponse response) throws IOException {
+        String message = "O servidor foi reiniciado recentemente e sua sessão foi encerrada por motivos de segurança. Você será redirecionado para a tela de login para continuar.";
+        response.setStatus(503);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }

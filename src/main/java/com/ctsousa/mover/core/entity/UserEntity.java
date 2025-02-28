@@ -32,7 +32,7 @@ public class UserEntity extends AbstractEntity {
     @Column(name = "client_id")
     private Long clientId;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "tb_user_profile",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -40,7 +40,7 @@ public class UserEntity extends AbstractEntity {
     )
     private Set<ProfileEntity> profiles = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "tb_user_permission",
             joinColumns = @JoinColumn(name = "user_id"),
