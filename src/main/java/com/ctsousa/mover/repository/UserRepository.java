@@ -1,6 +1,5 @@
 package com.ctsousa.mover.repository;
 
-import com.ctsousa.mover.core.entity.ContractEntity;
 import com.ctsousa.mover.core.entity.UserEntity;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;

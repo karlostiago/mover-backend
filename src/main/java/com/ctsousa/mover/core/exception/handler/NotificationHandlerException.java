@@ -1,14 +1,17 @@
 package com.ctsousa.mover.core.exception.handler;
 
 import com.ctsousa.mover.core.exception.builder.ErrorBuilder;
-import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.error.Error;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.notification.NotificationNotFoundException;
+import com.ctsousa.mover.core.exception.severity.Severity;
+import lombok.NonNull;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,46 +29,35 @@ public class NotificationHandlerException extends ResponseEntityExceptionHandler
 
     @ExceptionHandler({NotificationException.class})
     public ResponseEntity<List<Error>> handleNotificationException(NotificationException ex) {
-        List<Error> errors = List.of((ErrorBuilder.builder()
-                .withStatus(HttpStatus.BAD_REQUEST)
-                .withMessage(ex.getMessage())
-                .withDetails(ex)
-                .withSeverity(ex.getSeverity())
-                .build()));
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.status(ex.getHttpStatus()).body(getErrors(ex, ex.getSeverity(), ex.getHttpStatus()));
+    }
+
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<List<Error>> handleException(Exception ex) {
+        if (ex instanceof AuthorizationDeniedException) {
+            NotificationException e = new NotificationException(ex.getMessage(), Severity.ERROR, HttpStatus.FORBIDDEN);
+            return handleNotificationException(e);
+        }
+        return ResponseEntity.internalServerError().body(getErrors(ex, Severity.ERROR, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     @ExceptionHandler({NotificationNotFoundException.class})
     public ResponseEntity<List<Error>> handleNotificationNotFoundException(NotificationNotFoundException ex) {
-        List<Error> errors = List.of((ErrorBuilder.builder()
-                .withStatus(HttpStatus.NOT_FOUND)
-                .withMessage(ex.getMessage())
-                .withSeverity(ex.getSeverity())
-                .withDetails(ex)
-                .build()));
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.badRequest().body(getErrors(ex, ex.getSeverity(), HttpStatus.NOT_FOUND));
     }
 
     @ExceptionHandler({SQLIntegrityConstraintViolationException.class})
     public ResponseEntity<List<Error>> handleSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex) {
-        List<Error> errors = List.of((ErrorBuilder.builder()
-                .withStatus(HttpStatus.CONFLICT)
-                .withMessage("Conflict: " + ex.getMessage())
-                .build()));
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errors);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(getConflictErrors(ex));
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class})
     public ResponseEntity<List<Error>> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        List<Error> errors = List.of((ErrorBuilder.builder()
-                .withStatus(HttpStatus.CONFLICT)
-                .withMessage("Conflict: " + ex.getMessage())
-                .build()));
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errors);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(getConflictErrors(ex));
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         BindingResult bindingResult = ex.getBindingResult();
         List<Error> errors = new ArrayList<>(bindingResult.getFieldErrors().size());
 
@@ -77,5 +69,21 @@ public class NotificationHandlerException extends ResponseEntityExceptionHandler
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    private List<Error> getConflictErrors(Exception ex) {
+        return List.of((ErrorBuilder.builder()
+                .withStatus(HttpStatus.CONFLICT)
+                .withMessage("Conflict: " + ex.getMessage())
+                .build()));
+    }
+
+    private List<Error> getErrors(Exception ex, Severity severity, HttpStatus httpStatus) {
+        return List.of((ErrorBuilder.builder()
+                .withStatus(httpStatus)
+                .withMessage(ex.getMessage())
+                .withDetails(ex)
+                .withSeverity(severity)
+                .build()));
     }
 }
