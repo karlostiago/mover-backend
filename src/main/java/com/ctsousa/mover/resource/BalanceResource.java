@@ -29,8 +29,7 @@ public class BalanceResource implements BalanceApi {
     public ResponseEntity<BalanceResponse> balances(String filterURI) {
         var filter = new Transaction.Filter(filterURI);
 
-        Page<TransactionEntity> page = transactionService.search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(),
-                filter.getText(), PageRequest.of(0, Integer.MAX_VALUE));
+        Page<TransactionEntity> page = transactionService.search(filter, PageRequest.of(0, Integer.MAX_VALUE));
 
         BalanceResponse response = balanceService.calculateBalances(filter.getAccountsId(), page.stream().toList());
 

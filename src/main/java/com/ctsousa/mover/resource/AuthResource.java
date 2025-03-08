@@ -1,8 +1,8 @@
 package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.exception.notification.NotificationException;
-import com.ctsousa.mover.core.token.JwtToken;
-import com.ctsousa.mover.core.token.Token;
+import com.ctsousa.mover.core.security.token.JwtToken;
+import com.ctsousa.mover.core.security.token.Token;
 import com.ctsousa.mover.request.AuthRequest;
 import com.ctsousa.mover.response.AuthResponse;
 import com.ctsousa.mover.service.CustomUserDetailService;

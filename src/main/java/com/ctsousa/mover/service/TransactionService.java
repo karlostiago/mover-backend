@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public interface TransactionService extends BaseService<TransactionEntity, Long> {
 
@@ -26,5 +25,5 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
 
     TransactionEntity batchUpdate(final Long id, Transaction transaction);
 
-    Page<TransactionEntity> search(final LocalDate dtInitial, final LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable);
+    Page<TransactionEntity> search(final Transaction.Filter filter, Pageable pageable);
 }

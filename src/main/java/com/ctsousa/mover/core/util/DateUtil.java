@@ -5,6 +5,7 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.TextStyle;
 import java.util.*;
 
 public final class DateUtil {
@@ -123,6 +124,20 @@ public final class DateUtil {
 
     public static LocalDate newInstanceToLocalDate(LocalDate date) {
         return LocalDate.of(date.getYear(), date.getMonth(), date.getDayOfMonth());
+    }
+
+    public static String dayOfWeek(final LocalDate localDate) {
+        if (localDate == null) return "";
+        return localDate.getDayOfWeek().getDisplayName(
+            TextStyle.FULL, new Locale("pt", "BR")
+        );
+    }
+
+    public static String monthInFull(final LocalDate localDate) {
+        if (localDate == null) return "";
+        return localDate.getMonth().getDisplayName(
+                TextStyle.FULL, new Locale("pt", "BR")
+        );
     }
 
     private static List<DateTimeFormatter> formatters() {

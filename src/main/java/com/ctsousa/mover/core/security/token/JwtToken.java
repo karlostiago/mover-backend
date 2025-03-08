@@ -1,4 +1,4 @@
-package com.ctsousa.mover.core.token;
+package com.ctsousa.mover.core.security.token;
 
 import com.ctsousa.mover.core.entity.UserEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;

@@ -6,6 +6,7 @@ import com.ctsousa.mover.core.factory.*;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
+import com.ctsousa.mover.service.InvoiceService;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.ctsousa.mover.core.util.NumberUtil.parseMonetary;
@@ -37,7 +39,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository repository;
 
-    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, TransactionRepository repository) {
+    private final InvoiceService invoiceService;
+
+    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, TransactionRepository repository, InvoiceService invoiceService) {
         this.createTransactionServiceFactory = createTransactionServiceFactory;
         this.updateTransactionServiceFactory = updateTransactionServiceFactory;
         this.filterTransactionServiceFactory = filterTransactionServiceFactory;
@@ -45,6 +49,7 @@ public class TransactionServiceImpl implements TransactionService {
         this.refundTransactionServiceFactory = refundTransactionServiceFactory;
         this.deleteTransactionServiceFactory = deleteTransactionServiceFactory;
         this.repository = repository;
+        this.invoiceService = invoiceService;
     }
 
     @Override
@@ -132,38 +137,35 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Page<TransactionEntity> search(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable) {
+    public Page<TransactionEntity> search(Transaction.Filter filter, Pageable pageable) {
+        return search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
+    }
+
+    private Page<TransactionEntity> search(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable) {
         var value = parseMonetary(text);
         text = value != null ? null : toUppercase(text);
         Page<TransactionEntity> page;
+        List<TransactionEntity> entities;
         if (hasAccountAndText(accountListId, text)) {
             page = repository.findByPeriodAndAccountAndDescription(dtInitial, dtFinal, accountListId, text, pageable);
-            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
-            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
-        if (hasAccountAndValue(accountListId, value)) {
+        else if (hasAccountAndValue(accountListId, value)) {
             page = repository.findByPeriodAndAccountAndValue(dtInitial, dtFinal, accountListId, value, pageable);
-            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
-            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
-        if (hasValueAndNotAccount(accountListId, value)) {
+        else if (hasValueAndNotAccount(accountListId, value)) {
             page = repository.findByPeriodAndValue(dtInitial, dtFinal, value, pageable);
-            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
-            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
-        if (hasTextAndNotAccount(accountListId, text)) {
+        else if (hasTextAndNotAccount(accountListId, text)) {
             page = repository.findByPeriodAndDescription(dtInitial, dtFinal, text, pageable);
-            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
-            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
-        if (hasAccount(accountListId)) {
+        else if (hasAccount(accountListId)) {
             page = repository.findByPeriodAndAccount(dtInitial, dtFinal, accountListId, pageable);
-            List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
-            return new PageImpl<>(entities, pageable, page.getTotalElements());
         }
-        page = repository.findByPeriod(dtInitial, dtFinal, pageable);
-        List<TransactionEntity> entities = page.stream().filter(this::isNotIgnoreTransaction).toList();
-        return new PageImpl<>(entities, pageable, page.getTotalElements());
+        else {
+            page = repository.findByPeriod(dtInitial, dtFinal, pageable);
+        }
+        entities = new ArrayList<>(page.stream().toList());
+        return new PageImpl<>(invoiceService.genereteInvoice(entities), pageable, page.getTotalElements());
     }
 
     private boolean hasAccountAndText(List<Long> accountListId, String text) {
@@ -184,13 +186,5 @@ public class TransactionServiceImpl implements TransactionService {
 
     private boolean hasAccount(List<Long> accountListId) {
         return !accountListId.isEmpty();
-    }
-
-    private boolean isIgnoreTransaction(TransactionEntity entity) {
-        return "CREDIT".equals(entity.getTransactionType()) && "TRANSFER".equals(entity.getCategoryType());
-    }
-
-    private boolean isNotIgnoreTransaction(TransactionEntity entity) {
-        return !isIgnoreTransaction(entity);
     }
 }

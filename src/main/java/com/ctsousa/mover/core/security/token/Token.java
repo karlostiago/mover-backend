@@ -1,4 +1,4 @@
-package com.ctsousa.mover.core.token;
+package com.ctsousa.mover.core.security.token;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -49,6 +49,9 @@ public class TransactionResponse {
     private Boolean lastInstallment;
 
     private Long remainingPages;
+    private String dayOfWeek;
+    private InvoiceResponse invoice;
+    private Boolean hasInvoice = Boolean.FALSE;
 
     public void setCategoryType(String categoryType) {
         this.categoryType = TypeCategory.toDescription(categoryType)

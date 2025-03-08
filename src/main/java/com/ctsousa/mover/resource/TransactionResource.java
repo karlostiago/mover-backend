@@ -4,10 +4,12 @@ import com.ctsousa.mover.core.api.TransactionApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.security.Security;
+import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.BankIcon;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.request.TransactionRequest;
+import com.ctsousa.mover.response.InvoiceResponse;
 import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,8 +101,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
         var filter = new Transaction.Filter(uri);
 
-        Page<TransactionEntity> page = transactionService.search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(),
-                filter.getText(), PageRequest.of(filter.getPageNumber(), 100));
+        Page<TransactionEntity> page = transactionService.search(filter, PageRequest.of(filter.getPageNumber(), 100));
 
         REMAINING_PAGE = BigDecimal.valueOf(page.getTotalPages() - (page.getNumber() + 1)).longValue();
 
@@ -135,13 +136,15 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
             } else {
                 transactionResponse.setDate(transactionResponse.getDueDate());
             }
-
-            if ("TRANSFER".equals(entity.getCategoryType())) {
-                transactionResponse.setValue(entity.getValue().multiply(BigDecimal.valueOf(-1D)));
-            }
+            transactionResponse.setDayOfWeek(DateUtil.dayOfWeek(transactionResponse.getDate()));
 
             BankIcon icon = BankIcon.toName(entity.getAccount().getIcon());
             transactionResponse.setIcon(icon.getUrlImage());
+
+            if (entity.getInvoice() != null) {
+                transactionResponse.setInvoice(new InvoiceResponse(entity.getInvoice()));
+                transactionResponse.setHasInvoice(Boolean.TRUE);
+            }
         }
     }
 
