@@ -138,6 +138,12 @@ public class ContractResource extends BaseResource<ContractResponse, ContractReq
     }
 
     @Override
+    @PreAuthorize(Security.PreAutorize.Contract.FILTER_CONTRACTS)
+    public ResponseEntity<ContractResponse> findById(Long id) {
+        return super.findById(id);
+    }
+
+    @Override
     public void updateResponse(List<ContractResponse> response, List<ContractEntity> entities) {
         Map<Long, ContractResponse> responseMap = response.stream()
                 .collect(Collectors.toMap(ContractResponse::getId, r -> r));

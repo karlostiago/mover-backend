@@ -66,7 +66,7 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
     public ContractEntity close(ContractEntity entity) {
         entity.setClient(clientService.findById(entity.getClient().getId()));
         ClientEntity clientEntity = entity.getClient();
-        clientEntity.setActive(Boolean.FALSE);
+        clientEntity.setActive(entity.getInactiveClient() ? Boolean.FALSE : Boolean.TRUE);
         clientRepository.save(clientEntity);
 
         entity.setSituation(Situation.CLOSED);

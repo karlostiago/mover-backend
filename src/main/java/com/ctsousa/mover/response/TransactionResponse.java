@@ -52,6 +52,7 @@ public class TransactionResponse {
     private String dayOfWeek;
     private InvoiceResponse invoice;
     private Boolean hasInvoice = Boolean.FALSE;
+    private Boolean scheduled = Boolean.FALSE;
 
     public void setCategoryType(String categoryType) {
         this.categoryType = TypeCategory.toDescription(categoryType)

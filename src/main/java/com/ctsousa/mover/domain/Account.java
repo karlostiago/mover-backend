@@ -2,7 +2,7 @@ package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.util.HashUtil;
-import com.ctsousa.mover.enumeration.BankIcon;
+import com.ctsousa.mover.enumeration.Icon;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,7 +37,7 @@ public class Account extends DomainModel<AccountEntity> {
         entity.setInitialBalance(this.getInitialBalance());
         entity.setAvailableBalance(this.getInitialBalance());
 
-        BankIcon icon = BankIcon.toCode(this.getCodeIcon());
+        Icon icon = Icon.toCode(this.getCodeIcon());
         entity.setIcon(icon.name());
 
         String active = this.getActive() ? "SIM" : "NAO";

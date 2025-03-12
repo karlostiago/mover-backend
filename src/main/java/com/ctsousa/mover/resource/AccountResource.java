@@ -5,7 +5,7 @@ import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Account;
-import com.ctsousa.mover.enumeration.BankIcon;
+import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.request.AccountRequest;
 import com.ctsousa.mover.response.AccountResponse;
 import com.ctsousa.mover.response.BankIconResponse;
@@ -67,8 +67,8 @@ public class AccountResource extends BaseResource<AccountResponse, AccountReques
     @Override
     @PreAuthorize(Security.PreAutorize.Account.SEARCH_ACCOUNTS_ICONS)
     public ResponseEntity<List<BankIconResponse>> findAllIcons() {
-        List<BankIcon> icons = Stream.of(BankIcon.values())
-                .sorted(Comparator.comparing(BankIcon::getBankName))
+        List<Icon> icons = Stream.of(Icon.values())
+                .sorted(Comparator.comparing(Icon::getBankName))
                 .toList();
         return ResponseEntity.ok(toCollection(icons, BankIconResponse.class));
     }

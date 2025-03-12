@@ -2,7 +2,7 @@ package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.CardEntity;
-import com.ctsousa.mover.enumeration.BankIcon;
+import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.enumeration.CardType;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,7 +36,7 @@ public class Card extends DomainModel<CardEntity> {
         AccountEntity account = new AccountEntity(this.getAccountId());
         entity.setAccount(account);
 
-        entity.setIcon(BankIcon.toCode(this.getCodeIcon()).name());
+        entity.setIcon(Icon.toCode(this.getCodeIcon()).name());
         entity.setCardType(CardType.toDescription(this.getCardType()));
         entity.setAvailableBalance(this.getLimit());
 

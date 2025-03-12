@@ -4,7 +4,7 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import lombok.Getter;
 
 @Getter
-public enum BankIcon {
+public enum Icon {
     BANK_BB(1,"","Banco Do Brasil", "assets/icons/bb.png"),
     BANK_CAIXA(2,"","Caixa Econômica", "assets/icons/caixa.png"),
     BANK_BRADESCO(3,"","Bradesco", "assets/icons/bradesco.png"),
@@ -39,29 +39,30 @@ public enum BankIcon {
     BANK_BANQI(32,"Banco","BanQi", "assets/icons/banqi.png"),
     BANK_BARI(33,"Banco", "Bari", "assets/icons/bari.png"),
     BANK_GENERIC(34,"Banco","Genérico ", "assets/icons/bit.png"),
-    BANK_ASAAS(35,"Banco","Asaas ", "assets/icons/asaas.png");
+    BANK_ASAAS(35,"Banco","Asaas ", "assets/icons/asaas.png"),
+    INVOICE(36,"","", "assets/icons/invoice.png");
 
     private final Integer code;
     private final String prefix;
     private final String bankName;
     private final String urlImage;
 
-    BankIcon(Integer code, String prefix, String bankName, String urlImage) {
+    Icon(Integer code, String prefix, String bankName, String urlImage) {
         this.prefix = prefix;
         this.code = code;
         this.bankName = bankName;
         this.urlImage = urlImage;
     }
 
-    public static BankIcon toCode(Integer code) {
-        for (BankIcon bankIcon : BankIcon.values()) {
+    public static Icon toCode(Integer code) {
+        for (Icon bankIcon : Icon.values()) {
             if (bankIcon.code.equals(code)) return bankIcon;
         }
         throw new NotificationException("Código para o ícone selecionado não suportada :: " + code);
     }
 
-    public static BankIcon toName(String name) {
-        for (BankIcon bankIcon : BankIcon.values()) {
+    public static Icon toName(String name) {
+        for (Icon bankIcon : Icon.values()) {
             if (bankIcon.name().equals(name)) return bankIcon;
         }
         throw new NotificationException("Código para o ícone selecionado não suportada :: " + name);

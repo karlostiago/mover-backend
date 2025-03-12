@@ -1,6 +1,6 @@
 package com.ctsousa.mover.response;
 
-import com.ctsousa.mover.enumeration.BankIcon;
+import com.ctsousa.mover.enumeration.Icon;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +20,7 @@ public class AccountResponse {
     private Boolean active;
 
     public void setIcon(String nameIcon) {
-        BankIcon icon = BankIcon.toName(nameIcon);
+        Icon icon = Icon.toName(nameIcon);
         this.icon = icon.name();
         this.imageIcon = icon.getUrlImage();
         this.codeIcon = icon.getCode();

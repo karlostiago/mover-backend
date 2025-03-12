@@ -22,6 +22,7 @@ CREATE TABLE `tb_transaction` (
   `subcategory_id` bigint NOT NULL,
   `vehicle_id` bigint DEFAULT NULL,
   `last_installment` bit(1) NOT NULL,
+  `scheduled` bit(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_transaction_account_id` (`account_id`),
   KEY `fk_transaction_card_id` (`card_id`),

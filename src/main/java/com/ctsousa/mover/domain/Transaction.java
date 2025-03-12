@@ -41,6 +41,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
     private Boolean paid;
     private Boolean predicted;
     private Boolean lastInstallment;
+    private Boolean scheduled;
 
     public Transaction() {}
 
@@ -89,6 +90,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setInstallment(this.getInstallment());
         entity.setPaymentType(this.getPaymentType());
         entity.setFrequency(this.getFrequency());
+        entity.setScheduled(this.getScheduled());
 
         TypeCategory typeCategory = TypeCategory.toDescription(this.getCategoryType());
         entity.setCategoryType(typeCategory.name());

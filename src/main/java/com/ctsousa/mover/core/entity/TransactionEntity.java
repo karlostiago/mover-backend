@@ -90,6 +90,9 @@ public class TransactionEntity extends AbstractEntity {
     @Column(name = "last_installment", nullable = false)
     private Boolean lastInstallment;
 
+    @Column(name = "scheduled", nullable = false)
+    private Boolean scheduled;
+
     @Transient
     private AccountEntity destinationAccount;
 

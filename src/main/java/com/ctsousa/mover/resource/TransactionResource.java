@@ -6,7 +6,7 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
-import com.ctsousa.mover.enumeration.BankIcon;
+import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.request.TransactionRequest;
 import com.ctsousa.mover.response.InvoiceResponse;
@@ -138,7 +138,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
             }
             transactionResponse.setDayOfWeek(DateUtil.dayOfWeek(transactionResponse.getDate()));
 
-            BankIcon icon = BankIcon.toName(entity.getAccount().getIcon());
+            Icon icon = Icon.toName(entity.getAccount().getIcon());
             transactionResponse.setIcon(icon.getUrlImage());
 
             if (entity.getInvoice() != null) {

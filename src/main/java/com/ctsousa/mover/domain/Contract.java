@@ -6,6 +6,7 @@ import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.enumeration.DayOfWeek;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.enumeration.Situation;
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,6 +29,8 @@ public class Contract extends DomainModel<ContractEntity> {
     private String situation;
     private String paymentDay;
     private String reason;
+    private Boolean friendlyTermination;
+    private Boolean inactiveClient;
 
     @Override
     public ContractEntity toEntity() {
@@ -42,12 +45,18 @@ public class Contract extends DomainModel<ContractEntity> {
         entity.setDepositAmount(this.getDepositAmount());
         entity.setRecurrenceValue(this.getRecurrenceValue());
         entity.setReason(this.getReason());
+        entity.setFriendlyTermination(this.getFriendlyTermination());
+        entity.setInactiveClient(this.getInactiveClient());
 
         PaymentFrequency paymentFrequency = PaymentFrequency.toDescription(this.getPaymentFrequency());
         entity.setPaymentFrequency(paymentFrequency);
 
         Situation situation = Situation.toDescription(this.getSituation());
         entity.setSituation(situation);
+
+        if (Situation.ONGOING.equals(entity.getSituation())) {
+            entity.setReason(null);
+        }
 
         DayOfWeek dayOfWeek = DayOfWeek.toDescription(this.getPaymentDay());
         entity.setPaymentDay(dayOfWeek);

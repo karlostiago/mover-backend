@@ -61,6 +61,12 @@ public class ContractEntity extends AbstractEntity {
     @Column(name = "reason", columnDefinition = "LONGTEXT")
     private String reason;
 
+    @Column(name = "friendly_termination", nullable = false)
+    private Boolean friendlyTermination;
+
+    @Column(name = "inactive_client", nullable = false)
+    private Boolean inactiveClient;
+
     public ContractEntity(Long id) {
         super.setId(id);
     }

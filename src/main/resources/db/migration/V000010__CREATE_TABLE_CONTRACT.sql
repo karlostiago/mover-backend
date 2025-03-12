@@ -1,6 +1,8 @@
 CREATE TABLE `tb_contract` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `active` bit(1) DEFAULT NULL,
+  `friendly_termination` bit(1) NOT NULL,
+  `inactive_client` bit(1) NOT NULL,
   `billing_start_date` date NOT NULL,
   `deposit_amount` decimal(38,2) NOT NULL,
   `end_date` date DEFAULT NULL,

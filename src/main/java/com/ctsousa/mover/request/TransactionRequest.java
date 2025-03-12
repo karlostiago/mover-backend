@@ -52,4 +52,5 @@ public class TransactionRequest {
     private Boolean paid;
     private Boolean active;
     private Boolean deleteOnlyThis;
+    private Boolean scheduled;
 }

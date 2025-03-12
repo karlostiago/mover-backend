@@ -35,6 +35,8 @@ public class ContractResponse {
     private String paymentDay;
     private String reason;
     private Boolean active;
+    private Boolean friendlyTermination;
+    private Boolean inactiveClient;
 
     public void setPaymentFrequency(PaymentFrequency paymentFrequency) {
         this.paymentFrequency = paymentFrequency.getDescription();

@@ -1,7 +1,7 @@
 package com.ctsousa.mover.response;
 
 import com.ctsousa.mover.core.entity.TransactionEntity;
-import com.ctsousa.mover.enumeration.BankIcon;
+import com.ctsousa.mover.enumeration.Icon;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,13 +21,13 @@ public class InvoiceResponse {
     private Boolean paid;
     private BigDecimal total;
     private Long cardId;
-    private BankIcon icon;
+    private Icon icon;
     private List<TransactionResponse> transactions;
 
     public InvoiceResponse(TransactionEntity.Invoice invoice) {
         cardId = invoice.getCard().getId();
         dueDate = invoice.getDueDate();
-        icon = BankIcon.toName(invoice.getCard().getIcon());
+        icon = Icon.toName(invoice.getCard().getIcon());
         paymentDate = invoice.getPaymentDate();
         total = invoice.getTotal();
 

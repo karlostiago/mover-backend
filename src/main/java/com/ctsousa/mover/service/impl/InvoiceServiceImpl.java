@@ -1,11 +1,10 @@
 package com.ctsousa.mover.service.impl;
 
-import com.ctsousa.mover.core.entity.CardEntity;
-import com.ctsousa.mover.core.entity.CategoryEntity;
-import com.ctsousa.mover.core.entity.SubCategoryEntity;
-import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.entity.*;
+import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
+import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +53,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         TransactionEntity entity = new TransactionEntity();
         entity.setId(invoice.getCard().getId());
-        entity.setDescription(String.format("%s %s %d", INVOICE_TEXT, monthInFull(invoice.getDueDate()), invoice.getDueDate().getYear()));
+        entity.setDescription(String.format("%s %s - %s %d", INVOICE_TEXT, invoice.getCard().getName(), monthInFull(invoice.getDueDate()), invoice.getDueDate().getYear()));
         entity.setValue(invoice.getTotal());
         entity.setCard(invoice.getCard());
         entity.setDueDate(invoice.getDueDate());
@@ -62,7 +61,12 @@ public class InvoiceServiceImpl implements InvoiceService {
         entity.setTransactionType(TransactionType.DEBIT.name());
         entity.setSubcategory(subcategory);
         entity.setCard(invoice.getCard());
-        entity.setAccount(invoice.getCard().getAccount());
+
+        AccountEntity account = new AccountEntity();
+        account.setId(invoice.getCard().getAccount().getId());
+        account.setIcon(Icon.INVOICE.name());
+
+        entity.setAccount(account);
         entity.setInvoice(invoice);
         entity.setCategoryType(TypeCategory.EXPENSE.name());
         return entity;

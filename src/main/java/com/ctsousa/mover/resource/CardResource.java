@@ -5,7 +5,7 @@ import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Card;
-import com.ctsousa.mover.enumeration.BankIcon;
+import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.request.CardRequest;
 import com.ctsousa.mover.response.BankIconResponse;
 import com.ctsousa.mover.response.CardResponse;
@@ -61,8 +61,8 @@ public class CardResource extends BaseResource<CardResponse, CardRequest, CardEn
     @Override
     @PreAuthorize(Security.PreAutorize.Card.SEARCH_CARDS_ICONS)
     public ResponseEntity<List<BankIconResponse>> findAllIcons() {
-        List<BankIcon> icons = Stream.of(BankIcon.values())
-                .sorted(Comparator.comparing(BankIcon::getBankName))
+        List<Icon> icons = Stream.of(Icon.values())
+                .sorted(Comparator.comparing(Icon::getBankName))
                 .toList();
         return ResponseEntity.ok(toCollection(icons, BankIconResponse.class));
     }

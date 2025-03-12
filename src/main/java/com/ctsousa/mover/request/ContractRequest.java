@@ -59,4 +59,6 @@ public class ContractRequest {
     private Boolean active;
 
     private Boolean friendlyTermination;
+
+    private Boolean inactiveClient;
 }
