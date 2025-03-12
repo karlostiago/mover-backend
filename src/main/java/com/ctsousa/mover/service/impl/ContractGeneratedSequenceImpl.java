@@ -31,6 +31,8 @@ public class ContractGeneratedSequenceImpl implements ContractGeneratedSequenceS
         response.setInitialDate(LocalDate.now());
         response.setSituation(Situation.ONGOING);
         response.setActive(Boolean.TRUE);
+        response.setFriendlyTermination(Boolean.FALSE);
+        response.setInactiveClient(Boolean.FALSE);
         return response;
     }
 

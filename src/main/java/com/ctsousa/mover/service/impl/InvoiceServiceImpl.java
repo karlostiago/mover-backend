@@ -4,7 +4,6 @@ import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
-import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.stereotype.Component;
 
