@@ -1,7 +1,6 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.ClientEntity;
-import com.ctsousa.mover.core.entity.ContactEntity;
 import com.ctsousa.mover.core.entity.ContractEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
@@ -80,6 +79,15 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
     @Override
     public Optional<ContractEntity> findContratoByClientId(Long id) {
         return contractRepository.findContratoByClientId(id);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        try {
+            super.deleteById(id);
+        } catch (Exception e) {
+            throw new NotificationException("Esse contrato está em uso e não pode ser excluído.", Severity.ERROR);
+        }
     }
 
     private void validContract(ContractEntity entity) {

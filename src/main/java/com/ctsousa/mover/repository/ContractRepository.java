@@ -23,7 +23,7 @@ public interface ContractRepository extends JpaRepository<ContractEntity, Long> 
 
     @NonNull
     @Override
-    @Query("SELECT c FROM ContractEntity c JOIN FETCH c.client JOIN FETCH c.vehicle v JOIN FETCH v.brand JOIN FETCH v.model  WHERE 1 = 1")
+    @Query("SELECT c FROM ContractEntity c JOIN FETCH c.client JOIN FETCH c.vehicle v JOIN FETCH v.brand JOIN FETCH v.model  WHERE 1 = 1 ORDER BY c.active DESC")
     List<ContractEntity> findAll();
 
     @Query("SELECT CASE WHEN COUNT(c.id) > 0 THEN TRUE ELSE FALSE END FROM ContractEntity c JOIN c.client cc WHERE c.situation = :situation AND cc.id = :clientId")
