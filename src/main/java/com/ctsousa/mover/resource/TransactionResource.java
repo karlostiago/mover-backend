@@ -2,6 +2,7 @@ package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.api.TransactionApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
+import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.core.util.DateUtil;
@@ -11,6 +12,7 @@ import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.request.TransactionRequest;
 import com.ctsousa.mover.response.InvoiceResponse;
 import com.ctsousa.mover.response.TransactionResponse;
+import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,8 +40,11 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     @Autowired
     private TransactionService transactionService;
 
-    public TransactionResource(TransactionService transactionService) {
+    private final CardService cardService;
+
+    public TransactionResource(TransactionService transactionService, CardService cardService) {
         super(transactionService);
+        this.cardService = cardService;
     }
 
     @Override
@@ -116,6 +121,30 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
     public ResponseEntity<List<TransactionResponse>> findAll() {
         return super.findAll();
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.SCHEDULE_TRANSACTIONS)
+    public ResponseEntity<TransactionResponse> schedule(Long id) {
+        TransactionEntity entity = transactionService.schedule(id);
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.UNDO_SCHEDULING_TRANSACTIONS)
+    public ResponseEntity<TransactionResponse> undoSchedule(Long id) {
+        TransactionEntity entity = transactionService.undoScheduling(id);
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.CALCULATE_CUT_OFF_DATE_TRANSACTIONS)
+    public ResponseEntity<TransactionResponse> calculateCutOffDate(TransactionRequest request) {
+        Transaction domain = toMapper(request, Transaction.class);
+        CardEntity card = cardService.findById(domain.getCard().getId());
+        TransactionEntity entity = domain.toEntity();
+        entity.setDueDate(cardService.calculateCutOffDate(card));
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 
     @Override

@@ -19,6 +19,7 @@ public class InvoiceResponse {
     private LocalDate dueDate;
     private LocalDate paymentDate;
     private Boolean paid;
+    private Boolean scheduled;
     private BigDecimal total;
     private Long cardId;
     private Icon icon;
@@ -30,6 +31,7 @@ public class InvoiceResponse {
         icon = Icon.toName(invoice.getCard().getIcon());
         paymentDate = invoice.getPaymentDate();
         total = invoice.getTotal();
+        scheduled = null;
 
         transactions = new ArrayList<>();
         updateTransaction(invoice.getTransactions());

@@ -144,6 +144,20 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         return entity;
     }
 
+    public TransactionEntity schedule(Long id) {
+        TransactionEntity entity = findById(id);
+        entity.setScheduled(Boolean.TRUE);
+        repository.save(entity);
+        return entity;
+    }
+
+    public TransactionEntity undoScheduling(Long id) {
+        TransactionEntity entity = findById(id);
+        entity.setScheduled(Boolean.FALSE);
+        repository.save(entity);
+        return entity;
+    }
+
     public TransactionEntity refund(Long id) {
         TransactionEntity entity = findById(id);
         entity.setPaymentDate(null);

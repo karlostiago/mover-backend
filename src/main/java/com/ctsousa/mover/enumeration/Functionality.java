@@ -42,7 +42,6 @@ public enum Functionality {
     UPDATE_TRANSACTIONS(2, Menu.MY_MONEY,"Permite atualizar lançamentos"),
     DELETE_TRANSACTIONS(3, Menu.MY_MONEY,"Permite deletar lançamentos"),
     PAYMENT_TRANSACTIONS(4, Menu.MY_MONEY,"Permite pagar lançamentos"),
-
     REFUND_TRANSACTIONS(5, Menu.MY_MONEY,"Permite estornar lançamentos"),
     ENABLED_INSTALLMENT_TRANSACTIONS(6, Menu.MY_MONEY,"Permite ativa repetição de lançamentos"),
     FILTER_TRANSACTIONS(7, Menu.MY_MONEY,"Permite consultar lançamentos"),
@@ -53,6 +52,9 @@ public enum Functionality {
     FILTER_ACCOUNT_TRANSACTIONS(12, Menu.MY_MONEY,"Permite carregar as contas de lançamentos"),
     FILTER_CARDS_TRANSACTIONS(13, Menu.MY_MONEY,"Permite carregar os cartões de lançamentos"),
     FILTER_PARTNES_TRANSACTIONS(14, Menu.MY_MONEY,"Permite carregar os sócios de lançamentos"),
+    SCHEDULE_TRANSACTIONS(15, Menu.MY_MONEY,"Permite agendar lançamentos"),
+    UNDO_SCHEDULING_TRANSACTIONS(16, Menu.MY_MONEY,"Permite desfazer agendamento lançamentos"),
+    CALCULATE_CUT_OFF_DATE_TRANSACTIONS(17, Menu.MY_MONEY,"Permite calcular data de corte lançamentos"),
 
     REGISTER_ACCOUNTS(1, Menu.CONFIGURATION, "Permite salvar contas"),
     UPDATE_ACCOUNTS(2, Menu.CONFIGURATION, "Permite atualizar contas"),

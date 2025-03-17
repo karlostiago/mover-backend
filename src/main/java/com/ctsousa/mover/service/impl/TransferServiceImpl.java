@@ -253,6 +253,38 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
     }
 
     @Override
+    public TransactionEntity schedule(Long id) {
+        TransactionEntity entity = findById(id);
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
+                .stream().filter(t -> t.getInstallment() == entity.getInstallment())
+                .toList();
+
+        for (TransactionEntity entityUpdated : entities) {
+            entityUpdated.setScheduled(Boolean.TRUE);
+        }
+
+        repository.saveAll(entities);
+
+        return entity;
+    }
+
+    @Override
+    public TransactionEntity undoScheduling(Long id) {
+        TransactionEntity entity = findById(id);
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
+                .stream().filter(t -> t.getInstallment() == entity.getInstallment())
+                .toList();
+
+        for (TransactionEntity entityUpdated : entities) {
+            entityUpdated.setScheduled(Boolean.FALSE);
+        }
+
+        repository.saveAll(entities);
+
+        return entity;
+    }
+
+    @Override
     public void batchDelete(Long id) {
         TransactionEntity entity = findById(id);
         List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())

@@ -37,17 +37,23 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final DeleteTransactionServiceFactory deleteTransactionServiceFactory;
 
+    private final ScheduleTransactionServiceFactory scheduleTransactionServiceFactory;
+
+    private final UndoSchedulingTransactionServiceFactory undoSchedulingTransactionServiceFactory;
+
     private final TransactionRepository repository;
 
     private final InvoiceService invoiceService;
 
-    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, TransactionRepository repository, InvoiceService invoiceService) {
+    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, ScheduleTransactionServiceFactory scheduleTransactionServiceFactory, UndoSchedulingTransactionServiceFactory undoSchedulingTransactionServiceFactory, TransactionRepository repository, InvoiceService invoiceService) {
         this.createTransactionServiceFactory = createTransactionServiceFactory;
         this.updateTransactionServiceFactory = updateTransactionServiceFactory;
         this.filterTransactionServiceFactory = filterTransactionServiceFactory;
         this.paymentTransactionServiceFactory = paymentTransactionServiceFactory;
         this.refundTransactionServiceFactory = refundTransactionServiceFactory;
         this.deleteTransactionServiceFactory = deleteTransactionServiceFactory;
+        this.scheduleTransactionServiceFactory = scheduleTransactionServiceFactory;
+        this.undoSchedulingTransactionServiceFactory = undoSchedulingTransactionServiceFactory;
         this.repository = repository;
         this.invoiceService = invoiceService;
     }
@@ -104,6 +110,20 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setId(id);
         transaction.setPaymentDate(paymentDate);
         return paymentTransactionServiceFactory.execute(type, transaction);
+    }
+
+    @Override
+    public TransactionEntity schedule(Long id) {
+        TransactionEntity entity = findById(id);
+        TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
+        return scheduleTransactionServiceFactory.execute(type, new Transaction(id));
+    }
+
+    @Override
+    public TransactionEntity undoScheduling(Long id) {
+        TransactionEntity entity = findById(id);
+        TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
+        return undoSchedulingTransactionServiceFactory.execute(type, new Transaction(id));
     }
 
     @Override

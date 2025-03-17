@@ -104,6 +104,7 @@ public class TransactionEntity extends AbstractEntity {
         private LocalDate dueDate;
         private LocalDate paymentDate;
         private Boolean paid;
+        private Boolean scheduled;
         private BigDecimal total = BigDecimal.ZERO;
         private CardEntity card = new CardEntity();
         private final List<TransactionEntity> transactions = new ArrayList<>();
@@ -115,6 +116,7 @@ public class TransactionEntity extends AbstractEntity {
             total = total.add(transaction.getValue());
             card = transaction.getCard();
             paid = transaction.getPaid();
+            scheduled = transaction.getScheduled();
             this.transactions.add(transaction);
         }
 

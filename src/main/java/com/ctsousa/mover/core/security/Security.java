@@ -82,6 +82,9 @@ public abstract class Security {
             public final static String PAYMENT_TRANSACTIONS = "hasAnyRole('ROLE_PAYMENT_TRANSACTIONS')";
             public final static String REFUND_TRANSACTIONS = "hasAnyRole('ROLE_REFUND_TRANSACTIONS')";
             public final static String FILTER_TRANSACTIONS = "hasAnyRole('ROLE_FILTER_TRANSACTIONS')";
+            public final static String UNDO_SCHEDULING_TRANSACTIONS = "hasAnyRole('ROLE_UNDO_SCHEDULING_TRANSACTIONS')";
+            public final static String SCHEDULE_TRANSACTIONS = "hasAnyRole('ROLE_SCHEDULE_TRANSACTIONS')";
+            public final static String CALCULATE_CUT_OFF_DATE_TRANSACTIONS = "hasAnyRole('ROLE_CALCULATE_CUT_OFF_DATE_TRANSACTIONS')";
         }
 
         public static class Maintenance {

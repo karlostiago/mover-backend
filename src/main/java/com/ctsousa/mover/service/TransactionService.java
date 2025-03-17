@@ -26,4 +26,8 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
     TransactionEntity batchUpdate(final Long id, Transaction transaction);
 
     Page<TransactionEntity> search(final Transaction.Filter filter, Pageable pageable);
+
+    TransactionEntity schedule(final Long id);
+
+    TransactionEntity undoScheduling(final Long id);
 }

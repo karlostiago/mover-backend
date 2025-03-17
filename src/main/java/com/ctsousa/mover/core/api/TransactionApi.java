@@ -1,7 +1,6 @@
 package com.ctsousa.mover.core.api;
 
 import com.ctsousa.mover.request.TransactionRequest;
-import com.ctsousa.mover.response.BalanceResponse;
 import com.ctsousa.mover.response.TransactionResponse;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,12 +21,18 @@ public interface TransactionApi {
     @PutMapping("/{id}/refund")
     ResponseEntity<TransactionResponse> refund(@PathVariable Long id);
 
-//    @GetMapping("/balances")
-//    ResponseEntity<BalanceResponse> balance(@RequestParam("search") String uri);
-//
     @DeleteMapping("/batch-delete/{id}")
     void batchDelete(@PathVariable Long id);
-//
+
     @PutMapping("/batch-update/{id}")
     ResponseEntity<TransactionResponse>  batchUpdate(@PathVariable Long id, @Valid  @RequestBody TransactionRequest request);
+
+    @PutMapping("/{id}/schedule")
+    ResponseEntity<TransactionResponse> schedule(@PathVariable Long id);
+
+    @PutMapping("/{id}/undo-scheduling")
+    ResponseEntity<TransactionResponse> undoSchedule(@PathVariable Long id);
+
+    @PutMapping("/calculate-cut-off-date")
+    ResponseEntity<TransactionResponse>  calculateCutOffDate(@RequestBody TransactionRequest request);
 }

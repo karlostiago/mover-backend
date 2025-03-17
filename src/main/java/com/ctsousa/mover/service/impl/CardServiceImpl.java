@@ -9,6 +9,8 @@ import com.ctsousa.mover.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
@@ -51,5 +53,20 @@ public class CardServiceImpl extends BaseServiceImpl<CardEntity, Long> implement
     public List<CardEntity> filterBy(String search) {
         if (search == null || search.isEmpty()) return repository.findAll();
         return repository.findBy(toUppercase(search));
+    }
+
+    @Override
+    public LocalDate calculateCutOffDate(CardEntity entity) {
+        int year = LocalDate.now().getYear();
+        int day = entity.getDueDate();
+        Month month = LocalDate.now().getMonth().plus(1);
+
+        int currentDay = LocalDate.now().getDayOfMonth();
+
+        if (currentDay > entity.getClosingDay()) {
+            month = month.plus(1);
+        }
+
+        return LocalDate.of(year, month, day);
     }
 }

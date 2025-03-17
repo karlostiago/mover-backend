@@ -22,4 +22,8 @@ public interface TransactionCommand {
     void delete(Long id);
 
     void batchDelete(Long id);
+
+    TransactionEntity schedule(Long id);
+
+    TransactionEntity undoScheduling(Long id);
 }

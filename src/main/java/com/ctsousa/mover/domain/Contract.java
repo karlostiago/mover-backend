@@ -6,7 +6,6 @@ import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.enumeration.DayOfWeek;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.enumeration.Situation;
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 
