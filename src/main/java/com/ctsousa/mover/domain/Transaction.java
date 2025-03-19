@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
@@ -57,6 +58,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
         private final List<Long> accountsId;
         private final String text;
         private final int pageNumber;
+        private final int hash;
 
         public Filter(final String uri) {
             String [] filters = uri.split(";");
@@ -67,6 +69,8 @@ public class Transaction extends DomainModel<TransactionEntity> {
             accountsId = buildAccountList(filters);
             text = filters.length > 2 ? filters[2] : null;
             pageNumber = Integer.parseInt(filters[3]) - 1;
+
+            hash = Objects.hash(dtInitial, dtFinal, accountsId, text);
         }
 
         private List<Long> buildAccountList(String [] filters) {

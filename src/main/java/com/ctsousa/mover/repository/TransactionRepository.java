@@ -1,5 +1,6 @@
 package com.ctsousa.mover.repository;
 
+import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
@@ -149,4 +150,18 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
 
     @Query("SELECT t.signature FROM TransactionEntity t WHERE t.id = :id")
     String findBySignature(@Param("id") Long id);
+
+    @Query("""
+            SELECT t
+            FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            JOIN FETCH sb.category
+            JOIN FETCH t.account
+            LEFT JOIN FETCH t.card
+            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.contract
+            LEFT JOIN FETCH t.partner
+            WHERE t.dueDate = :dueDate AND t.card = :card
+            """)
+    List<TransactionEntity> searchInvoiceByDueDate(@Param("dueDate") LocalDate dueDate, @Param("card") CardEntity card);
 }

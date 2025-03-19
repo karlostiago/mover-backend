@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.monthInFull;
@@ -50,8 +51,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         subcategory.setCategory(new CategoryEntity(INVOICE_TEXT, TypeCategory.EXPENSE, new ArrayList<>()));
         subcategory.setDescription(String.format("%s %s", INVOICE_TEXT, CARD_TEXT));
 
+        Long id = (long) Objects.hash(invoice.getCard().getId(), invoice.getDueDate());
+
         TransactionEntity entity = new TransactionEntity();
-        entity.setId(invoice.getCard().getId());
+        entity.setId(id);
         entity.setDescription(String.format("%s %s - %s %d", INVOICE_TEXT, invoice.getCard().getName(), monthInFull(invoice.getDueDate()), invoice.getDueDate().getYear()));
         entity.setValue(invoice.getTotal());
         entity.setCard(invoice.getCard());

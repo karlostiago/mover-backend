@@ -15,8 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.ctsousa.mover.core.util.NumberUtil.parseMonetary;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
@@ -158,7 +157,25 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Page<TransactionEntity> search(Transaction.Filter filter, Pageable pageable) {
-        return search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
+        Page<TransactionEntity> page = search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
+        List<TransactionEntity> entities = new ArrayList<>();
+
+        Set<String> cacheProcessInvoice = new HashSet<>();
+
+        for (TransactionEntity entity : page.stream().toList()) {
+            if (entity.getCard() != null) {
+                String cacheKey = entity.getCard().getId() + ":" + entity.getDueDate();
+                if (cacheProcessInvoice.add(cacheKey)) {
+                    List<TransactionEntity> invoces = invoiceService.genereteInvoice(
+                            repository.searchInvoiceByDueDate(entity.getDueDate(), entity.getCard()));
+                    entities.addAll(invoces);
+                }
+            } else {
+                entities.add(entity);
+            }
+        }
+
+        return new PageImpl<>(entities, pageable, page.getTotalElements());
     }
 
     private Page<TransactionEntity> search(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable) {
@@ -184,8 +201,10 @@ public class TransactionServiceImpl implements TransactionService {
         else {
             page = repository.findByPeriod(dtInitial, dtFinal, pageable);
         }
+
         entities = new ArrayList<>(page.stream().toList());
-        return new PageImpl<>(invoiceService.genereteInvoice(entities), pageable, page.getTotalElements());
+
+        return new PageImpl<>(entities, pageable, page.getTotalElements());
     }
 
     private boolean hasAccountAndText(List<Long> accountListId, String text) {

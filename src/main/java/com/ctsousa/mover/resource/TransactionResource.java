@@ -150,7 +150,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     @Override
     public void updateResponse(List<TransactionResponse> response, List<TransactionEntity> entities) {
         Map<Long, TransactionResponse> responseMap = response.stream()
-                .collect(Collectors.toMap(TransactionResponse::getId, r -> r));
+                .collect(Collectors.toMap(TransactionResponse::getId, r -> r, (existing, replacement) -> existing));
 
         for (TransactionEntity entity : entities) {
             String subcategory = entity.getSubcategory().getDescription();
