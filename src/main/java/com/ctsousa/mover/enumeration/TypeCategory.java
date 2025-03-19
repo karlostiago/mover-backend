@@ -32,6 +32,8 @@ public enum TypeCategory {
     }
 
     public static TypeCategory toDescription(String description) {
+        if (description == null) throw new NotificationException("Tipo categoria não informado.");
+
         for (TypeCategory typeCategory : TypeCategory.values()) {
             if (typeCategory.name().equals(description) || typeCategory.description.equals(description)) return typeCategory;
         }

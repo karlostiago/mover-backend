@@ -116,7 +116,7 @@ public class TransactionEntity extends AbstractEntity {
             total = total.add(transaction.getValue());
             card = transaction.getCard();
             paid = transaction.getPaid();
-            scheduled = transaction.getScheduled();
+            scheduled = null;
             this.transactions.add(transaction);
         }
 

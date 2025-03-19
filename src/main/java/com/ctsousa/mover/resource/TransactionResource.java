@@ -173,6 +173,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
             if (entity.getInvoice() != null) {
                 transactionResponse.setInvoice(new InvoiceResponse(entity.getInvoice()));
                 transactionResponse.setHasInvoice(Boolean.TRUE);
+                transactionResponse.setScheduled(null);
             }
         }
     }
