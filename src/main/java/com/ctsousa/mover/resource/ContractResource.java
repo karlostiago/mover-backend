@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -120,6 +121,7 @@ public class ContractResource extends BaseResource<ContractResponse, ContractReq
     @PreAuthorize(Security.PreAutorize.Contract.TERMINATION_CONTRACTS)
     public ResponseEntity<ContractResponse> close(Long id, ContractRequest request) {
         contractService.existsById(id);
+        request.setSituation(Situation.CLOSED.getDescription());
         Contract contract = toMapper(request, Contract.class);
         ContractEntity entity = contract.toEntity();
         return ResponseEntity.ok(toMapper(contractService.close(entity), ContractResponse.class));
@@ -155,6 +157,7 @@ public class ContractResource extends BaseResource<ContractResponse, ContractReq
             ContractResponse contractResponse = responseMap.get(entity.getId());
             contractResponse.setVehicleName(fullNameVehicle);
             contractResponse.setPaymentFrequency(entity.getPaymentFrequency());
+            contractResponse.setClientContact(entity.getClient().getCellPhone());
         }
     }
 

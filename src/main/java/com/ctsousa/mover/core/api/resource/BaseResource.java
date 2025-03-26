@@ -2,6 +2,7 @@ package com.ctsousa.mover.core.api.resource;
 
 import com.ctsousa.mover.core.api.Api;
 import com.ctsousa.mover.core.service.BaseService;
+import com.ctsousa.mover.response.PaginationResponse;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

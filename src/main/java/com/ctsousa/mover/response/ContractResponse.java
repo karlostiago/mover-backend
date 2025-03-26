@@ -18,6 +18,7 @@ public class ContractResponse {
     private Long clientId;
     private String vehicleName;
     private String clientName;
+    private String clientContact;
     private String number;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")

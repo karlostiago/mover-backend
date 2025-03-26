@@ -106,7 +106,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
         var filter = new Transaction.Filter(uri);
 
-        Page<TransactionEntity> page = transactionService.search(filter, PageRequest.of(filter.getPageNumber(), 100));
+        Page<TransactionEntity> page = transactionService.search(filter, PageRequest.of(filter.getPageNumber(), 10));
 
         REMAINING_PAGE = BigDecimal.valueOf(page.getTotalPages() - (page.getNumber() + 1)).longValue();
 

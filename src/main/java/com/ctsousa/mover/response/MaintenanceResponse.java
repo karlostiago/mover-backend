@@ -25,6 +25,8 @@ public class MaintenanceResponse {
     private String detail;
     private BigDecimal value;
     private Boolean active;
+    private String account;
+    private String card;
 
     public void setType(String type) {
         this.type = TypeMaintenance.toDescription(type).getDescription();

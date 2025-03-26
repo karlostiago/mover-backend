@@ -95,6 +95,11 @@ public class MaintenanceResource extends BaseResource<MaintenanceResponse, Maint
                     entity.getVehicle().getLicensePlate();
             MaintenanceResponse maintenanceResponse = responseMap.get(entity.getId());
             maintenanceResponse.setVehicleName(fullNameVehicle);
+            maintenanceResponse.setAccount(entity.getAccount().getName() + " - " + entity.getAccount().getNumber());
+
+            if (entity.getCard() != null) {
+                maintenanceResponse.setCard(entity.getCard().getName());
+            }
         }
     }
 

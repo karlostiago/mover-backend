@@ -32,4 +32,9 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Long> {
 
     @Query(value = "SELECT DISTINCT c.* FROM tb_client c LEFT JOIN tb_contract ct ON ct.client_id = c.id WHERE ct.client_id IS NULL OR ct.situation = 'CLOSED' ORDER BY c.name ASC", nativeQuery = true)
     List<ClientEntity> onlyAvailable();
+
+    @NonNull
+    @Override
+    @Query("SELECT c FROM ClientEntity c WHERE 1 = 1 ORDER BY c.active DESC")
+    List<ClientEntity> findAll();
 }

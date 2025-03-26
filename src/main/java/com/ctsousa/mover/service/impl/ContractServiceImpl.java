@@ -10,6 +10,8 @@ import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.ContractRepository;
 import com.ctsousa.mover.service.ClientService;
 import com.ctsousa.mover.service.ContractService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,19 +29,13 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
 
     private final ClientService clientService;
 
-    private final ContractRepository contractRepository;
-
     public ContractServiceImpl(ContractRepository repository,
-                               ContractRepository repository1,
                                ClientRepository clientRepository,
-                               ClientService clientService,
-                               ContractRepository contractRepository) {
-
+                               ClientService clientService) {
         super(repository);
-        this.repository = repository1;
+        this.repository = repository;
         this.clientRepository = clientRepository;
         this.clientService = clientService;
-        this.contractRepository = contractRepository;
     }
 
     @Override
@@ -78,7 +74,7 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
 
     @Override
     public Optional<ContractEntity> findContratoByClientId(Long id) {
-        return contractRepository.findContratoByClientId(id);
+        return repository.findContratoByClientId(id);
     }
 
     @Override
@@ -88,6 +84,26 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
         } catch (Exception e) {
             throw new NotificationException("Esse contrato está em uso e não pode ser excluído.", Severity.ERROR);
         }
+    }
+
+    @Override
+    public List<ContractEntity> filterBy(String search) {
+        if (search == null || search.isEmpty()) return repository.findAll();
+
+        String [] situations = { Situation.CLOSED.getDescription().toLowerCase(), Situation.ONGOING.getDescription().toLowerCase() };
+
+        for (String situation : situations) {
+            if (situation.contains(search)) {
+                return repository.findBy(Situation.toDescription(situation));
+            }
+        }
+
+        return repository.findBy(search);
+    }
+
+    @Override
+    public Page<ContractEntity> filterBy(String search, Pageable pageable) {
+        return null;
     }
 
     private void validContract(ContractEntity entity) {
@@ -134,20 +150,5 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
         if (entity.getRecurrenceValue().compareTo(BigDecimal.ZERO) == 0) {
             throw new NotificationException("Valor recorrência não pode ser zero.");
         }
-    }
-
-    @Override
-    public List<ContractEntity> filterBy(String search) {
-        if (search == null || search.isEmpty()) return repository.findAll();
-
-        String [] situations = { Situation.CLOSED.getDescription().toLowerCase(), Situation.ONGOING.getDescription().toLowerCase() };
-
-        for (String situation : situations) {
-            if (situation.contains(search)) {
-                return repository.findBy(Situation.toDescription(situation));
-            }
-        }
-
-        return repository.findBy(search);
     }
 }

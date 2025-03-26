@@ -1,10 +1,7 @@
 package com.ctsousa.mover.core.api;
 
 import com.ctsousa.mover.request.ContractRequest;
-import com.ctsousa.mover.response.ContractResponse;
-import com.ctsousa.mover.response.DayOfWeekResponse;
-import com.ctsousa.mover.response.PaymentFrequencyResponse;
-import com.ctsousa.mover.response.SituationResponse;
+import com.ctsousa.mover.response.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
