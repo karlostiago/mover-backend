@@ -3,6 +3,7 @@ package com.ctsousa.mover.domain;
 import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.enumeration.TypeCategory;
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,6 +31,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
     private String categoryType;
     private LocalDate dueDate;
     private LocalDate paymentDate;
+    private LocalDate registerDate;
     private BigDecimal value;
     private Card card;
     private Account account;
@@ -43,6 +45,9 @@ public class Transaction extends DomainModel<TransactionEntity> {
     private Boolean predicted;
     private Boolean lastInstallment;
     private Boolean scheduled;
+    private Boolean invoice;
+    private Long invoiceId;
+    private BigDecimal amountPaid;
 
     public Transaction() {}
 
@@ -97,6 +102,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setPaymentType(this.getPaymentType());
         entity.setFrequency(this.getFrequency());
         entity.setScheduled(this.getScheduled());
+        entity.setRegisterDate(this.getRegisterDate());
 
         if (this.getCategoryType() != null) {
             TypeCategory typeCategory = TypeCategory.toDescription(this.getCategoryType());

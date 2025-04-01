@@ -20,6 +20,7 @@ public class TransactionResponse {
     private String frequency;
     private String paymentType;
     private String categoryType;
+    private int codeTypeCategory;
     private BigDecimal value;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
@@ -46,17 +47,29 @@ public class TransactionResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate date;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate registerDate;
+
     private Boolean lastInstallment;
 
     private Long remainingPages;
     private String dayOfWeek;
-    private InvoiceResponse invoice;
-    private Boolean hasInvoice = Boolean.FALSE;
     private Boolean scheduled = Boolean.FALSE;
 
+    private String vehicle;
+    private String account;
+    private String card;
+    private String contract;
+
+    private Boolean invoice;
+    private Long invoiceId;
+    private BigDecimal amountPaid;
+
     public void setCategoryType(String categoryType) {
-        this.categoryType = TypeCategory.toDescription(categoryType)
-                .getDescription();
+        TypeCategory type = TypeCategory.toDescription(categoryType);
+        this.categoryType = type.getDescription();
+        this.codeTypeCategory = type.getCode();
+
     }
 
     public void setTransactionType(String transactionType) {

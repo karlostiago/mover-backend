@@ -46,6 +46,9 @@ public class TransactionEntity extends AbstractEntity {
     @Column(name = "payment_date")
     private LocalDate paymentDate;
 
+    @Column(name = "`date`", nullable = false)
+    private LocalDate registerDate;
+
     @Column(name = "`value`", nullable = false)
     private BigDecimal value;
 
@@ -93,11 +96,20 @@ public class TransactionEntity extends AbstractEntity {
     @Column(name = "scheduled", nullable = false)
     private Boolean scheduled;
 
+    @Column(name = "invoice", nullable = false)
+    private Boolean invoice;
+
+    @Column(name = "invoice_id")
+    private Long invoiceId;
+
+    @Column(name = "`amount_paid`", nullable = false)
+    private BigDecimal amountPaid;
+
     @Transient
     private AccountEntity destinationAccount;
 
-    @Transient
-    private Invoice invoice;
+//    @Transient
+//    private Invoice invoice;
 
     @Getter
     public static class Invoice {

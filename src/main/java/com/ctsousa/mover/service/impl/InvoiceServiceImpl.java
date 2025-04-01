@@ -69,7 +69,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         account.setIcon(Icon.INVOICE.name());
 
         entity.setAccount(account);
-        entity.setInvoice(invoice);
+//        entity.setInvoice(invoice);
         entity.setCategoryType(TypeCategory.EXPENSE.name());
         return entity;
     }

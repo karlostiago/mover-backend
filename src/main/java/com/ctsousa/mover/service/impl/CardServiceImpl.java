@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
@@ -56,17 +55,21 @@ public class CardServiceImpl extends BaseServiceImpl<CardEntity, Long> implement
     }
 
     @Override
-    public LocalDate calculateCutOffDate(CardEntity entity) {
-        int year = LocalDate.now().getYear();
-        int day = entity.getDueDate();
-        Month month = LocalDate.now().getMonth().plus(1);
+    public LocalDate calculateCutOffDate(CardEntity entity, LocalDate purchaseDate) {
+        int closingDay = entity.getClosingDay();
+        int dueDate = entity.getDueDate();
 
-        int currentDay = LocalDate.now().getDayOfMonth();
+        LocalDate referenceMonth = purchaseDate.withDayOfMonth(1);
+        LocalDate closingDate = referenceMonth.withDayOfMonth(closingDay);
 
-        if (currentDay > entity.getClosingDay()) {
-            month = month.plus(1);
+        if (closingDay < dueDate) {
+            closingDate = closingDate.plusMonths(1);
         }
 
-        return LocalDate.of(year, month, day);
+        if (purchaseDate.isBefore(closingDate) || purchaseDate.equals(closingDate)) {
+            return referenceMonth.withDayOfMonth(dueDate).plusMonths(1);
+        }
+
+        return referenceMonth.withDayOfMonth(dueDate).plusMonths(2);
     }
 }

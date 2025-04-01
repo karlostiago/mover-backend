@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface TransactionService extends BaseService<TransactionEntity, Long> {
 
@@ -30,4 +31,6 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
     TransactionEntity schedule(final Long id);
 
     TransactionEntity undoScheduling(final Long id);
+
+    List<TransactionEntity> searchInvoiceBy(final Long id);
 }

@@ -37,6 +37,10 @@ public class TransactionRequest {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate paymentDate;
 
+    @DateFormat(message = "Data inválida")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate registerDate;
+
     @NotEmpty(message = "Valor não pode ser vázio")
     private BigDecimal value;
     private BigDecimal installmentValue;

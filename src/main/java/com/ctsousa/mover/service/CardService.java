@@ -10,5 +10,5 @@ public interface CardService extends BaseService<CardEntity, Long> {
 
     List<CardEntity> filterBy(String search);
 
-    LocalDate calculateCutOffDate(CardEntity entity);
+    LocalDate calculateCutOffDate(CardEntity entity, LocalDate date);
 }

@@ -2,15 +2,13 @@ package com.ctsousa.mover.resource;
 
 import com.ctsousa.mover.core.api.TransactionApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
-import com.ctsousa.mover.core.entity.CardEntity;
-import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.request.TransactionRequest;
-import com.ctsousa.mover.response.InvoiceResponse;
 import com.ctsousa.mover.response.TransactionResponse;
 import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.TransactionService;
@@ -24,8 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.mapper.Transform.toCollection;
@@ -69,7 +69,18 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<TransactionResponse> findById(Long id) {
         TransactionEntity entity = transactionService.findById(id);
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
-        return ResponseEntity.ok(toMapper(transactionService.filterById(id, type), TransactionResponse.class));
+        TransactionResponse response = toMapper(transactionService.filterById(id, type), TransactionResponse.class);
+        updateResponse(Collections.singletonList(response), Collections.singletonList(entity));
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
+    public ResponseEntity<List<TransactionResponse>> searchInvoice(Long id) {
+        List<TransactionEntity> entities = transactionService.searchInvoiceBy(id);
+        List<TransactionResponse> responses = toCollection(entities, TransactionResponse.class);
+        updateResponse(responses, entities);
+        return ResponseEntity.ok(responses);
     }
 
     @Override
@@ -106,7 +117,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
         var filter = new Transaction.Filter(uri);
 
-        Page<TransactionEntity> page = transactionService.search(filter, PageRequest.of(filter.getPageNumber(), 10));
+        Page<TransactionEntity> page = transactionService.search(filter, PageRequest.of(filter.getPageNumber(), 100));
 
         REMAINING_PAGE = BigDecimal.valueOf(page.getTotalPages() - (page.getNumber() + 1)).longValue();
 
@@ -143,7 +154,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
         Transaction domain = toMapper(request, Transaction.class);
         CardEntity card = cardService.findById(domain.getCard().getId());
         TransactionEntity entity = domain.toEntity();
-        entity.setDueDate(cardService.calculateCutOffDate(card));
+        entity.setDueDate(cardService.calculateCutOffDate(card, entity.getRegisterDate()));
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 
@@ -153,28 +164,38 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
                 .collect(Collectors.toMap(TransactionResponse::getId, r -> r, (existing, replacement) -> existing));
 
         for (TransactionEntity entity : entities) {
-            String subcategory = entity.getSubcategory().getDescription();
-            String category = entity.getSubcategory().getCategory().getDescription();
+            SubCategoryEntity subcategory = entity.getSubcategory();
+            CategoryEntity category = subcategory.getCategory();
+            AccountEntity account = entity.getAccount();
+            VehicleEntity vehicle = entity.getVehicle();
+            CardEntity card = entity.getCard();
+            ContractEntity contract = entity.getContract();
+//            TransactionEntity.Invoice invoice = entity.getInvoice();
+
             TransactionResponse transactionResponse = responseMap.get(entity.getId());
-            transactionResponse.setSubcategory(subcategory);
-            transactionResponse.setCategory(category);
+            transactionResponse.setSubcategory(subcategory.getDescription());
+            transactionResponse.setCategory(category.getDescription());
             transactionResponse.setRemainingPages(REMAINING_PAGE);
+            transactionResponse.setAccount(String.format("%s - %s", account.getName(), account.getNumber()));
 
-            if (transactionResponse.getPaymentDate() != null) {
-                transactionResponse.setDate(transactionResponse.getPaymentDate());
-            } else {
-                transactionResponse.setDate(transactionResponse.getDueDate());
-            }
+            Optional.ofNullable(vehicle).ifPresent(v -> transactionResponse.setVehicle(
+                    String.format("%s - %s - %s", v.getBrand().getName(), v.getModel().getName(), v.getLicensePlate())
+            ));
+
+            Optional.ofNullable(card).ifPresent(c -> transactionResponse.setCard(c.getName()));
+            Optional.ofNullable(contract).ifPresent(c -> transactionResponse.setContract(c.getNumber()));
+
+            transactionResponse.setDate(Optional.ofNullable(transactionResponse.getPaymentDate())
+                    .orElse(transactionResponse.getDueDate()));
+
             transactionResponse.setDayOfWeek(DateUtil.dayOfWeek(transactionResponse.getDate()));
+            transactionResponse.setIcon(Icon.toName(account.getIcon()).getUrlImage());
 
-            Icon icon = Icon.toName(entity.getAccount().getIcon());
-            transactionResponse.setIcon(icon.getUrlImage());
-
-            if (entity.getInvoice() != null) {
-                transactionResponse.setInvoice(new InvoiceResponse(entity.getInvoice()));
-                transactionResponse.setHasInvoice(Boolean.TRUE);
-                transactionResponse.setScheduled(null);
-            }
+//            Optional.ofNullable(invoice).ifPresent(inv -> {
+//                transactionResponse.setInvoice(new InvoiceResponse(inv));
+//                transactionResponse.setHasInvoice(true);
+//                transactionResponse.setScheduled(null);
+//            });
         }
     }
 

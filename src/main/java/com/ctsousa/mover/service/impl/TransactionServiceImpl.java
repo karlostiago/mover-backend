@@ -157,25 +157,31 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Page<TransactionEntity> search(Transaction.Filter filter, Pageable pageable) {
-        Page<TransactionEntity> page = search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
-        List<TransactionEntity> entities = new ArrayList<>();
+//        Page<TransactionEntity> page = search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
+//        List<TransactionEntity> entities = new ArrayList<>();
+//
+//        Set<String> cacheProcessInvoice = new HashSet<>();
+//
+//        for (TransactionEntity entity : page.stream().toList()) {
+//            if (entity.getCard() != null) {
+//                String cacheKey = entity.getCard().getId() + ":" + entity.getDueDate();
+//                if (cacheProcessInvoice.add(cacheKey)) {
+//                    List<TransactionEntity> invoces = invoiceService.genereteInvoice(
+//                            repository.searchInvoiceByDueDate(entity.getDueDate(), entity.getCard()));
+//                    entities.addAll(invoces);
+//                }
+//            } else {
+//                entities.add(entity);
+//            }
+//        }
+//
+//        return new PageImpl<>(entities, pageable, page.getTotalElements());
+        return search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
+    }
 
-        Set<String> cacheProcessInvoice = new HashSet<>();
-
-        for (TransactionEntity entity : page.stream().toList()) {
-            if (entity.getCard() != null) {
-                String cacheKey = entity.getCard().getId() + ":" + entity.getDueDate();
-                if (cacheProcessInvoice.add(cacheKey)) {
-                    List<TransactionEntity> invoces = invoiceService.genereteInvoice(
-                            repository.searchInvoiceByDueDate(entity.getDueDate(), entity.getCard()));
-                    entities.addAll(invoces);
-                }
-            } else {
-                entities.add(entity);
-            }
-        }
-
-        return new PageImpl<>(entities, pageable, page.getTotalElements());
+    @Override
+    public List<TransactionEntity> searchInvoiceBy(Long id) {
+        return repository.searchInvoiceById(id);
     }
 
     private Page<TransactionEntity> search(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable) {

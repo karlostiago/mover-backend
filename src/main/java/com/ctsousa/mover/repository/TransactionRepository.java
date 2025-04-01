@@ -25,10 +25,12 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             JOIN FETCH sb.category
             JOIN FETCH t.account
             LEFT JOIN FETCH t.card
-            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.vehicle v
+            LEFT JOIN FETCH v.brand
+            LEFT JOIN FETCH v.model
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
-            WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
+            WHERE t.invoiceId IS NULL AND ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
             ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END DESC
             """)
     Page<TransactionEntity> findByPeriod(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, Pageable pageable);
@@ -40,11 +42,14 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             JOIN FETCH sb.category
             JOIN FETCH t.account
             LEFT JOIN FETCH t.card
-            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.vehicle v
+            LEFT JOIN FETCH v.brand
+            LEFT JOIN FETCH v.model
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
             AND ABS(t.value) = :value
+            AND t.invoiceId IS NULL
             ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END DESC
             """)
     Page<TransactionEntity> findByPeriodAndValue(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("value") BigDecimal value, Pageable pageable);
@@ -55,11 +60,14 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             JOIN FETCH sb.category c
             JOIN FETCH t.account
             LEFT JOIN FETCH t.card
-            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.vehicle v
+            LEFT JOIN FETCH v.brand
+            LEFT JOIN FETCH v.model
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND (sb.description LIKE %:description% OR c.description LIKE %:description% OR t.description LIKE %:description%)
+              AND t.invoiceId IS NULL
             ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END DESC
             """)
     Page<TransactionEntity> findByPeriodAndDescription(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("description") String description, Pageable pageable);
@@ -70,11 +78,14 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             JOIN FETCH sb.category c
             JOIN FETCH t.account acc
             LEFT JOIN FETCH t.card
-            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.vehicle v
+            LEFT JOIN FETCH v.brand
+            LEFT JOIN FETCH v.model
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND t.account.id IN (:accounts)
+              AND t.invoiceId IS NULL
             ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END DESC
             """)
     Page<TransactionEntity> findByPeriodAndAccount(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, Pageable pageable);
@@ -85,12 +96,15 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             JOIN FETCH sb.category c
             JOIN FETCH t.account acc
             LEFT JOIN FETCH t.card
-            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.vehicle v
+            LEFT JOIN FETCH v.brand
+            LEFT JOIN FETCH v.model
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND (sb.description LIKE %:description% OR c.description LIKE %:description% OR t.description LIKE %:description%)
               AND t.account.id IN (:accounts)
+              AND t.invoiceId IS NULL
             ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END DESC
             """)
     Page<TransactionEntity> findByPeriodAndAccountAndDescription(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, @Param("description") String description, Pageable pageable);
@@ -101,12 +115,15 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             JOIN FETCH sb.category c
             JOIN FETCH t.account acc
             LEFT JOIN FETCH t.card
-            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.vehicle v
+            LEFT JOIN FETCH v.brand
+            LEFT JOIN FETCH v.model
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND ABS(t.value) = :value
               AND t.account.id IN (:accounts)
+              AND t.invoiceId IS NULL
             ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END DESC
             """)
     Page<TransactionEntity> findByPeriodAndAccountAndValue(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("accounts") List<Long> accounts, @Param("value") BigDecimal value, Pageable pageable);
@@ -116,7 +133,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "JOIN FETCH sb.category " +
             "JOIN FETCH t.account " +
             "LEFT JOIN FETCH t.card " +
-            "LEFT JOIN FETCH t.vehicle " +
+            "LEFT JOIN FETCH t.vehicle v " +
+            "LEFT JOIN FETCH v.brand " +
+            "LEFT JOIN FETCH v.model " +
             "LEFT JOIN FETCH t.contract " +
             "LEFT JOIN FETCH t.partner " +
             "WHERE t.signature = :signature ORDER BY t.installment ASC ")
@@ -129,10 +148,12 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "JOIN FETCH sb.category " +
             "JOIN FETCH t.account " +
             "LEFT JOIN FETCH t.card " +
-            "LEFT JOIN FETCH t.vehicle " +
+            "LEFT JOIN FETCH t.vehicle v " +
+            "LEFT JOIN FETCH v.brand " +
+            "LEFT JOIN FETCH v.model " +
             "LEFT JOIN FETCH t.contract " +
             "LEFT JOIN FETCH t.partner " +
-            "WHERE 1 = 1 ORDER BY t.id DESC ")
+            "WHERE 1 = 1 AND t.invoiceId IS NULL ORDER BY t.id DESC ")
     List<TransactionEntity> findAll();
 
     @NonNull
@@ -142,7 +163,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "JOIN FETCH sb.category " +
             "JOIN FETCH t.account " +
             "LEFT JOIN FETCH t.card " +
-            "LEFT JOIN FETCH t.vehicle " +
+            "LEFT JOIN FETCH t.vehicle v " +
+            "LEFT JOIN FETCH v.brand " +
+            "LEFT JOIN FETCH v.model " +
             "LEFT JOIN FETCH t.contract " +
             "LEFT JOIN FETCH t.partner " +
             "WHERE t.id = :id ORDER BY t.id DESC ")
@@ -158,10 +181,41 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             JOIN FETCH sb.category
             JOIN FETCH t.account
             LEFT JOIN FETCH t.card
-            LEFT JOIN FETCH t.vehicle
+            LEFT JOIN FETCH t.vehicle v
+            LEFT JOIN FETCH v.brand
+            LEFT JOIN FETCH v.model
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
             WHERE t.dueDate = :dueDate AND t.card = :card
             """)
     List<TransactionEntity> searchInvoiceByDueDate(@Param("dueDate") LocalDate dueDate, @Param("card") CardEntity card);
+
+    @Query("""
+            SELECT t
+            FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            JOIN FETCH sb.category
+            JOIN FETCH t.account
+            LEFT JOIN FETCH t.card
+            LEFT JOIN FETCH t.vehicle v
+            LEFT JOIN FETCH v.brand
+            LEFT JOIN FETCH v.model
+            LEFT JOIN FETCH t.contract
+            LEFT JOIN FETCH t.partner
+            WHERE t.id = :id AND t.invoice = true AND t.invoiceId IS NULL
+            UNION
+            SELECT t
+            FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            JOIN FETCH sb.category
+            JOIN FETCH t.account
+            LEFT JOIN FETCH t.card
+            LEFT JOIN FETCH t.vehicle v
+            LEFT JOIN FETCH v.brand
+            LEFT JOIN FETCH v.model
+            LEFT JOIN FETCH t.contract
+            LEFT JOIN FETCH t.partner
+            WHERE t.invoiceId = :id AND t.invoice = false
+            """)
+    List<TransactionEntity> searchInvoiceById(@Param("id") Long id);
 }
