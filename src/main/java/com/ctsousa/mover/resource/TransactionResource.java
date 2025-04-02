@@ -75,15 +75,6 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     }
 
     @Override
-    @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
-    public ResponseEntity<List<TransactionResponse>> searchInvoice(Long id) {
-        List<TransactionEntity> entities = transactionService.searchInvoiceBy(id);
-        List<TransactionResponse> responses = toCollection(entities, TransactionResponse.class);
-        updateResponse(responses, entities);
-        return ResponseEntity.ok(responses);
-    }
-
-    @Override
     @PreAuthorize(Security.PreAutorize.Transaction.PAYMENT_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> pay(Long id, LocalDate paymentDate) {
         TransactionEntity entity = transactionService.pay(id, paymentDate);

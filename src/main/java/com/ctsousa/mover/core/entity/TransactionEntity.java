@@ -9,9 +9,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 @Getter
 @Setter
@@ -107,33 +104,4 @@ public class TransactionEntity extends AbstractEntity {
 
     @Transient
     private AccountEntity destinationAccount;
-
-//    @Transient
-//    private Invoice invoice;
-
-    @Getter
-    public static class Invoice {
-        private LocalDate dueDate;
-        private LocalDate paymentDate;
-        private Boolean paid;
-        private Boolean scheduled;
-        private BigDecimal total = BigDecimal.ZERO;
-        private CardEntity card = new CardEntity();
-        private final List<TransactionEntity> transactions = new ArrayList<>();
-
-        public void add(final TransactionEntity transaction) {
-            if (transaction.getCard() == null) return;
-            if (dueDate == null) dueDate = transaction.getDueDate();
-            if (paymentDate == null) paymentDate = transaction.getPaymentDate();
-            total = total.add(transaction.getValue());
-            card = transaction.getCard();
-            paid = transaction.getPaid();
-            scheduled = null;
-            this.transactions.add(transaction);
-        }
-
-        public List<TransactionEntity> getTransactions() {
-            return Collections.unmodifiableList(transactions);
-        }
-    }
 }

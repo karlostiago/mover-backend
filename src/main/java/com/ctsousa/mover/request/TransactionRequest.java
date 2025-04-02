@@ -3,7 +3,6 @@ package com.ctsousa.mover.request;
 import com.ctsousa.mover.core.annotation.DateFormat;
 import com.ctsousa.mover.core.annotation.NotEmpty;
 import com.ctsousa.mover.core.deserializer.LocalDateDeserializer;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,4 +56,8 @@ public class TransactionRequest {
     private Boolean active;
     private Boolean deleteOnlyThis;
     private Boolean scheduled;
+
+    private Boolean invoice;
+    private Long invoiceId;
+    private BigDecimal amountPaid;
 }

@@ -6,10 +6,11 @@ import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.core.util.DateUtil;
+import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.request.TransactionRequest;
 import com.ctsousa.mover.response.TransactionResponse;
-import com.ctsousa.mover.service.TransactionService;
+import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,16 +23,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.mapper.Transform.toCollection;
+import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
 @RequestMapping("/invoices")
 public class InvoiceResource extends BaseResource<TransactionResponse, TransactionRequest, TransactionEntity> implements InvoiceApi {
 
     @Autowired
-    private TransactionService transactionService;
+    private InvoiceService invoiceService;
 
-    public InvoiceResource(TransactionService transactionService) {
-        super(transactionService);
+    public InvoiceResource(InvoiceService invoiceService) {
+        super(invoiceService);
     }
 
     @Override
@@ -43,13 +45,16 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
     @Override
     @PreAuthorize(Security.PreAutorize.Transaction.UPDATE_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> update(Long id, TransactionRequest request) {
-        throw new NotificationException("Ação não suportada.");
+        TransactionEntity invoice = invoiceService.findById(request.getInvoiceId());
+        Transaction domain = toMapper(request, Transaction.class);
+        TransactionEntity updatedEntity = invoiceService.update(invoice, domain.toEntity());
+        return ResponseEntity.ok(toMapper(updatedEntity, TransactionResponse.class));
     }
 
     @Override
     @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
     public ResponseEntity<List<TransactionResponse>> searchById(Long id) {
-        List<TransactionEntity> entities = transactionService.searchInvoiceBy(id);
+        List<TransactionEntity> entities = invoiceService.searchById(id);
         List<TransactionResponse> responses = toCollection(entities, TransactionResponse.class);
         updateResponse(responses, entities);
         return ResponseEntity.ok(responses);

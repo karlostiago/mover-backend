@@ -35,7 +35,4 @@ public interface TransactionApi {
 
     @PutMapping("/calculate-cut-off-date")
     ResponseEntity<TransactionResponse>  calculateCutOffDate(@RequestBody TransactionRequest request);
-
-    @GetMapping("/invoice/{id}")
-    ResponseEntity<List<TransactionResponse>> searchInvoice(@PathVariable Long id);
 }

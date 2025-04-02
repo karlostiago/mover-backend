@@ -186,22 +186,6 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             LEFT JOIN FETCH v.model
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
-            WHERE t.dueDate = :dueDate AND t.card = :card
-            """)
-    List<TransactionEntity> searchInvoiceByDueDate(@Param("dueDate") LocalDate dueDate, @Param("card") CardEntity card);
-
-    @Query("""
-            SELECT t
-            FROM TransactionEntity t
-            JOIN FETCH t.subcategory sb
-            JOIN FETCH sb.category
-            JOIN FETCH t.account
-            LEFT JOIN FETCH t.card
-            LEFT JOIN FETCH t.vehicle v
-            LEFT JOIN FETCH v.brand
-            LEFT JOIN FETCH v.model
-            LEFT JOIN FETCH t.contract
-            LEFT JOIN FETCH t.partner
             WHERE t.id = :id AND t.invoice = true AND t.invoiceId IS NULL
             UNION
             SELECT t

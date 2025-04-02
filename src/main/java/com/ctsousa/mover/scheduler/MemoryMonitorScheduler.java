@@ -11,7 +11,7 @@ public class MemoryMonitorScheduler implements Scheduler{
     private static final long MAX_MEMORY_MB = 512;
 
     @Override
-    @Scheduled(cron = "0/10 * * * * *") // executa a cada 10 segundos
+//    @Scheduled(cron = "0/10 * * * * *") // executa a cada 10 segundos
     public void process() {
         long totalMemory = Runtime.getRuntime().totalMemory();
         long freeMemory = Runtime.getRuntime().freeMemory();

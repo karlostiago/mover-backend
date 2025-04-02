@@ -3,7 +3,6 @@ package com.ctsousa.mover.domain;
 import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.enumeration.TypeCategory;
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -144,6 +143,9 @@ public class Transaction extends DomainModel<TransactionEntity> {
         }
 
         entity.setHour(LocalTime.now());
+        entity.setInvoice(getInvoice());
+        entity.setInvoiceId(getInvoiceId());
+        entity.setAmountPaid(getAmountPaid());
 
         return entity;
     }
