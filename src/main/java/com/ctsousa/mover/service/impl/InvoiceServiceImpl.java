@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long> implements InvoiceService {
@@ -33,7 +35,10 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
     @Override
     public List<TransactionEntity> searchById(Long id) {
-        return repository.searchInvoiceById(id);
+        List<TransactionEntity> entities = repository.searchInvoiceById(id);
+        return entities.stream()
+                .sorted(Comparator.comparing(TransactionEntity::getRegisterDate).reversed())
+                .collect(Collectors.toList());
     }
 
     private BigDecimal calculateUpdatedValue(BigDecimal invoiceValue, BigDecimal previousValue, BigDecimal newValue) {

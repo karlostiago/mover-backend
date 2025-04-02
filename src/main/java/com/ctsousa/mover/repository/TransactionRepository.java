@@ -200,6 +200,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
             WHERE t.invoiceId = :id AND t.invoice = false
+            ORDER BY t.registerDate DESC
             """)
     List<TransactionEntity> searchInvoiceById(@Param("id") Long id);
 }

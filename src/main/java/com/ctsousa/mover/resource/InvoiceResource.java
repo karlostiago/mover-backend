@@ -88,7 +88,7 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
             transactionResponse.setDate(Optional.ofNullable(transactionResponse.getPaymentDate())
                     .orElse(transactionResponse.getDueDate()));
 
-            transactionResponse.setDayOfWeek(DateUtil.dayOfWeek(transactionResponse.getDate()));
+            transactionResponse.setDayOfWeek(DateUtil.dayOfWeek(transactionResponse.getRegisterDate()));
             transactionResponse.setIcon(Icon.toName(account.getIcon()).getUrlImage());
         }
     }
