@@ -10,6 +10,7 @@ import com.ctsousa.mover.scheduler.InsertTransactionScheduler;
 import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.FixedInstallmentService;
 import com.ctsousa.mover.service.InstallmentService;
+import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
@@ -31,6 +32,8 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
     @Autowired
     protected AccountService accountService;
 
+    @Autowired
+    protected InvoiceService invoiceService;
     private final InstallmentService installmentService;
     private final FixedInstallmentService fixedInstallmentService;
 
@@ -60,6 +63,9 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             entities.forEach(repository::save);
         }
         else {
+            TransactionEntity invoice = invoiceService.toGenerate(entity);
+            entity.setInvoiceId(invoice.getId());
+
             TransactionEntity entitySaved = repository.save(entity);
             entities.add(entitySaved);
         }

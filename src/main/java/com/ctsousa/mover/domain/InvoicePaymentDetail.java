@@ -1,8 +1,7 @@
 package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
-import com.ctsousa.mover.core.entity.CardEntity;
-import com.ctsousa.mover.core.entity.PaymentDetailEntity;
+import com.ctsousa.mover.core.entity.InvoicePaymentDetailEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import lombok.Getter;
@@ -13,27 +12,27 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class PaymentDetail extends DomainModel<PaymentDetailEntity> {
+public class InvoicePaymentDetail extends DomainModel<InvoicePaymentDetailEntity> {
     private LocalDate date;
-    private BigDecimal amountPaid;
+    private BigDecimal value;
     private TransactionEntity invoice;
     private AccountEntity account;
-    private CardEntity card;
+    private TransactionEntity payment;
 
     @Override
-    public PaymentDetailEntity toEntity() {
+    public InvoicePaymentDetailEntity toEntity() {
 
-        if (account == null && card == null) {
-            throw new NotificationException("O pagamento deve estar associado a uma conta ou cartão.");
+        if (account == null) {
+            throw new NotificationException("O pagamento deve estar associado a uma conta.");
         }
 
-        PaymentDetailEntity entity = new PaymentDetailEntity();
+        InvoicePaymentDetailEntity entity = new InvoicePaymentDetailEntity();
         entity.setId(getId());
         entity.setDate(getDate());
-        entity.setAmountPaid(getAmountPaid());
+        entity.setValue(getValue());
         entity.setActive(getActive());
         entity.setAccount(getAccount());
-        entity.setCard(getCard());
+        entity.setPayment(getPayment());
         return entity;
     }
 }

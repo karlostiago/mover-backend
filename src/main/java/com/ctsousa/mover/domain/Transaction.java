@@ -145,7 +145,6 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setHour(LocalTime.now());
         entity.setInvoice(getInvoice());
         entity.setInvoiceId(getInvoiceId());
-        entity.setAmountPaid(getAmountPaid());
 
         return entity;
     }

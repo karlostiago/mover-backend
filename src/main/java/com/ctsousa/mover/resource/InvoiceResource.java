@@ -9,7 +9,9 @@ import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.request.TransactionRequest;
+import com.ctsousa.mover.response.InvoicePaymentDetailResponse;
 import com.ctsousa.mover.response.TransactionResponse;
+import com.ctsousa.mover.service.InvoicePaymentService;
 import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,8 +36,11 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
     @Autowired
     private InvoiceService invoiceService;
 
-    public InvoiceResource(InvoiceService invoiceService) {
+    private final InvoicePaymentService invoicePaymentService;
+
+    public InvoiceResource(InvoiceService invoiceService, InvoicePaymentService invoicePaymentService) {
         super(invoiceService);
+        this.invoicePaymentService = invoicePaymentService;
     }
 
     @Override
@@ -58,6 +65,57 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
         List<TransactionResponse> responses = toCollection(entities, TransactionResponse.class);
         updateResponse(responses, entities);
         return ResponseEntity.ok(responses);
+    }
+
+    @Override
+    public void delete(Long id) {
+        super.delete(id);
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.SCHEDULE_TRANSACTIONS)
+    public ResponseEntity<TransactionResponse> schedule(Long id) {
+        TransactionEntity entity = invoiceService.schedule(id);
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.UNDO_SCHEDULING_TRANSACTIONS)
+    public ResponseEntity<TransactionResponse> undoSchedule(Long id) {
+        TransactionEntity entity = invoiceService.undoScheduling(id);
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.PAYMENT_TRANSACTIONS)
+    public ResponseEntity<TransactionResponse> pay(Long id, LocalDate paymentDate, TransactionRequest request) {
+        AccountEntity account = new AccountEntity(request.getAccountId());
+        TransactionEntity entity = invoiceService.pay(id, paymentDate, request.getValue(), account);
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.REFUND_TRANSACTIONS)
+    public ResponseEntity<TransactionResponse> refund(Long id) {
+        TransactionEntity entity = invoiceService.refund(id);
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
+    public ResponseEntity<List<InvoicePaymentDetailResponse>> invoicePaymentDetail(Long id) {
+        List<InvoicePaymentDetailEntity> entities = invoicePaymentService.findByPaymentDetails(id);
+        List<InvoicePaymentDetailResponse> response = new ArrayList<>(entities.size());
+        entities.forEach(detail -> {
+            response.add(InvoicePaymentDetailResponse
+                    .builder()
+                            .id(detail.getId())
+                            .value(detail.getValue())
+                            .date(detail.getDate())
+                            .account(detail.getAccount().getName())
+                    .build());
+        });
+        return ResponseEntity.ok(response);
     }
 
     @Override

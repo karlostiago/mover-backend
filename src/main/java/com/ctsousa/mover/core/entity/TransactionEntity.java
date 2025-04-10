@@ -99,9 +99,6 @@ public class TransactionEntity extends AbstractEntity {
     @Column(name = "invoice_id")
     private Long invoiceId;
 
-    @Column(name = "`amount_paid`", nullable = false)
-    private BigDecimal amountPaid;
-
     @Transient
     private AccountEntity destinationAccount;
 }

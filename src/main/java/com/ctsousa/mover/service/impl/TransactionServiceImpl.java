@@ -6,7 +6,6 @@ import com.ctsousa.mover.core.factory.*;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
-import com.ctsousa.mover.service.InvoiceService;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,7 +14,8 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.ctsousa.mover.core.util.NumberUtil.parseMonetary;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
@@ -42,9 +42,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository repository;
 
-    private final InvoiceService invoiceService;
-
-    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, ScheduleTransactionServiceFactory scheduleTransactionServiceFactory, UndoSchedulingTransactionServiceFactory undoSchedulingTransactionServiceFactory, TransactionRepository repository, InvoiceService invoiceService) {
+    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, ScheduleTransactionServiceFactory scheduleTransactionServiceFactory, UndoSchedulingTransactionServiceFactory undoSchedulingTransactionServiceFactory, TransactionRepository repository) {
         this.createTransactionServiceFactory = createTransactionServiceFactory;
         this.updateTransactionServiceFactory = updateTransactionServiceFactory;
         this.filterTransactionServiceFactory = filterTransactionServiceFactory;
@@ -54,7 +52,6 @@ public class TransactionServiceImpl implements TransactionService {
         this.scheduleTransactionServiceFactory = scheduleTransactionServiceFactory;
         this.undoSchedulingTransactionServiceFactory = undoSchedulingTransactionServiceFactory;
         this.repository = repository;
-        this.invoiceService = invoiceService;
     }
 
     @Override

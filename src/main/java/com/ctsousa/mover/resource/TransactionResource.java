@@ -161,10 +161,9 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
             VehicleEntity vehicle = entity.getVehicle();
             CardEntity card = entity.getCard();
             ContractEntity contract = entity.getContract();
-//            TransactionEntity.Invoice invoice = entity.getInvoice();
 
             TransactionResponse transactionResponse = responseMap.get(entity.getId());
-            transactionResponse.setSubcategory(subcategory.getDescription());
+            transactionResponse.setSubcategory(transactionResponse.getInvoice() ? "FATURA CARTÃO" : subcategory.getDescription());
             transactionResponse.setCategory(category.getDescription());
             transactionResponse.setRemainingPages(REMAINING_PAGE);
             transactionResponse.setAccount(String.format("%s - %s", account.getName(), account.getNumber()));
@@ -181,12 +180,6 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
 
             transactionResponse.setDayOfWeek(DateUtil.dayOfWeek(transactionResponse.getDate()));
             transactionResponse.setIcon(Icon.toName(account.getIcon()).getUrlImage());
-
-//            Optional.ofNullable(invoice).ifPresent(inv -> {
-//                transactionResponse.setInvoice(new InvoiceResponse(inv));
-//                transactionResponse.setHasInvoice(true);
-//                transactionResponse.setScheduled(null);
-//            });
         }
     }
 

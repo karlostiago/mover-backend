@@ -13,30 +13,28 @@ import java.util.List;
 public interface BalanceRepository extends JpaRepository<TransactionEntity, Long> {
 
     @Query(value = """
-            SELECT
-            	COALESCE(SUM(TEMP.BALANCE), 0) AS BALANCE
-            FROM (
-            	SELECT
-            	    c.name AS NAME,
-            	    COALESCE(c.initial_balance, 0) + COALESCE((
-            	        SELECT SUM(t.value)
-            	        FROM tb_transaction t
-            	        WHERE t.account_id = c.id
-            	          AND t.paid
-            	    ), 0) AS BALANCE
-            	FROM
-            	    tb_account c
-            	WHERE
-            	    c.id IN (:accounts)
-            ) AS TEMP
+            SELECT SUM(c.initial_balance + IFNULL(t.total_value, 0)) AS BALANCE
+            FROM tb_account c
+            LEFT JOIN (
+                SELECT t.account_id, SUM(t.value) AS total_value
+                FROM tb_transaction t
+                WHERE t.paid
+                AND t.invoice_id IS NULL
+                AND NOT EXISTS (
+                  SELECT DISTINCT ipd.invoice_id
+                  FROM tb_invoice_payment_detail ipd
+                  WHERE ipd.invoice_id = t.id
+                )
+                GROUP BY t.account_id
+            ) t ON t.account_id = c.id
             """, nativeQuery = true)
     BigDecimal accountBalance(@Param("accounts") List<Long> accounts);
 
     @Deprecated
-    @Query(value = "SELECT SUM(t.value * -1) AS DESPESA FROM tb_transaction t WHERE t.category_type = 'EXPENSE'", nativeQuery = true)
+    @Query(value = "SELECT SUM(t.value * -1) AS DESPESA FROM tb_transaction t WHERE AND t.invoice_id IS NUL AND t.category_type = 'EXPENSE'", nativeQuery = true)
     BigDecimal expenseBalance();
 
     @Deprecated
-    @Query(value = "SELECT SUM(t.value) AS RECEITA FROM tb_transaction t WHERE t.category_type = 'INCOME'", nativeQuery = true)
+    @Query(value = "SELECT SUM(t.value) AS RECEITA FROM tb_transaction t WHERE AND t.invoice_id IS NUL AND t.category_type = 'INCOME'", nativeQuery = true)
     BigDecimal incomeBalance();
 }
