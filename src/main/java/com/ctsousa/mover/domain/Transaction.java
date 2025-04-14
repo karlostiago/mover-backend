@@ -46,7 +46,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
     private Boolean scheduled;
     private Boolean invoice;
     private Long invoiceId;
-    private BigDecimal amountPaid;
+    private BigDecimal residualValue;
 
     public Transaction() {}
 
@@ -145,6 +145,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setHour(LocalTime.now());
         entity.setInvoice(getInvoice());
         entity.setInvoiceId(getInvoiceId());
+        entity.setResidualValue(getResidualValue());
 
         return entity;
     }

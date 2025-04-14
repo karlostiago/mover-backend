@@ -2,9 +2,11 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.CardEntity;
+import com.ctsousa.mover.core.entity.InvoicePaymentDetailEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
+import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.repository.InvoiceRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.CardService;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -120,11 +123,14 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
                 .findFirst()
                 .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
 
-        if (value.abs().compareTo(invoice.getValue().abs()) != 0) {
-            BigDecimal nextValue = invoice.getValue().add(value);
-            LocalDate dueDate = invoice.getDueDate().plusMonths(1);
-            TransactionEntity nextInvoice = create(invoice, nextValue, createDescription(invoice.getCard(), dueDate), dueDate);
-            toGenerate(nextInvoice);
+        var residualValue = BigDecimal.ZERO;
+
+        if (NumberUtil.nonZero(invoice.getResidualValue(), BigDecimal.ZERO)) {
+            residualValue = invoice.getResidualValue().add(value);
+            invoice.setResidualValue(residualValue);
+        } else if (NumberUtil.nonZero(invoice.getValue(), value)) {
+            residualValue = invoice.getValue().add(value);
+            invoice.setResidualValue(residualValue);
         }
 
         TransactionEntity payment = invoicePaymentService.create(invoice, account, paymentDate, value);
@@ -135,7 +141,26 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
     @Override
     public TransactionEntity refund(Long id) {
-        return null;
+        List<TransactionEntity> entities = searchById(id);
+        entities.forEach(t -> t.setPaid(false));
+
+        TransactionEntity invoice = entities.stream().filter(t -> t.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
+
+        invoice.setResidualValue(BigDecimal.ZERO);
+        invoice.setRefund(true);
+        entities.forEach(this::save);
+
+        List<InvoicePaymentDetailEntity> details = invoicePaymentService.findByPaymentDetails(invoice.getId());
+        details.forEach(detail -> invoicePaymentService.deletePaymentDetail(detail.getId()));
+        details.forEach(detail -> super.deleteById(detail.getPayment().getId()));
+
+        return invoice;
+    }
+
+    private void sendNext(TransactionEntity invoice) {
+
     }
 
     private String createDescription(CardEntity card, LocalDate dueDate) {

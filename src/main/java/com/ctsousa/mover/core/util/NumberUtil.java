@@ -3,13 +3,13 @@ package com.ctsousa.mover.core.util;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class NumberUtil {
+
     private NumberUtil() { }
 
     public static BigDecimal toBigDecimal(String value) {
@@ -45,16 +45,11 @@ public final class NumberUtil {
         return null;
     }
 
-    public static BigDecimal getValueOrZero(final BigDecimal value) {
-        return value != null ? value : BigDecimal.ZERO;
-    }
-
     public static BigDecimal invertSignal(final BigDecimal value) {
         return value.multiply(BigDecimal.valueOf(-1));
     }
 
-    public static String currencyFormatter(BigDecimal value, Locale locale) {
-        NumberFormat format = NumberFormat.getCurrencyInstance(locale);
-        return format.format(value);
+    public static boolean nonZero(BigDecimal valueSource, BigDecimal valueTarget) {
+        return valueSource.abs().compareTo(valueTarget.abs()) != 0;
     }
 }

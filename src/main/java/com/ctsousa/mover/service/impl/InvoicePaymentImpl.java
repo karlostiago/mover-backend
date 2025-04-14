@@ -48,6 +48,13 @@ public class InvoicePaymentImpl extends BaseServiceImpl<TransactionEntity, Long>
     }
 
     @Override
+    public void deletePaymentDetail(Long id) {
+        InvoicePaymentDetailEntity entity = invoicePaymentDetailRepository.findById(id)
+                .orElseThrow(() -> new NotificationException("Não foi encontrado registro detalhe de pagamento."));
+        invoicePaymentDetailRepository.deleteById(entity.getId());
+    }
+
+    @Override
     public TransactionEntity create(TransactionEntity invoice, AccountEntity account, LocalDate paymentDate, BigDecimal value) {
         TransactionEntity payment = new TransactionEntity();
         payment.setDescription(invoice.getDescription().replace("FATURA CARTÃO", "PAGAMENTO FATURA CARTÃO"));
