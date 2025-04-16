@@ -35,7 +35,7 @@ public class InvoicePaymentImpl extends BaseServiceImpl<TransactionEntity, Long>
         try {
             InvoicePaymentDetailEntity detailEntity = invoicePaymentDetailRepository.findByPaymentId(id)
                     .stream().findFirst()
-                    .orElseThrow(() -> new NotificationException("Não existe uma detalhe pagamento.", Severity.INFO));
+                    .orElseThrow(() -> new NotificationException("Não existe detalhe pagamento.", Severity.INFO));
             return detailEntity.getInvoice().getId();
         } catch (NotificationException e) {
             return id;
@@ -81,10 +81,8 @@ public class InvoicePaymentImpl extends BaseServiceImpl<TransactionEntity, Long>
         payment.setInvoice(true);
         payment.setPredicted(false);
         payment.setActive(true);
-
         TransactionEntity savedPayment = save(payment);
         createPaymentDetail(savedPayment, invoice, value, account);
-
         return savedPayment;
     }
 

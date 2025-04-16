@@ -145,7 +145,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setHour(LocalTime.now());
         entity.setInvoice(getInvoice());
         entity.setInvoiceId(getInvoiceId());
-        entity.setResidualValue(getResidualValue());
+        entity.setResidualValue(BigDecimal.ZERO);
 
         return entity;
     }

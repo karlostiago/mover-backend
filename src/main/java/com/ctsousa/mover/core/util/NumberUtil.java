@@ -49,7 +49,23 @@ public final class NumberUtil {
         return value.multiply(BigDecimal.valueOf(-1));
     }
 
-    public static boolean nonZero(BigDecimal valueSource, BigDecimal valueTarget) {
-        return valueSource.abs().compareTo(valueTarget.abs()) != 0;
+    public static boolean nonZero(BigDecimal sourceValue, BigDecimal targetValue) {
+        return sourceValue.abs().compareTo(targetValue.abs()) != 0;
+    }
+
+    public static boolean equals(BigDecimal sourceValue, BigDecimal targetValue) {
+        return sourceValue.abs().compareTo(targetValue.abs()) == 0;
+    }
+
+    public static boolean lessThanZero(BigDecimal value) {
+        return value.compareTo(BigDecimal.ZERO) < 0;
+    }
+
+    public static boolean nonZero(BigDecimal value) {
+        return nonZero(value, BigDecimal.ZERO);
+    }
+
+    public static boolean equalsZero(BigDecimal value) {
+        return value.compareTo(BigDecimal.ZERO) == 0;
     }
 }

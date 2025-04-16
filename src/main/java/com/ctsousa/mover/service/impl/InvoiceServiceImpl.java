@@ -7,23 +7,26 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.core.util.NumberUtil;
+import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.InvoiceRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.InvoicePaymentService;
 import com.ctsousa.mover.service.InvoiceService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.monthInFull;
-import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
+import static com.ctsousa.mover.core.util.NumberUtil.*;
 import static com.ctsousa.mover.core.util.StringUtil.removeDuplicateWords;
 import static java.util.UUID.randomUUID;
 
@@ -123,20 +126,55 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
                 .findFirst()
                 .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
 
-        var residualValue = BigDecimal.ZERO;
-
-        if (NumberUtil.nonZero(invoice.getResidualValue(), BigDecimal.ZERO)) {
-            residualValue = invoice.getResidualValue().add(value);
-            invoice.setResidualValue(residualValue);
-        } else if (NumberUtil.nonZero(invoice.getValue(), value)) {
-            residualValue = invoice.getValue().add(value);
-            invoice.setResidualValue(residualValue);
-        }
+        BigDecimal residualValue = calculateResidualValue(invoice, value);
+        invoice.setResidualValue(residualValue);
 
         TransactionEntity payment = invoicePaymentService.create(invoice, account, paymentDate, value);
         entities.forEach(this::save);
 
+        handleResidualValue(payment, invoice.getCard(), residualValue);
+
         return payment;
+    }
+
+    private void handleResidualValue(TransactionEntity invoice, CardEntity card, BigDecimal residualValue) {
+        LocalDate dueDate = invoice.getDueDate().plusMonths(1);
+        TransactionEntity nextInvoice = repository.findBy(dueDate, card);
+        TypeCategory typeCategory = NumberUtil.lessThanZero(residualValue) ? TypeCategory.EXPENSE : TypeCategory.INCOME;
+
+        if (nextInvoice == null) {
+            TransactionEntity newInvoice = new TransactionEntity();
+            BeanUtils.copyProperties(invoice, newInvoice);
+            newInvoice.setId(null);
+            newInvoice.setDescription(createDescription(newInvoice.getCard(), dueDate));
+            newInvoice.setDueDate(dueDate);
+            newInvoice.setPaymentDate(null);
+            newInvoice.setPaid(false);
+            newInvoice.setCard(card);
+            newInvoice.setResidualValue(BigDecimal.ZERO);
+            newInvoice.setRegisterDate(LocalDate.now());
+            newInvoice.setPredicted(true);
+            newInvoice.setRefund(false);
+            newInvoice.setScheduled(false);
+            newInvoice.setTransactionType(typeCategory.getTransactionType().name());
+            newInvoice.setCategoryType(typeCategory.name());
+            newInvoice.setHour(LocalTime.now());
+            newInvoice.setSignature(String.valueOf(UUID.randomUUID()));
+            newInvoice.setValue(residualValue);
+            save(newInvoice);
+        } else {
+            BigDecimal value = nextInvoice.getValue().add(invoice.getValue().abs());
+            nextInvoice.setValue(value);
+            nextInvoice.setResidualValue(nextInvoice.getResidualValue().add(residualValue));
+            nextInvoice.setTransactionType(typeCategory.getTransactionType().name());
+            nextInvoice.setCategoryType(typeCategory.name());
+
+            if (NumberUtil.equalsZero(value)) {
+                super.deleteById(nextInvoice.getId());
+            } else {
+                save(nextInvoice);
+            }
+        }
     }
 
     @Override
@@ -159,8 +197,14 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         return invoice;
     }
 
-    private void sendNext(TransactionEntity invoice) {
-
+    private BigDecimal calculateResidualValue(TransactionEntity invoice, BigDecimal value) {
+        var residualValue = BigDecimal.ZERO;
+        if (nonZero(invoice.getResidualValue())) {
+            return invoice.getResidualValue().add(value);
+        } else if (nonZero(invoice.getValue(), value)) {
+            return invoice.getValue().add(value);
+        }
+        return residualValue;
     }
 
     private String createDescription(CardEntity card, LocalDate dueDate) {
@@ -179,36 +223,32 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
     private TransactionEntity create(TransactionEntity entity, String description,  LocalDate dueDate) {
         TransactionEntity invoice = new TransactionEntity();
+        BeanUtils.copyProperties(entity, invoice);
+        invoice.setId(null);
         invoice.setDescription(description);
-        invoice.setSubcategory(entity.getSubcategory());
-        invoice.setInstallment(0);
-        invoice.setCategoryType(entity.getCategoryType());
-        invoice.setDueDate(dueDate);
-        invoice.setPaymentDate(entity.getPaymentDate());
-        invoice.setRegisterDate(entity.getRegisterDate());
-        invoice.setValue(entity.getValue());
-        invoice.setCard(entity.getCard());
-        invoice.setAccount(entity.getAccount());
+//        invoice.setSubcategory(entity.getSubcategory());
+//        invoice.setInstallment(0);
+//        invoice.setCategoryType(entity.getCategoryType());
+//        invoice.setDueDate(dueDate);
+//        invoice.setPaymentDate(entity.getPaymentDate());
+//        invoice.setRegisterDate(entity.getRegisterDate());
+//        invoice.setValue(entity.getValue());
+//        invoice.setCard(entity.getCard());
+//        invoice.setAccount(entity.getAccount());
         invoice.setVehicle(null);
         invoice.setContract(null);
         invoice.setSignature(String.valueOf(randomUUID()));
-        invoice.setTransactionType(entity.getTransactionType());
+//        invoice.setTransactionType(entity.getTransactionType());
         invoice.setPartner(null);
         invoice.setPaid(false);
         invoice.setRefund(entity.getRefund());
-        invoice.setHour(entity.getHour());
+        invoice.setHour(LocalTime.now());
         invoice.setLastInstallment(false);
         invoice.setScheduled(entity.getScheduled());
         invoice.setInvoiceId(null);
         invoice.setInvoice(true);
         invoice.setPredicted(false);
         invoice.setActive(true);
-        return invoice;
-    }
-
-    private TransactionEntity create(TransactionEntity entity, BigDecimal value, String description,  LocalDate dueDate) {
-        TransactionEntity invoice = create(entity, description, dueDate);
-        invoice.setValue(value);
         return invoice;
     }
 

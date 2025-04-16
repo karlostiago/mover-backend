@@ -64,6 +64,7 @@ public class TransactionResponse {
     private Boolean invoice;
     private Long invoiceId;
     private BigDecimal residualValue;
+    private BigDecimal amountPaid;
 
     public void setCategoryType(String categoryType) {
         TypeCategory type = TypeCategory.toDescription(categoryType);

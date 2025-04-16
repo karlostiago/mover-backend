@@ -22,10 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.mapper.Transform.toCollection;
@@ -179,7 +176,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
                     .orElse(transactionResponse.getDueDate()));
 
             transactionResponse.setDayOfWeek(DateUtil.dayOfWeek(transactionResponse.getDate()));
-            transactionResponse.setIcon(Icon.toName(account.getIcon()).getUrlImage());
+            transactionResponse.setIcon(Icon.toName(entity.getInvoice() ? Icon.INVOICE.name() : account.getIcon()).getUrlImage());
         }
     }
 
