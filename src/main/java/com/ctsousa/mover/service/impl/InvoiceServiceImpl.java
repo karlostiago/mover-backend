@@ -26,7 +26,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.monthInFull;
-import static com.ctsousa.mover.core.util.NumberUtil.*;
+import static com.ctsousa.mover.core.util.NumberUtil.equalsZero;
+import static com.ctsousa.mover.core.util.NumberUtil.nonZero;
 import static com.ctsousa.mover.core.util.StringUtil.removeDuplicateWords;
 import static java.util.UUID.randomUUID;
 
@@ -68,15 +69,27 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
     @Override
     public void deleteById(Long id) {
-        TransactionEntity entity = findById(id);
-        TransactionEntity invoice = findById(entity.getInvoiceId());
+        TransactionEntity invoice = findById(id);
+        Long paymentId = invoicePaymentService.findPaymentId(invoice.getId());
+        List<InvoicePaymentDetailEntity> paymentDetails = invoicePaymentService.findByPaymentDetails(paymentId);
+        InvoicePaymentDetailEntity invoicePaymentDetail = paymentDetails.stream().filter(d -> d.getPayment().getId().equals(id))
+                .findFirst()
+                .orElse(null);
 
-        BigDecimal value = invoice.getValue().add(invertSignal(entity.getValue()));
-        invoice.setValue(value);
-        invoice.setTransactionType(value.compareTo(BigDecimal.ZERO) > 0 ? "CREDIT" : "DEBIT");
-        save(invoice);
+        boolean hasPaymentDetails = invoicePaymentDetail != null;
+        if (hasPaymentDetails) {
+            paymentDetails.remove(invoicePaymentDetail);
+            invoicePaymentService.deletePaymentDetail(invoicePaymentDetail.getId());
+        }
 
-        super.deleteById(entity.getId());
+        boolean haveInvoicePaidNoPaymentDetails = invoice.getPaid() && paymentDetails.isEmpty();
+        if (haveInvoicePaidNoPaymentDetails) {
+            List<TransactionEntity> entities = searchById(paymentId);
+            entities.forEach(e -> e.setPaid(false));
+            entities.forEach(this::save);
+        }
+
+        super.deleteById(id);
     }
 
     @Override
