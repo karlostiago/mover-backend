@@ -26,8 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.monthInFull;
-import static com.ctsousa.mover.core.util.NumberUtil.equalsZero;
-import static com.ctsousa.mover.core.util.NumberUtil.nonZero;
+import static com.ctsousa.mover.core.util.NumberUtil.*;
 import static com.ctsousa.mover.core.util.StringUtil.removeDuplicateWords;
 import static java.util.UUID.randomUUID;
 
@@ -69,27 +68,41 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
     @Override
     public void deleteById(Long id) {
-        TransactionEntity invoice = findById(id);
-        Long paymentId = invoicePaymentService.findPaymentId(invoice.getId());
-        List<InvoicePaymentDetailEntity> paymentDetails = invoicePaymentService.findByPaymentDetails(paymentId);
-        InvoicePaymentDetailEntity invoicePaymentDetail = paymentDetails.stream().filter(d -> d.getPayment().getId().equals(id))
-                .findFirst()
-                .orElse(null);
+        TransactionEntity entity = findById(id);
 
-        boolean hasPaymentDetails = invoicePaymentDetail != null;
-        if (hasPaymentDetails) {
-            paymentDetails.remove(invoicePaymentDetail);
-            invoicePaymentService.deletePaymentDetail(invoicePaymentDetail.getId());
+        if (entity.getInvoice()) {
+            Long paymentId = invoicePaymentService.findPaymentId(entity.getId());
+            List<InvoicePaymentDetailEntity> paymentDetails = invoicePaymentService.findByPaymentDetails(paymentId);
+            InvoicePaymentDetailEntity invoicePaymentDetail = paymentDetails.stream().filter(d -> d.getPayment().getId().equals(id))
+                    .findFirst()
+                    .orElse(null);
+
+            boolean hasPaymentDetails = invoicePaymentDetail != null;
+            if (hasPaymentDetails) {
+                paymentDetails.remove(invoicePaymentDetail);
+                invoicePaymentService.deletePaymentDetail(invoicePaymentDetail.getId());
+            }
+
+            boolean haveInvoicePaidNoPaymentDetails = entity.getPaid() && paymentDetails.isEmpty();
+            if (haveInvoicePaidNoPaymentDetails) {
+                List<TransactionEntity> entities = searchById(paymentId);
+                entities.forEach(e -> e.setPaid(false));
+                entities.forEach(this::save);
+            }
+
+            super.deleteById(id);
+        } else {
+            TransactionEntity invoice = findById(entity.getInvoiceId());
+            BigDecimal value = invoice.getValue().add(invertSignal(entity.getValue()));
+            invoice.setValue(value);
+            invoice.setTransactionType(value.compareTo(BigDecimal.ZERO) > 0 ? "CREDIT" : "DEBIT");
+            if (invoice.getValue().compareTo(BigDecimal.ZERO) == 0) {
+                super.deleteById(invoice.getId());
+            } else {
+                save(invoice);
+                super.deleteById(entity.getId());
+            }
         }
-
-        boolean haveInvoicePaidNoPaymentDetails = invoice.getPaid() && paymentDetails.isEmpty();
-        if (haveInvoicePaidNoPaymentDetails) {
-            List<TransactionEntity> entities = searchById(paymentId);
-            entities.forEach(e -> e.setPaid(false));
-            entities.forEach(this::save);
-        }
-
-        super.deleteById(id);
     }
 
     @Override
@@ -118,7 +131,7 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         entities.forEach(this::save);
         return entities.stream().filter(t -> t.getId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new NotificationException("Não existe fatura para ser realizado agendamento."));
+                .orElseThrow(() -> new NotificationException("Não existe fatura para realizar agendamento."));
     }
 
     @Override
@@ -127,7 +140,7 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         entities.forEach(this::save);
         return entities.stream().filter(t -> t.getId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new NotificationException("Não existe fatura para ser desfazer o agendamento."));
+                .orElseThrow(() -> new NotificationException("Não existe fatura para desfazer agendamento."));
     }
 
     @Override
