@@ -6,7 +6,6 @@ import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.core.util.DateUtil;
-import com.ctsousa.mover.domain.InvoicePaymentDetail;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.request.TransactionRequest;
@@ -22,7 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.mapper.Transform.toCollection;

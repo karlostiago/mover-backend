@@ -8,6 +8,7 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.enumeration.TypeCategory;
+import com.ctsousa.mover.repository.InvoicePaymentDetailRepository;
 import com.ctsousa.mover.repository.InvoiceRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.CardService;
@@ -39,11 +40,13 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     private InvoiceRepository repository;
     private final CardService cardService;
     private final InvoicePaymentService invoicePaymentService;
+    private final InvoicePaymentDetailRepository invoicePaymentDetailRepository;
 
-    public InvoiceServiceImpl(TransactionRepository repository, CardService cardService, InvoicePaymentService invoicePaymentService) {
+    public InvoiceServiceImpl(TransactionRepository repository, CardService cardService, InvoicePaymentService invoicePaymentService, InvoicePaymentDetailRepository invoicePaymentDetailRepository) {
         super(repository);
         this.cardService = cardService;
         this.invoicePaymentService = invoicePaymentService;
+        this.invoicePaymentDetailRepository = invoicePaymentDetailRepository;
     }
 
     @Override
@@ -69,39 +72,10 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     @Override
     public void deleteById(Long id) {
         TransactionEntity entity = findById(id);
-
         if (entity.getInvoice()) {
-            Long paymentId = invoicePaymentService.findPaymentId(entity.getId());
-            List<InvoicePaymentDetailEntity> paymentDetails = invoicePaymentService.findByPaymentDetails(paymentId);
-            InvoicePaymentDetailEntity invoicePaymentDetail = paymentDetails.stream().filter(d -> d.getPayment().getId().equals(id))
-                    .findFirst()
-                    .orElse(null);
-
-            boolean hasPaymentDetails = invoicePaymentDetail != null;
-            if (hasPaymentDetails) {
-                paymentDetails.remove(invoicePaymentDetail);
-                invoicePaymentService.deletePaymentDetail(invoicePaymentDetail.getId());
-            }
-
-            boolean haveInvoicePaidNoPaymentDetails = entity.getPaid() && paymentDetails.isEmpty();
-            if (haveInvoicePaidNoPaymentDetails) {
-                List<TransactionEntity> entities = searchById(paymentId);
-                entities.forEach(e -> e.setPaid(false));
-                entities.forEach(this::save);
-            }
-
-            super.deleteById(id);
+            delete(entity, id);
         } else {
-            TransactionEntity invoice = findById(entity.getInvoiceId());
-            BigDecimal value = invoice.getValue().add(invertSignal(entity.getValue()));
-            invoice.setValue(value);
-            invoice.setTransactionType(value.compareTo(BigDecimal.ZERO) > 0 ? "CREDIT" : "DEBIT");
-            if (invoice.getValue().compareTo(BigDecimal.ZERO) == 0) {
-                super.deleteById(invoice.getId());
-            } else {
-                save(invoice);
-                super.deleteById(entity.getId());
-            }
+            deleteItem(entity);
         }
     }
 
@@ -166,21 +140,52 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     @Override
     public TransactionEntity refund(Long id) {
         List<TransactionEntity> entities = searchById(id);
-        entities.forEach(t -> t.setPaid(false));
 
-        TransactionEntity invoice = entities.stream().filter(t -> t.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
+        if (!entities.isEmpty()) {
+            updateRefundAndPaidAndResidualValue(entities);
+            TransactionEntity invoice = entities.stream()
+                    .filter(t -> t.getId().equals(id))
+                    .findFirst()
+                    .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
 
-        invoice.setResidualValue(BigDecimal.ZERO);
-        invoice.setRefund(true);
-        entities.forEach(this::save);
+            entities.forEach(this::save);
 
-        List<InvoicePaymentDetailEntity> details = invoicePaymentService.findByPaymentDetails(invoice.getId());
-        details.forEach(detail -> invoicePaymentService.deletePaymentDetail(detail.getId()));
-        details.forEach(detail -> super.deleteById(detail.getPayment().getId()));
+            invoicePaymentService.findByPaymentDetails(invoice.getId())
+                    .forEach(detail -> {
+                        invoicePaymentService.deletePaymentDetail(detail.getId());
+                        super.deleteById(detail.getPayment().getId());
+                    });
 
-        return invoice;
+            return invoice;
+        }
+
+        InvoicePaymentDetailEntity paymentDetail = invoicePaymentDetailRepository.findById(id)
+                .orElseThrow(() -> new NotificationException("Detalhe de pagamento não encontrado"));
+
+        List<InvoicePaymentDetailEntity> details = invoicePaymentDetailRepository.findByInvoiceId(paymentDetail.getInvoice().getId());
+        entities = searchById(paymentDetail.getInvoice().getId());
+
+        details.removeIf(detail -> detail.getId().equals(paymentDetail.getId()));
+
+        invoicePaymentDetailRepository.delete(paymentDetail);
+        invoicePaymentService.deleteById(paymentDetail.getPayment().getId());
+
+        if (details.isEmpty()) {
+            updateRefundAndPaidAndResidualValue(entities);
+            entities.forEach(this::save);
+        }
+
+        return paymentDetail.getInvoice();
+    }
+
+    private void updateRefundAndPaidAndResidualValue(List<TransactionEntity> entities) {
+        entities.forEach(t -> {
+            t.setRefund(true);
+            t.setPaid(false);
+            if (Boolean.TRUE.equals(t.getInvoice())) {
+                t.setResidualValue(BigDecimal.ZERO);
+            }
+        });
     }
 
     private void handleResidualValue(TransactionEntity invoice, CardEntity card, BigDecimal residualValue) {
@@ -281,5 +286,44 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
     private BigDecimal calculateUpdatedValue(BigDecimal invoiceValue, BigDecimal previousValue, BigDecimal newValue) {
         return invoiceValue.subtract(previousValue).add(newValue);
+    }
+
+    private void delete(TransactionEntity entity, Long id) {
+        Long paymentId = invoicePaymentService.findPaymentId(entity.getId());
+        List<InvoicePaymentDetailEntity> paymentDetails = invoicePaymentService.findByPaymentDetails(paymentId);
+        InvoicePaymentDetailEntity invoicePaymentDetail = paymentDetails.stream().filter(d -> d.getPayment().getId().equals(id))
+                .findFirst()
+                .orElse(null);
+
+        boolean hasPaymentDetails = invoicePaymentDetail != null;
+        if (hasPaymentDetails) {
+            paymentDetails.remove(invoicePaymentDetail);
+            invoicePaymentService.deletePaymentDetail(invoicePaymentDetail.getId());
+        }
+
+        boolean haveInvoicePaidNoPaymentDetails = entity.getPaid() && paymentDetails.isEmpty();
+        if (haveInvoicePaidNoPaymentDetails) {
+            List<TransactionEntity> entities = searchById(paymentId);
+            entities.forEach(e -> e.setPaid(false));
+            entities.forEach(this::save);
+        }
+
+        super.deleteById(id);
+    }
+
+    private void deleteItem(TransactionEntity entity) {
+        TransactionEntity invoice = findById(entity.getInvoiceId());
+
+        if (invoice.getPaid()) throw new NotificationException("Não é permitido excluir lançamento. A fatura está paga.");
+
+        BigDecimal value = invoice.getValue().add(invertSignal(entity.getValue()));
+        invoice.setValue(value);
+        invoice.setTransactionType(value.compareTo(BigDecimal.ZERO) > 0 ? "CREDIT" : "DEBIT");
+        if (invoice.getValue().compareTo(BigDecimal.ZERO) == 0) {
+            super.deleteById(invoice.getId());
+        } else {
+            save(invoice);
+            super.deleteById(entity.getId());
+        }
     }
 }

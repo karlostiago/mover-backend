@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface InvoicePaymentDetailRepository extends JpaRepository<InvoicePaymentDetailEntity, Long> {
@@ -22,4 +23,15 @@ public interface InvoicePaymentDetailRepository extends JpaRepository<InvoicePay
             WHERE i.invoice.id = :id
             """)
     List<InvoicePaymentDetailEntity> findByInvoiceId(@NonNull Long id);
+
+    @NonNull
+    @Override
+    @Query("""
+            SELECT i FROM InvoicePaymentDetailEntity i
+            JOIN FETCH i.invoice
+            JOIN FETCH i.payment
+            JOIN FETCH i.account
+            WHERE i.id = :id
+            """)
+    Optional<InvoicePaymentDetailEntity> findById(@NonNull Long id);
 }
