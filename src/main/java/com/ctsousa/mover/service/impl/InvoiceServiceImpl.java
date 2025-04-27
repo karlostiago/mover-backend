@@ -61,7 +61,7 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
         if (invoiceFound != null) {
             BigDecimal value = invoiceFound.getValue().add(entity.getValue());
-            invoiceFound.setTransactionType(value.compareTo(BigDecimal.ZERO) > 0 ? "CREDIT" : "DEBIT");
+            updateTransactionTypeAndTypeCategoryWhenCredit(value, invoiceFound);
             invoiceFound.setValue(value);
             return save(invoiceFound);
         }
@@ -316,14 +316,22 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
         if (invoice.getPaid()) throw new NotificationException("Não é permitido excluir lançamento. A fatura está paga.");
 
-        BigDecimal value = invoice.getValue().add(invertSignal(entity.getValue()));
-        invoice.setValue(value);
-        invoice.setTransactionType(value.compareTo(BigDecimal.ZERO) > 0 ? "CREDIT" : "DEBIT");
+        invoice.setValue(invoice.getValue().add(invertSignal(entity.getValue())));
+        updateTransactionTypeAndTypeCategoryWhenCredit(invoice.getValue(), invoice);
         if (invoice.getValue().compareTo(BigDecimal.ZERO) == 0) {
             super.deleteById(invoice.getId());
         } else {
             save(invoice);
             super.deleteById(entity.getId());
         }
+    }
+
+    private void updateTransactionTypeAndTypeCategoryWhenCredit(BigDecimal value, TransactionEntity invoiceFound) {
+        TypeCategory type = TypeCategory.EXPENSE;
+        if (value.compareTo(BigDecimal.ZERO) > 0) {
+            type = TypeCategory.INCOME;
+        }
+        invoiceFound.setTransactionType(type.getTransactionType().name());
+        invoiceFound.setCategoryType(type.name());
     }
 }
