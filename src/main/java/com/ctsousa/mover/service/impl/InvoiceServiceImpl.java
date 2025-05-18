@@ -66,7 +66,7 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
             return save(invoiceFound);
         }
 
-        return save(create(entity, createDescription(card, dueDate), dueDate));
+        return save(create(entity, createDescription(card, dueDate)));
     }
 
     @Override
@@ -253,24 +253,14 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         return entity.getCard() == null;
     }
 
-    private TransactionEntity create(TransactionEntity entity, String description,  LocalDate dueDate) {
+    private TransactionEntity create(TransactionEntity entity, String description) {
         TransactionEntity invoice = new TransactionEntity();
         BeanUtils.copyProperties(entity, invoice);
         invoice.setId(null);
         invoice.setDescription(description);
-//        invoice.setSubcategory(entity.getSubcategory());
-//        invoice.setInstallment(0);
-//        invoice.setCategoryType(entity.getCategoryType());
-//        invoice.setDueDate(dueDate);
-//        invoice.setPaymentDate(entity.getPaymentDate());
-//        invoice.setRegisterDate(entity.getRegisterDate());
-//        invoice.setValue(entity.getValue());
-//        invoice.setCard(entity.getCard());
-//        invoice.setAccount(entity.getAccount());
         invoice.setVehicle(null);
         invoice.setContract(null);
         invoice.setSignature(String.valueOf(randomUUID()));
-//        invoice.setTransactionType(entity.getTransactionType());
         invoice.setPartner(null);
         invoice.setPaid(false);
         invoice.setRefund(entity.getRefund());
