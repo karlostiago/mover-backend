@@ -27,6 +27,7 @@ public interface BalanceRepository extends JpaRepository<TransactionEntity, Long
                 )
                 GROUP BY t.account_id
             ) t ON t.account_id = c.id
+            WHERE c.id IN (:accounts)
             """, nativeQuery = true)
     BigDecimal accountBalance(@Param("accounts") List<Long> accounts);
 
