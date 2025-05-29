@@ -13,6 +13,17 @@ import java.io.IOException;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsConfig implements Filter {
 
+    private static final String [] ALLOWED_ORIGINS = {
+        "http://localhost:4200",
+        "https://localhost:4200",
+        "https://moverfrotas.netlify.app",
+        "http://moverfrotas.netlify.app",
+        "https://moverfrotashom.netlify.app",
+        "http://moverfrotashom.netlify.app",
+        "https://moverfrota.com.br",
+        "http://moverfrota.com.br"
+    };
+
     private static final String ORIGIN = "Origin";
 
     @Override
@@ -36,12 +47,11 @@ public class CorsConfig implements Filter {
     }
 
     private String enabledOrigin(final HttpServletRequest request) {
-        String[] origens = getOrigensPermidas();
         String origemPermitida = null;
 
-        for (String origem : origens) {
-            if (request.getHeader(ORIGIN) != null && request.getHeader(ORIGIN).equals(origem.trim())) {
-                origemPermitida = origem;
+        for (String origin : ALLOWED_ORIGINS) {
+            if (request.getHeader(ORIGIN) != null && request.getHeader(ORIGIN).equals(origin.trim())) {
+                origemPermitida = origin;
                 break;
             }
         }
@@ -51,10 +61,5 @@ public class CorsConfig implements Filter {
 
     private boolean isEnabledOrigin(final HttpServletRequest request) {
         return enabledOrigin(request) != null;
-    }
-
-    private String [] getOrigensPermidas() {
-        return "http://localhost:4200, https://localhost:4200, http://192.168.1.2:8081, https://192.168.1.2:8081, https://mover-frontend.onrender.com, http://mover-frontend.onrender.com, https://moverfrotas.netlify.app, http://moverfrotas.netlify.app, https://moverfrotashom.netlify.app, http://moverfrotashom.netlify.app, https://moverfrota.com.br, http://moverfrota.com.br"
-                .split(",");
     }
 }

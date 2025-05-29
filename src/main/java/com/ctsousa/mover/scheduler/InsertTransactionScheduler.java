@@ -2,6 +2,7 @@ package com.ctsousa.mover.scheduler;
 
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.repository.TransactionRepository;
+import com.ctsousa.mover.service.InvoiceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,9 +19,11 @@ public class InsertTransactionScheduler implements Scheduler {
     private static final Queue<List<TransactionEntity>> queue = new ConcurrentLinkedQueue<>();
 
     protected final TransactionRepository repository;
+    protected final InvoiceService invoiceService;
 
-    public InsertTransactionScheduler(TransactionRepository repository) {
+    public InsertTransactionScheduler(TransactionRepository repository, InvoiceService invoiceService) {
         this.repository = repository;
+        this.invoiceService = invoiceService;
     }
 
     @Override
@@ -32,7 +35,11 @@ public class InsertTransactionScheduler implements Scheduler {
         log.info("Iniciado processamento de insert de lançamentos :: {} ", LocalDateTime.now());
         while (!queue.isEmpty()) {
             List<TransactionEntity> entities = queue.poll();
-            entities.forEach(repository::save);
+            for (TransactionEntity entity : entities) {
+                TransactionEntity invoice = invoiceService.toGenerate(entity);
+                entity.setInvoiceId(invoice.getId());
+                repository.save(entity);
+            }
         }
         log.info("Finalizado processamento de insert de lançamentos :: {} ", LocalDateTime.now());
     }

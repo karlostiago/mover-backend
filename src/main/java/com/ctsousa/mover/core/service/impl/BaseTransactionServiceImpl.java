@@ -79,6 +79,10 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
     public TransactionEntity update(Transaction transaction) {
         String signature = repository.findBySignature(transaction.getId());
         TransactionEntity entity = transaction.toEntity();
+
+        TransactionEntity invoice = invoiceService.toGenerate(entity);
+        entity.setInvoiceId(invoice.getId());
+
         entity.setSignature(signature);
         updateAvailableBalance(transaction, entity.getAccount().getId());
         return repository.save(entity);
