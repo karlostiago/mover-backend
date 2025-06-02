@@ -82,10 +82,13 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     @Override
     public TransactionEntity update(TransactionEntity invoice, TransactionEntity entity) {
         TransactionEntity savedEntity = findById(entity.getId());
-
+        BigDecimal newValue = entity.getValue();
+        if (entity.getCard() == null) {
+            entity.setInvoiceId(null);
+            newValue = BigDecimal.ZERO;
+        }
         entity.setSignature(savedEntity.getSignature());
-        invoice.setValue(calculateUpdatedValue(invoice.getValue(), savedEntity.getValue(), entity.getValue()));
-
+        invoice.setValue(calculateUpdatedValue(invoice.getValue(), savedEntity.getValue(), newValue));
         repository.save(invoice);
         return repository.save(entity);
     }

@@ -36,8 +36,10 @@ public class InsertTransactionScheduler implements Scheduler {
         while (!queue.isEmpty()) {
             List<TransactionEntity> entities = queue.poll();
             for (TransactionEntity entity : entities) {
-                TransactionEntity invoice = invoiceService.toGenerate(entity);
-                entity.setInvoiceId(invoice.getId());
+                if (entity.getCard() != null) {
+                    TransactionEntity invoice = invoiceService.toGenerate(entity);
+                    entity.setInvoiceId(invoice.getId());
+                }
                 repository.save(entity);
             }
         }

@@ -60,7 +60,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         else if (hasInstallment) {
             entities = installmentService.generated(transaction);
             transaction.setValue(entities.get(0).getValue());
-            entities.forEach(repository::save);
+            InsertTransactionScheduler.add(entities);
         }
         else {
             TransactionEntity invoice = invoiceService.toGenerate(entity);
@@ -97,7 +97,8 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         TransactionEntity entity = transaction.toEntity();
 
         for (TransactionEntity entityUpdate : entities) {
-            entityUpdate.setDescription(entity.getDescription());
+            String description = entity.getDescription().replaceAll("\\s*\\(.*?\\)", "").trim();
+            entityUpdate.setDescription(String.format("%s (%d/%d)", description, entityUpdate.getInstallment(), entities.size()));
             entityUpdate.setSubcategory(entity.getSubcategory());
             entityUpdate.setVehicle(entity.getVehicle());
             entityUpdate.setContract(entity.getContract());
