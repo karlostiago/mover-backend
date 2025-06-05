@@ -63,11 +63,8 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             InsertTransactionScheduler.add(entities);
         }
         else {
-            TransactionEntity invoice = invoiceService.toGenerate(entity);
-            entity.setInvoiceId(invoice.getId());
-
-            TransactionEntity entitySaved = repository.save(entity);
-            entities.add(entitySaved);
+            InsertTransactionScheduler.add(entity);
+            entities.add(entity);
         }
 
         updateAvailableBalance(transaction, transaction.getAccount().getId());
@@ -80,8 +77,10 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         String signature = repository.findBySignature(transaction.getId());
         TransactionEntity entity = transaction.toEntity();
 
-        TransactionEntity invoice = invoiceService.toGenerate(entity);
-        entity.setInvoiceId(invoice.getId());
+        if (transaction.getCard() != null) {
+            TransactionEntity invoice = invoiceService.toGenerate(entity);
+            entity.setInvoiceId(invoice.getId());
+        }
 
         entity.setSignature(signature);
         updateAvailableBalance(transaction, entity.getAccount().getId());

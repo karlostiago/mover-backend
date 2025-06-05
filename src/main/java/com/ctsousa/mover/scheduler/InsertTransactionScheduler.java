@@ -49,4 +49,8 @@ public class InsertTransactionScheduler implements Scheduler {
     public static void add(final List<TransactionEntity> entities) {
         queue.add(entities);
     }
+
+    public static void add(final TransactionEntity entity) {
+        add(List.of(entity));
+    }
 }

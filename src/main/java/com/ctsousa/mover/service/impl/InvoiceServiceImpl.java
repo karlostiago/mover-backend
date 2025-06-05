@@ -83,10 +83,16 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     public TransactionEntity update(TransactionEntity invoice, TransactionEntity entity) {
         TransactionEntity savedEntity = findById(entity.getId());
         BigDecimal newValue = entity.getValue();
+
+        if (!invoice.getDueDate().isEqual(entity.getDueDate())) {
+            throw new NotificationException("Não é possível atualizar data de vencimento desse item fatura.");
+        }
+
         if (entity.getCard() == null) {
             entity.setInvoiceId(null);
             newValue = BigDecimal.ZERO;
         }
+        
         entity.setSignature(savedEntity.getSignature());
         invoice.setValue(calculateUpdatedValue(invoice.getValue(), savedEntity.getValue(), newValue));
         repository.save(invoice);
