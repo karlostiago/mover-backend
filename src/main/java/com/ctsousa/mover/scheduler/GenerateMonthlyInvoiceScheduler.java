@@ -36,18 +36,11 @@ public class GenerateMonthlyInvoiceScheduler implements Scheduler {
 
         Page<TransactionEntity> page = repository.findByPeriod(dtInitial, dtFim, PageRequest.of(0, Integer.MAX_VALUE));
 
-        List<TransactionEntity> entities = Optional.of(page.getContent())
-                .orElse(Collections.emptyList())
-                .stream()
-                .filter(t -> t.getCard() != null && !t.getInvoice())
-                .toList();
+        List<TransactionEntity> entities = getCardTransactionOnly(page);
 
         if (entities.isEmpty()) return;
 
-        Map<Map.Entry<LocalDate, CardEntity>, List<TransactionEntity>> groupedEntities = entities.stream()
-                .collect(Collectors.groupingBy(
-                    t -> Map.entry(t.getDueDate(), t.getCard())
-                ));
+        Map<Map.Entry<LocalDate, CardEntity>, List<TransactionEntity>> groupedEntities = groupByDueDateAndCard(entities);
 
         List<TransactionEntity> invoicesProcess = new ArrayList<>();
 
@@ -68,6 +61,20 @@ public class GenerateMonthlyInvoiceScheduler implements Scheduler {
         }
 
         log.info("Finalizado geração de fatura.");
+    }
+
+    private Map<Map.Entry<LocalDate, CardEntity>, List<TransactionEntity>> groupByDueDateAndCard(List<TransactionEntity> entities) {
+        return entities.stream().collect(Collectors.groupingBy(
+                    t -> Map.entry(t.getDueDate(), t.getCard())
+                ));
+    }
+
+    private List<TransactionEntity> getCardTransactionOnly(Page<TransactionEntity> page) {
+        return Optional.of(page.getContent())
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(t -> t.getCard() != null && !t.getInvoice())
+                .toList();
     }
 
     private boolean hasInvoice(LocalDate dueDate, CardEntity card) {

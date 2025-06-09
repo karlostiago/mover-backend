@@ -34,4 +34,10 @@ public interface InvoiceApi {
 
     @PutMapping("/{id}/refund")
     ResponseEntity<TransactionResponse> refund(@PathVariable Long id);
+
+    @GetMapping("/{id}/next")
+    ResponseEntity<List<TransactionResponse>> next(@PathVariable Long id);
+
+    @GetMapping("/{id}/previous")
+    ResponseEntity<List<TransactionResponse>> previous(@PathVariable Long id);
 }

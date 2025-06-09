@@ -54,6 +54,7 @@ public interface InvoiceRepository extends JpaRepository<TransactionEntity, Long
               AND t.invoice = true
               AND t.invoiceId IS NULL
               AND t.card = :card
+              AND t.paymentDate IS NULL
             """)
     TransactionEntity findBy(@Param("dueDate") LocalDate dueDate, @Param("card") CardEntity card);
 }

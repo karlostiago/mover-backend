@@ -4,10 +4,12 @@ import com.ctsousa.mover.core.api.InvoiceApi;
 import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.Icon;
+import com.ctsousa.mover.repository.InvoiceRepository;
 import com.ctsousa.mover.request.TransactionRequest;
 import com.ctsousa.mover.response.InvoicePaymentDetailResponse;
 import com.ctsousa.mover.response.TransactionResponse;
@@ -37,10 +39,13 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
     @Autowired
     private InvoiceService invoiceService;
 
+    private final InvoiceRepository repository;
+
     private final InvoicePaymentService invoicePaymentService;
 
-    public InvoiceResource(InvoiceService invoiceService, InvoicePaymentService invoicePaymentService) {
+    public InvoiceResource(InvoiceService invoiceService, InvoiceRepository repository, InvoicePaymentService invoicePaymentService) {
         super(invoiceService);
+        this.repository = repository;
         this.invoicePaymentService = invoicePaymentService;
     }
 
@@ -117,6 +122,26 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
                     .build());
         });
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
+    public ResponseEntity<List<TransactionResponse>> next(Long id) {
+        TransactionEntity invoice = invoiceService.findById(id);
+        LocalDate nextDueDate = invoice.getDueDate().plusMonths(1);
+        TransactionEntity nextInvoice = repository.findBy(nextDueDate, invoice.getCard());
+        if (nextInvoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
+        return searchById(nextInvoice.getId());
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
+    public ResponseEntity<List<TransactionResponse>> previous(Long id) {
+        TransactionEntity invoice = invoiceService.findById(id);
+        LocalDate nextDueDate = invoice.getDueDate().minusMonths(1);
+        TransactionEntity nextInvoice = repository.findBy(nextDueDate, invoice.getCard());
+        if (nextInvoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
+        return searchById(nextInvoice.getId());
     }
 
     @Override
