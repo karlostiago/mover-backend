@@ -97,11 +97,12 @@ public class Transaction extends DomainModel<TransactionEntity> {
         if (this.getSubcategory() != null) {
             entity.setSubcategory(this.getSubcategory().toEntity());
         }
-        entity.setInstallment(this.getInstallment());
+        entity.setInstallment(this.getInstallment() == null ? 0 : this.getInstallment());
         entity.setPaymentType(this.getPaymentType());
         entity.setFrequency(this.getFrequency());
         entity.setScheduled(this.getScheduled());
         entity.setRegisterDate(this.getRegisterDate());
+        entity.setSignature(this.getSignature());
 
         if (this.getCategoryType() != null) {
             TypeCategory typeCategory = TypeCategory.toDescription(this.getCategoryType());

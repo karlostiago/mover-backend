@@ -13,6 +13,7 @@ import com.ctsousa.mover.repository.InvoiceRepository;
 import com.ctsousa.mover.request.TransactionRequest;
 import com.ctsousa.mover.response.InvoicePaymentDetailResponse;
 import com.ctsousa.mover.response.TransactionResponse;
+import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.InvoicePaymentService;
 import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +44,13 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
 
     private final InvoicePaymentService invoicePaymentService;
 
-    public InvoiceResource(InvoiceService invoiceService, InvoiceRepository repository, InvoicePaymentService invoicePaymentService) {
+    private final CardService cardService;
+
+    public InvoiceResource(InvoiceService invoiceService, InvoiceRepository repository, InvoicePaymentService invoicePaymentService, CardService cardService) {
         super(invoiceService);
         this.repository = repository;
         this.invoicePaymentService = invoicePaymentService;
+        this.cardService = cardService;
     }
 
     @Override
@@ -126,22 +130,22 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
 
     @Override
     @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
-    public ResponseEntity<List<TransactionResponse>> next(Long id) {
-        TransactionEntity invoice = invoiceService.findById(id);
-        LocalDate nextDueDate = invoice.getDueDate().plusMonths(1);
-        TransactionEntity nextInvoice = repository.findBy(nextDueDate, invoice.getCard());
-        if (nextInvoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
-        return searchById(nextInvoice.getId());
+    public ResponseEntity<List<TransactionResponse>> next(Long cardId, LocalDate dueDate) {
+        CardEntity entity = cardService.findById(cardId);
+        LocalDate nextDueDate = dueDate.plusMonths(1);
+        TransactionEntity invoice = repository.findBy(nextDueDate, entity);
+        if (invoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
+        return searchById(invoice.getId());
     }
 
     @Override
     @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
-    public ResponseEntity<List<TransactionResponse>> previous(Long id) {
-        TransactionEntity invoice = invoiceService.findById(id);
-        LocalDate nextDueDate = invoice.getDueDate().minusMonths(1);
-        TransactionEntity nextInvoice = repository.findBy(nextDueDate, invoice.getCard());
-        if (nextInvoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
-        return searchById(nextInvoice.getId());
+    public ResponseEntity<List<TransactionResponse>> previous(Long cardId, LocalDate dueDate) {
+        CardEntity entity = cardService.findById(cardId);
+        LocalDate previousDueDate = dueDate.minusMonths(1);
+        TransactionEntity invoice = repository.findBy(previousDueDate, entity);
+        if (invoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
+        return searchById(invoice.getId());
     }
 
     @Override

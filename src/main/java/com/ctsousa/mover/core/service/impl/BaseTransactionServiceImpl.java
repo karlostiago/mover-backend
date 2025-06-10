@@ -34,6 +34,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     @Autowired
     protected InvoiceService invoiceService;
+
     private final InstallmentService installmentService;
     private final FixedInstallmentService fixedInstallmentService;
 
@@ -213,6 +214,34 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
 
         repository.deleteAll(entities);
+    }
+
+    public void batchDelete(Transaction transaction) {
+        TransactionEntity entity = transaction.toEntity();
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
+                .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
+                .toList();
+
+        Map<AccountEntity, BigDecimal> accumulatedBalance = entities.stream()
+                .filter(TransactionEntity::getPaid)
+                .collect(Collectors.groupingBy(
+                        TransactionEntity::getAccount,
+                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
+                ));
+
+        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
+
+        if (hasInvoiceItem(entity)) {
+            for (TransactionEntity invoiceItem : entities) {
+                invoiceService.delete(invoiceItem);
+            }
+        } else {
+            repository.deleteAll(entities);
+        }
+    }
+
+    private boolean hasInvoiceItem(TransactionEntity entity) {
+        return entity.getInvoiceId() != null;
     }
 
     public static LocalDate calculateDueDate(LocalDate dueDate, String frequency, long installment) {

@@ -3,6 +3,7 @@ package com.ctsousa.mover.service.impl;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.factory.*;
+import com.ctsousa.mover.core.mapper.Transform;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 import static com.ctsousa.mover.core.util.NumberUtil.parseMonetary;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -142,7 +144,7 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionEntity entity = findById(id);
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         deleteTransactionServiceFactory.batchDelete(true);
-        deleteTransactionServiceFactory.execute(type, new Transaction(id));
+        deleteTransactionServiceFactory.execute(type, toMapper(entity, Transaction.class));
     }
 
     @Override

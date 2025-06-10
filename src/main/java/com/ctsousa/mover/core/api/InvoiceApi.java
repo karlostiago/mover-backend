@@ -35,9 +35,11 @@ public interface InvoiceApi {
     @PutMapping("/{id}/refund")
     ResponseEntity<TransactionResponse> refund(@PathVariable Long id);
 
-    @GetMapping("/{id}/next")
-    ResponseEntity<List<TransactionResponse>> next(@PathVariable Long id);
+    @GetMapping("/{cardId}/{dueDate}/next")
+    ResponseEntity<List<TransactionResponse>> next(@PathVariable Long cardId,
+                                                   @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dueDate);
 
-    @GetMapping("/{id}/previous")
-    ResponseEntity<List<TransactionResponse>> previous(@PathVariable Long id);
+    @GetMapping("/{cardId}/{dueDate}/previous")
+    ResponseEntity<List<TransactionResponse>> previous(@PathVariable Long cardId,
+                                                       @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dueDate);
 }

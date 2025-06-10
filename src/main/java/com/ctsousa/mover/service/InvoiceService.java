@@ -23,4 +23,6 @@ public interface InvoiceService extends BaseService<TransactionEntity, Long> {
     TransactionEntity pay(final Long id, LocalDate paymentDate, final BigDecimal value, final AccountEntity account);
 
     TransactionEntity refund(final Long id);
+
+    void delete(TransactionEntity entity);
 }

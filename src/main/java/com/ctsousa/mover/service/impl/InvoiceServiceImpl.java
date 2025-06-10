@@ -80,6 +80,15 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     }
 
     @Override
+    public void delete(TransactionEntity entity) {
+        if (entity.getInvoice()) {
+            delete(entity, entity.getId());
+        } else {
+            deleteItem(entity);
+        }
+    }
+
+    @Override
     public TransactionEntity update(TransactionEntity invoice, TransactionEntity entity) {
         TransactionEntity savedEntity = findById(entity.getId());
         BigDecimal newValue = entity.getValue();

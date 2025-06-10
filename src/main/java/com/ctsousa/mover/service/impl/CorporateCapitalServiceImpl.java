@@ -56,6 +56,26 @@ public class CorporateCapitalServiceImpl extends BaseTransactionServiceImpl impl
         repository.deleteAll(entities);
     }
 
+    @Override
+    public void batchDelete(Transaction transaction) {
+        TransactionEntity entity = transaction.toEntity();
+
+        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
+                .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
+                .toList();
+
+        Map<AccountEntity, BigDecimal> accumulatedBalance = entities.stream()
+                .filter(TransactionEntity::getPaid)
+                .collect(Collectors.groupingBy(
+                        TransactionEntity::getAccount,
+                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
+                ));
+
+        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().subtract(balance)));
+
+        repository.deleteAll(entities);
+    }
+
     public void delete(Long id) {
         TransactionEntity entity = findById(id);
 
