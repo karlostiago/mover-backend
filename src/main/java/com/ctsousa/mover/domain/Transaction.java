@@ -47,6 +47,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
     private Boolean invoice;
     private Long invoiceId;
     private BigDecimal residualValue;
+    private Integer totalInstallment;
 
     public Transaction() {}
 
@@ -94,10 +95,13 @@ public class Transaction extends DomainModel<TransactionEntity> {
 
         entity.setId(this.getId());
         entity.setDescription(toUppercase(this.getDescription()));
+
         if (this.getSubcategory() != null) {
             entity.setSubcategory(this.getSubcategory().toEntity());
         }
+
         entity.setInstallment(this.getInstallment() == null ? 0 : this.getInstallment());
+        entity.setTotalInstallment(this.getTotalInstallment() == null ? 0 : this.getTotalInstallment());
         entity.setPaymentType(this.getPaymentType());
         entity.setFrequency(this.getFrequency());
         entity.setScheduled(this.getScheduled());

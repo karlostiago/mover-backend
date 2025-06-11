@@ -102,6 +102,9 @@ public class TransactionEntity extends AbstractEntity {
     @Column(name = "residual_value", nullable = false)
     private BigDecimal residualValue = BigDecimal.ZERO;
 
+    @Column(name = "total_installment")
+    private int totalInstallment;
+
     @Transient
     private AccountEntity destinationAccount;
 }

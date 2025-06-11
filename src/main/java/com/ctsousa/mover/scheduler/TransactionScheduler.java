@@ -14,14 +14,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Slf4j
 @Component
-public class InsertTransactionScheduler implements Scheduler {
+public class TransactionScheduler implements Scheduler {
 
     private static final Queue<List<TransactionEntity>> queue = new ConcurrentLinkedQueue<>();
 
     protected final TransactionRepository repository;
     protected final InvoiceService invoiceService;
 
-    public InsertTransactionScheduler(TransactionRepository repository, InvoiceService invoiceService) {
+    public TransactionScheduler(TransactionRepository repository, InvoiceService invoiceService) {
         this.repository = repository;
         this.invoiceService = invoiceService;
     }
@@ -36,6 +36,11 @@ public class InsertTransactionScheduler implements Scheduler {
         while (!queue.isEmpty()) {
             List<TransactionEntity> entities = queue.poll();
             for (TransactionEntity entity : entities) {
+                if (entity.getInvoiceId() != null) {
+                    TransactionEntity invoice = invoiceService.findById(entity.getInvoiceId());
+                    invoiceService.update(invoice, entity);
+                    continue;
+                }
                 if (entity.getCard() != null) {
                     TransactionEntity invoice = invoiceService.toGenerate(entity);
                     entity.setInvoiceId(invoice.getId());

@@ -8,7 +8,7 @@ import com.ctsousa.mover.domain.Account;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.repository.TransactionRepository;
-import com.ctsousa.mover.scheduler.InsertTransactionScheduler;
+import com.ctsousa.mover.scheduler.TransactionScheduler;
 import com.ctsousa.mover.service.FixedInstallmentService;
 import com.ctsousa.mover.service.InstallmentService;
 import com.ctsousa.mover.service.TransferService;
@@ -43,7 +43,7 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
 
         if (fixedInstallmentService.isFixed(transaction)) {
             entities = fixedInstallmentService.generated(transaction);
-            InsertTransactionScheduler.add(entities);
+            TransactionScheduler.add(entities);
         }
         else if (installmentService.hasInstallment(transaction)) {
             entities = installmentService.generated(transaction);

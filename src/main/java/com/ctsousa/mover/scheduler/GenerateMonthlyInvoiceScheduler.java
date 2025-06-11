@@ -57,7 +57,7 @@ public class GenerateMonthlyInvoiceScheduler implements Scheduler {
         log.info("Quantidade de faturas a serem geradas :: {}", invoicesProcess.size());
 
         if (!invoicesProcess.isEmpty()) {
-            InsertTransactionScheduler.add(invoicesProcess);
+            TransactionScheduler.add(invoicesProcess);
         }
 
         log.info("Finalizado geração de fatura.");

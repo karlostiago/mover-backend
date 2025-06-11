@@ -6,7 +6,7 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.repository.TransactionRepository;
-import com.ctsousa.mover.scheduler.InsertTransactionScheduler;
+import com.ctsousa.mover.scheduler.TransactionScheduler;
 import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.FixedInstallmentService;
 import com.ctsousa.mover.service.InstallmentService;
@@ -16,9 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.newInstanceToLocalDate;
@@ -56,15 +54,15 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
         if (isFixed) {
             entities = fixedInstallmentService.generated(transaction);
-            InsertTransactionScheduler.add(entities);
+            TransactionScheduler.add(entities);
         }
         else if (hasInstallment) {
             entities = installmentService.generated(transaction);
             transaction.setValue(entities.get(0).getValue());
-            InsertTransactionScheduler.add(entities);
+            TransactionScheduler.add(entities);
         }
         else {
-            InsertTransactionScheduler.add(entity);
+            TransactionScheduler.add(entity);
             entities.add(entity);
         }
 
@@ -79,8 +77,8 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         TransactionEntity entity = transaction.toEntity();
 
         if (transaction.getCard() != null) {
-            TransactionEntity invoice = invoiceService.toGenerate(entity);
-            entity.setInvoiceId(invoice.getId());
+            TransactionEntity invoice = invoiceService.findById(entity.getInvoiceId());
+            return invoiceService.update(invoice, entity);
         }
 
         entity.setSignature(signature);
@@ -98,7 +96,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
         for (TransactionEntity entityUpdate : entities) {
             String description = entity.getDescription().replaceAll("\\s*\\(.*?\\)", "").trim();
-            entityUpdate.setDescription(String.format("%s (%d/%d)", description, entityUpdate.getInstallment(), entities.size()));
+            entityUpdate.setDescription(String.format("%s (%d/%d)", description, entityUpdate.getInstallment(), entityUpdate.getTotalInstallment()));
             entityUpdate.setSubcategory(entity.getSubcategory());
             entityUpdate.setVehicle(entity.getVehicle());
             entityUpdate.setContract(entity.getContract());
@@ -114,7 +112,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             }
         }
 
-        InsertTransactionScheduler.add(entities);
+        TransactionScheduler.add(entities);
 
         updateAvailableBalance(transaction, entity.getAccount().getId());
 
@@ -218,11 +216,28 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     public void batchDelete(Transaction transaction) {
         TransactionEntity entity = transaction.toEntity();
-        List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
-                .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
+
+        List<TransactionEntity> allWithSignature = repository.findBySignature(entity.getSignature()).stream()
+                .sorted(Comparator.comparingInt(TransactionEntity::getInstallment))
                 .toList();
 
-        Map<AccountEntity, BigDecimal> accumulatedBalance = entities.stream()
+        List<TransactionEntity> toDelete = allWithSignature.stream()
+                .filter(t -> t.getInstallment() >= entity.getInstallment())
+                .toList();
+
+        if ("IN_INSTALLMENTS".equalsIgnoreCase(entity.getPaymentType())) {
+            Optional<TransactionEntity> previous = allWithSignature.stream()
+                    .filter(t -> t.getInstallment() == entity.getInstallment() - 1)
+                    .findFirst();
+
+            previous.ifPresent(prev -> {
+                prev.setLastInstallment(true);
+                prev.setTotalInstallment(prev.getInstallment());
+                repository.save(prev);
+            });
+        }
+
+        Map<AccountEntity, BigDecimal> accumulatedBalance = toDelete.stream()
                 .filter(TransactionEntity::getPaid)
                 .collect(Collectors.groupingBy(
                         TransactionEntity::getAccount,
@@ -232,11 +247,9 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
 
         if (hasInvoiceItem(entity)) {
-            for (TransactionEntity invoiceItem : entities) {
-                invoiceService.delete(invoiceItem);
-            }
+            toDelete.forEach(invoiceService::delete);
         } else {
-            repository.deleteAll(entities);
+            repository.deleteAll(toDelete);
         }
     }
 
