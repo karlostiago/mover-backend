@@ -30,6 +30,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             LEFT JOIN FETCH t.contract
             LEFT JOIN FETCH t.partner
             WHERE t.invoiceId IS NULL AND ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
+              AND t.value != 0
               AND NOT EXISTS (
                    SELECT DISTINCT ipd.invoice.id
                    FROM InvoicePaymentDetailEntity ipd
@@ -77,6 +78,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND (sb.description LIKE %:description% OR c.description LIKE %:description% OR t.description LIKE %:description%)
               AND t.invoiceId IS NULL
+              AND t.value != 0
               AND NOT EXISTS (
                    SELECT DISTINCT ipd.invoice.id
                    FROM InvoicePaymentDetailEntity ipd
@@ -100,6 +102,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND t.account.id IN (:accounts)
               AND t.invoiceId IS NULL
+              AND t.value != 0
               AND NOT EXISTS (
                    SELECT DISTINCT ipd.invoice.id
                    FROM InvoicePaymentDetailEntity ipd

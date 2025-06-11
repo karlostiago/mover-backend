@@ -25,4 +25,8 @@ public interface InvoiceService extends BaseService<TransactionEntity, Long> {
     TransactionEntity refund(final Long id);
 
     void delete(TransactionEntity entity);
+
+    TransactionEntity next(Long cardId, LocalDate dueDate);
+
+    TransactionEntity previous(Long cardId, LocalDate dueDate);
 }

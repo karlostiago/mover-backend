@@ -5,6 +5,7 @@ import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.entity.InvoicePaymentDetailEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
+import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.core.util.NumberUtil;
 import com.ctsousa.mover.enumeration.TypeCategory;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -92,20 +94,26 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     public TransactionEntity update(TransactionEntity invoice, TransactionEntity entity) {
         TransactionEntity savedEntity = findById(entity.getId());
         BigDecimal newValue = entity.getValue();
+        entity.setSignature(savedEntity.getSignature());
 
-        if (!invoice.getDueDate().isEqual(entity.getDueDate())) {
-            throw new NotificationException("Não é possível atualizar data de vencimento desse item fatura.");
+        if (!invoice.getDueDate().isEqual(entity.getDueDate()) && entity.getCard() != null) {
+            if (invoice.getDueDate().isBefore(entity.getDueDate())) {
+                return handleMove(invoice, entity, savedEntity.getValue(), newValue);
+            } else {
+                return handleMove(invoice, entity, savedEntity.getValue(), newValue);
+            }
         }
 
         if (entity.getCard() == null) {
             entity.setInvoiceId(null);
             newValue = BigDecimal.ZERO;
         }
-        
-        entity.setSignature(savedEntity.getSignature());
+
         invoice.setValue(calculateUpdatedValue(invoice.getValue(), savedEntity.getValue(), newValue));
-        repository.save(invoice);
-        return repository.save(entity);
+        updateTransactionTypeAndTypeCategoryWhenCredit(invoice.getValue(), invoice);
+        List.of(invoice, entity).forEach(repository::save);
+
+        return entity;
     }
 
     @Override
@@ -194,6 +202,38 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         }
 
         return paymentDetail.getInvoice();
+    }
+
+    @Override
+    public TransactionEntity next(Long cardId, LocalDate dueDate) {
+        CardEntity entity = cardService.findById(cardId);
+        TransactionEntity invoice = null;
+
+        for (int month = 1; month <= 12; month++) {
+            LocalDate nextDueDate = dueDate.plusMonths(month);
+            invoice = repository.findBy(nextDueDate, entity);
+            if (invoice != null) break;
+        }
+
+        if (invoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
+
+        return invoice;
+    }
+
+    @Override
+    public TransactionEntity previous(Long cardId, LocalDate dueDate) {
+        CardEntity entity = cardService.findById(cardId);
+        TransactionEntity invoice = null;
+
+        for (int month = 1; month <= 12; month++) {
+            LocalDate nextDueDate = dueDate.minusMonths(month);
+            invoice = repository.findBy(nextDueDate, entity);
+            if (invoice != null) break;
+        }
+
+        if (invoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
+
+        return invoice;
     }
 
     private void updateRefundAndPaidAndResidualValue(List<TransactionEntity> entities) {
@@ -341,5 +381,32 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         }
         invoiceFound.setTransactionType(type.getTransactionType().name());
         invoiceFound.setCategoryType(type.name());
+    }
+
+    private TransactionEntity handleMove(TransactionEntity invoice, TransactionEntity entity, BigDecimal oldValue, BigDecimal newValue) {
+        TransactionEntity nextInvoice;
+        List<TransactionEntity> toProcess = new ArrayList<>();
+
+        nextInvoice = repository.findBy(entity.getDueDate(), entity.getCard());
+        if (nextInvoice != null) {
+            entity.setInvoiceId(nextInvoice.getId());
+            invoice.setValue(calculateUpdatedValue(invoice.getValue(), oldValue, BigDecimal.ZERO));
+            nextInvoice.setValue(calculateUpdatedValue(nextInvoice.getValue(), BigDecimal.ZERO, newValue));
+            toProcess.addAll(List.of(entity, invoice, nextInvoice));
+        } else {
+            nextInvoice = toGenerate(entity);
+            entity.setInvoiceId(nextInvoice.getId());
+            invoice.setValue(calculateUpdatedValue(invoice.getValue(), oldValue, BigDecimal.ZERO));
+            toProcess.addAll(List.of(entity, invoice));
+        }
+
+        toProcess.forEach(e -> {
+            if (Boolean.TRUE.equals(e.getInvoice())) {
+                updateTransactionTypeAndTypeCategoryWhenCredit(e.getValue(), e);
+            }
+            repository.save(e);
+        });
+
+        return entity;
     }
 }
