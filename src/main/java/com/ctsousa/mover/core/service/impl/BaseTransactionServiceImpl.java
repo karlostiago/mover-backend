@@ -5,6 +5,7 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
+import com.ctsousa.mover.repository.InvoiceRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.scheduler.TransactionScheduler;
 import com.ctsousa.mover.service.AccountService;
@@ -32,6 +33,9 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     @Autowired
     protected InvoiceService invoiceService;
+
+    @Autowired
+    protected InvoiceRepository invoiceRepository;
 
     private final InstallmentService installmentService;
     private final FixedInstallmentService fixedInstallmentService;
@@ -75,13 +79,20 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
     public TransactionEntity update(Transaction transaction) {
         String signature = repository.findBySignature(transaction.getId());
         TransactionEntity entity = transaction.toEntity();
+        entity.setSignature(signature);
 
-        if (transaction.getCard() != null) {
-            TransactionEntity invoice = invoiceService.findById(entity.getInvoiceId());
+        TransactionEntity invoice;
+
+        if (Objects.nonNull(entity.getInvoiceId())) {
+            invoice = findById(entity.getInvoiceId());
             return invoiceService.update(invoice, entity);
         }
 
-        entity.setSignature(signature);
+        if (Objects.nonNull(entity.getCard())) {
+            invoice = invoiceRepository.findBy(entity.getDueDate(), entity.getCard());
+            return invoiceService.update(invoice, entity);
+        }
+
         updateAvailableBalance(transaction, entity.getAccount().getId());
         return repository.save(entity);
     }

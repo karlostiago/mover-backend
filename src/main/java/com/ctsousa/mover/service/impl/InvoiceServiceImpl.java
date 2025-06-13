@@ -22,10 +22,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.monthInFull;
@@ -93,15 +90,14 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     @Override
     public TransactionEntity update(TransactionEntity invoice, TransactionEntity entity) {
         TransactionEntity savedEntity = findById(entity.getId());
+
         BigDecimal newValue = entity.getValue();
+
         entity.setSignature(savedEntity.getSignature());
+        entity.setInvoiceId(invoice.getId());
 
         if (!invoice.getDueDate().isEqual(entity.getDueDate()) && entity.getCard() != null) {
-            if (invoice.getDueDate().isBefore(entity.getDueDate())) {
-                return handleMove(invoice, entity, savedEntity.getValue(), newValue);
-            } else {
-                return handleMove(invoice, entity, savedEntity.getValue(), newValue);
-            }
+            return handleMove(invoice, entity, savedEntity.getValue(), newValue);
         }
 
         if (entity.getCard() == null) {
@@ -109,10 +105,16 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
             newValue = BigDecimal.ZERO;
         }
 
-        invoice.setValue(calculateUpdatedValue(invoice.getValue(), savedEntity.getValue(), newValue));
-        updateTransactionTypeAndTypeCategoryWhenCredit(invoice.getValue(), invoice);
-        List.of(invoice, entity).forEach(repository::save);
+        repository.save(entity);
 
+        if (invoice.getValue().compareTo(BigDecimal.ZERO) == 0) {
+            invoice.setValue(newValue);
+        } else {
+            invoice.setValue(recalculate(invoice));
+        }
+
+        updateTransactionTypeAndTypeCategoryWhenCredit(invoice.getValue(), invoice);
+        repository.save(invoice);
         return entity;
     }
 
@@ -332,8 +334,15 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         return invoice;
     }
 
-    private BigDecimal calculateUpdatedValue(BigDecimal invoiceValue, BigDecimal previousValue, BigDecimal newValue) {
-        return invoiceValue.subtract(previousValue).add(newValue);
+    private BigDecimal calculateUpdatedValue(BigDecimal value, BigDecimal previousValue, BigDecimal newValue) {
+        return value.subtract(previousValue).add(newValue);
+    }
+
+    private BigDecimal recalculate(TransactionEntity invoice) {
+        return repository.findBy(invoice.getId()).stream()
+                .filter(t -> Objects.nonNull(t.getInvoiceId()))
+                .map(TransactionEntity::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private void delete(TransactionEntity entity, Long id) {
@@ -366,37 +375,34 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
         invoice.setValue(invoice.getValue().add(invertSignal(entity.getValue())));
         updateTransactionTypeAndTypeCategoryWhenCredit(invoice.getValue(), invoice);
-        if (invoice.getValue().compareTo(BigDecimal.ZERO) == 0) {
-            super.deleteById(invoice.getId());
-        } else {
-            save(invoice);
-            super.deleteById(entity.getId());
-        }
+
+        save(invoice);
+        super.deleteById(entity.getId());
     }
 
-    private void updateTransactionTypeAndTypeCategoryWhenCredit(BigDecimal value, TransactionEntity invoiceFound) {
+    private void updateTransactionTypeAndTypeCategoryWhenCredit(BigDecimal value, TransactionEntity invoice) {
         TypeCategory type = TypeCategory.EXPENSE;
         if (value.compareTo(BigDecimal.ZERO) > 0) {
             type = TypeCategory.INCOME;
         }
-        invoiceFound.setTransactionType(type.getTransactionType().name());
-        invoiceFound.setCategoryType(type.name());
+        invoice.setTransactionType(type.getTransactionType().name());
+        invoice.setCategoryType(type.name());
     }
 
-    private TransactionEntity handleMove(TransactionEntity invoice, TransactionEntity entity, BigDecimal oldValue, BigDecimal newValue) {
+    private TransactionEntity handleMove(TransactionEntity invoice, TransactionEntity entity, BigDecimal previousValue, BigDecimal newValue) {
         TransactionEntity nextInvoice;
         List<TransactionEntity> toProcess = new ArrayList<>();
 
         nextInvoice = repository.findBy(entity.getDueDate(), entity.getCard());
         if (nextInvoice != null) {
             entity.setInvoiceId(nextInvoice.getId());
-            invoice.setValue(calculateUpdatedValue(invoice.getValue(), oldValue, BigDecimal.ZERO));
+            invoice.setValue(calculateUpdatedValue(invoice.getValue(), previousValue, BigDecimal.ZERO));
             nextInvoice.setValue(calculateUpdatedValue(nextInvoice.getValue(), BigDecimal.ZERO, newValue));
             toProcess.addAll(List.of(entity, invoice, nextInvoice));
         } else {
             nextInvoice = toGenerate(entity);
             entity.setInvoiceId(nextInvoice.getId());
-            invoice.setValue(calculateUpdatedValue(invoice.getValue(), oldValue, BigDecimal.ZERO));
+            invoice.setValue(calculateUpdatedValue(invoice.getValue(), previousValue, BigDecimal.ZERO));
             toProcess.addAll(List.of(entity, invoice));
         }
 
