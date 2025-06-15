@@ -1,5 +1,6 @@
 package com.ctsousa.mover.core.config;
 
+import com.ctsousa.mover.core.util.CorsUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,17 +13,6 @@ import java.io.IOException;
 @Configuration
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsConfig implements Filter {
-
-    private static final String [] ALLOWED_ORIGINS = {
-        "http://localhost:4200",
-        "https://localhost:4200",
-        "https://moverfrotas.netlify.app",
-        "http://moverfrotas.netlify.app",
-        "https://moverfrotashom.netlify.app",
-        "http://moverfrotashom.netlify.app",
-        "https://moverfrota.com.br",
-        "http://moverfrota.com.br"
-    };
 
     private static final String ORIGIN = "Origin";
 
@@ -49,7 +39,7 @@ public class CorsConfig implements Filter {
     private String enabledOrigin(final HttpServletRequest request) {
         String origemPermitida = null;
 
-        for (String origin : ALLOWED_ORIGINS) {
+        for (String origin : CorsUtil.ALLOWED_ORIGINS) {
             if (request.getHeader(ORIGIN) != null && request.getHeader(ORIGIN).equals(origin.trim())) {
                 origemPermitida = origin;
                 break;

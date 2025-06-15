@@ -8,10 +8,7 @@ import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.repository.InvoiceRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.scheduler.TransactionScheduler;
-import com.ctsousa.mover.service.AccountService;
-import com.ctsousa.mover.service.FixedInstallmentService;
-import com.ctsousa.mover.service.InstallmentService;
-import com.ctsousa.mover.service.InvoiceService;
+import com.ctsousa.mover.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
@@ -36,6 +33,9 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     @Autowired
     protected InvoiceRepository invoiceRepository;
+
+    @Autowired
+    protected BalanceNotificationService balanceNotificationService;
 
     private final InstallmentService installmentService;
     private final FixedInstallmentService fixedInstallmentService;
@@ -106,8 +106,9 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         TransactionEntity entity = transaction.toEntity();
 
         for (TransactionEntity entityUpdate : entities) {
-            String description = entity.getDescription().replaceAll("\\s*\\(.*?\\)", "").trim();
-            entityUpdate.setDescription(String.format("%s (%d/%d)", description, entityUpdate.getInstallment(), entityUpdate.getTotalInstallment()));
+            entityUpdate.setDescription(format(entity.getDescription(), entityUpdate.getPaymentType(),
+                    entityUpdate.getInstallment(), entityUpdate.getTotalInstallment()));
+
             entityUpdate.setSubcategory(entity.getSubcategory());
             entityUpdate.setVehicle(entity.getVehicle());
             entityUpdate.setContract(entity.getContract());
@@ -260,7 +261,11 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         if (hasInvoiceItem(entity)) {
             toDelete.forEach(invoiceService::delete);
         } else {
-            repository.deleteAll(toDelete);
+            toDelete.forEach(t -> {
+                if (Objects.isNull(t.getInvoiceId())) {
+                    repository.delete(t);
+                }
+            });
         }
     }
 
@@ -310,6 +315,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
     protected void updateAccountBalance(AccountEntity account, BigDecimal balance) {
         account.setAvailableBalance(balance);
         accountService.save(account);
+        balanceNotificationService.notifyBalanceChanged();
     }
 
     protected boolean isPaymentStatusChanged(final Transaction transaction) {
@@ -325,5 +331,18 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         }
         TransactionEntity entity = findById(id);
         return !entity.getPaid().equals(paid);
+    }
+
+    private String format(String description, String type, int installment, int totalInstallment) {
+        String cleanDescription = cleanDescription(description);
+        return switch (type) {
+            case "FIXED" -> String.format("%s (F)", cleanDescription);
+            case "IN_INSTALLMENTS" -> String.format("%s (%d/%d)", cleanDescription, installment, totalInstallment);
+            default -> cleanDescription;
+        };
+    }
+
+    private String cleanDescription(String description) {
+        return description.replaceAll("\\s*\\(.*?\\)", "").trim();
     }
 }
