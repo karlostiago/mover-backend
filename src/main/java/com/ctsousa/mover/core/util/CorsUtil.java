@@ -12,6 +12,8 @@ public final class CorsUtil {
             "https://moverfrotashom.netlify.app",
             "http://moverfrotashom.netlify.app",
             "https://moverfrota.com.br",
-            "http://moverfrota.com.br"
+            "http://moverfrota.com.br",
+            "https://carlo4284.c44.integrator.host",
+            "http://carlo4284.c44.integrator.host"
     };
 }
