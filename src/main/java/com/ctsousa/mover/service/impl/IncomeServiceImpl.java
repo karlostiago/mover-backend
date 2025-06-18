@@ -38,8 +38,6 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
                     .subtract(entity.getValue());
             updateAccountBalance(entity.getAccount(), availableBalance);
         }
-
-        balanceNotificationService.notifyBalanceChanged();
         repository.deleteById(id);
     }
 
@@ -58,8 +56,6 @@ public class IncomeServiceImpl extends BaseTransactionServiceImpl implements Inc
                 ));
 
         accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().subtract(balance)));
-
-        balanceNotificationService.notifyBalanceChanged();
         repository.deleteAll(entities);
     }
 

@@ -3,10 +3,10 @@ package com.ctsousa.mover.service.impl;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.factory.*;
-import com.ctsousa.mover.core.mapper.Transform;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
+import com.ctsousa.mover.service.BalanceNotificationService;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -44,7 +44,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository repository;
 
-    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, ScheduleTransactionServiceFactory scheduleTransactionServiceFactory, UndoSchedulingTransactionServiceFactory undoSchedulingTransactionServiceFactory, TransactionRepository repository) {
+    private final BalanceNotificationService balanceNotificationService;
+
+    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, ScheduleTransactionServiceFactory scheduleTransactionServiceFactory, UndoSchedulingTransactionServiceFactory undoSchedulingTransactionServiceFactory, TransactionRepository repository, BalanceNotificationService balanceNotificationService) {
         this.createTransactionServiceFactory = createTransactionServiceFactory;
         this.updateTransactionServiceFactory = updateTransactionServiceFactory;
         this.filterTransactionServiceFactory = filterTransactionServiceFactory;
@@ -54,6 +56,7 @@ public class TransactionServiceImpl implements TransactionService {
         this.scheduleTransactionServiceFactory = scheduleTransactionServiceFactory;
         this.undoSchedulingTransactionServiceFactory = undoSchedulingTransactionServiceFactory;
         this.repository = repository;
+        this.balanceNotificationService = balanceNotificationService;
     }
 
     @Override
@@ -85,14 +88,18 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionEntity save(Transaction transaction) {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
-        return createTransactionServiceFactory.execute(type, transaction);
+        TransactionEntity entity = createTransactionServiceFactory.execute(type, transaction);
+        balanceNotificationService.notifyBalanceChanged();
+        return entity;
     }
 
     @Override
     public TransactionEntity update(Transaction transaction) {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
         updateTransactionServiceFactory.batchUpdate(false);
-        return updateTransactionServiceFactory.execute(type, transaction);
+        TransactionEntity entity = updateTransactionServiceFactory.execute(type, transaction);
+        balanceNotificationService.notifyBalanceChanged();
+        return entity;
     }
 
     @Override
@@ -107,7 +114,9 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setId(id);
         transaction.setPaymentDate(paymentDate);
-        return paymentTransactionServiceFactory.execute(type, transaction);
+        TransactionEntity paidEntity = paymentTransactionServiceFactory.execute(type, transaction);
+        balanceNotificationService.notifyBalanceChanged();
+        return paidEntity;
     }
 
     @Override
@@ -128,7 +137,9 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionEntity refund(Long id) {
         TransactionEntity entity = findById(id);
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
-        return refundTransactionServiceFactory.execute(type, new Transaction(id));
+        TransactionEntity refundEntity = refundTransactionServiceFactory.execute(type, new Transaction(id));
+        balanceNotificationService.notifyBalanceChanged();
+        return refundEntity;
     }
 
     @Override
@@ -137,6 +148,7 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         deleteTransactionServiceFactory.batchDelete(false);
         deleteTransactionServiceFactory.execute(type, new Transaction(id));
+        balanceNotificationService.notifyBalanceChanged();
     }
 
     @Override
@@ -145,13 +157,16 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         deleteTransactionServiceFactory.batchDelete(true);
         deleteTransactionServiceFactory.execute(type, toMapper(entity, Transaction.class));
+        balanceNotificationService.notifyBalanceChanged();
     }
 
     @Override
     public TransactionEntity batchUpdate(Long id, Transaction transaction) {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
         updateTransactionServiceFactory.batchUpdate(true);
-        return updateTransactionServiceFactory.execute(type, transaction);
+        TransactionEntity entity = updateTransactionServiceFactory.execute(type, transaction);
+        balanceNotificationService.notifyBalanceChanged();
+        return entity;
     }
 
     @Override

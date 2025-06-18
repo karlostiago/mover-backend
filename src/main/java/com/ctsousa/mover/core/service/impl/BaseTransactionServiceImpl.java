@@ -8,7 +8,10 @@ import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.repository.InvoiceRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.scheduler.TransactionScheduler;
-import com.ctsousa.mover.service.*;
+import com.ctsousa.mover.service.AccountService;
+import com.ctsousa.mover.service.FixedInstallmentService;
+import com.ctsousa.mover.service.InstallmentService;
+import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
@@ -33,9 +36,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
     @Autowired
     protected InvoiceRepository invoiceRepository;
-
-    @Autowired
-    protected BalanceNotificationService balanceNotificationService;
 
     private final InstallmentService installmentService;
     private final FixedInstallmentService fixedInstallmentService;
@@ -71,7 +71,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         }
 
         updateAvailableBalance(transaction, transaction.getAccount().getId());
-        balanceNotificationService.notifyBalanceChanged();
 
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Erro ao salvar lançamento."));
@@ -95,7 +94,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         }
 
         updateAvailableBalance(transaction, entity.getAccount().getId());
-        balanceNotificationService.notifyBalanceChanged();
 
         return repository.save(entity);
     }
@@ -130,7 +128,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         TransactionScheduler.add(entities);
 
         updateAvailableBalance(transaction, entity.getAccount().getId());
-        balanceNotificationService.notifyBalanceChanged();
 
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Erro ao atualizar em lote de lançamentos."));
@@ -165,7 +162,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
                 .add(entity.getValue());
 
         updateAccountBalance(entity.getAccount(), availableBalance);
-        balanceNotificationService.notifyBalanceChanged();
 
         return entity;
     }
@@ -197,7 +193,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
                         .subtract(entity.getValue());
 
         updateAccountBalance(entity.getAccount(), availableBalance);
-        balanceNotificationService.notifyBalanceChanged();
 
         return entity;
     }
@@ -212,7 +207,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         }
 
         repository.deleteById(id);
-        balanceNotificationService.notifyBalanceChanged();
     }
 
     public void batchDelete(Long id) {
@@ -231,7 +225,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
 
         repository.deleteAll(entities);
-        balanceNotificationService.notifyBalanceChanged();
     }
 
     public void batchDelete(Transaction transaction) {
@@ -275,8 +268,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
                 }
             });
         }
-
-        balanceNotificationService.notifyBalanceChanged();
     }
 
     private boolean hasInvoiceItem(TransactionEntity entity) {
