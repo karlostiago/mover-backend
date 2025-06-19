@@ -1,7 +1,7 @@
 package com.ctsousa.mover.resource;
 
-import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.api.ModelApi;
+import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Model;
@@ -9,6 +9,9 @@ import com.ctsousa.mover.request.ModelRequest;
 import com.ctsousa.mover.response.ModelResponse;
 import com.ctsousa.mover.service.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,9 +53,10 @@ public class ModelResource extends BaseResource<ModelResponse, ModelRequest, Mod
 
     @Override
     @PreAuthorize(Security.PreAutorize.Model.FILTER_MODELS)
-    public ResponseEntity<List<ModelResponse>> filterBy(String search) {
-        List<ModelEntity> entities = modelService.findBy(search);
-        return ResponseEntity.ok(toCollection(entities, ModelResponse.class));
+    public ResponseEntity<Page<ModelResponse>> filterBy(String search, int pageNumber, int size) {
+        Page<ModelEntity> page = modelService.findBy(search, PageRequest.of(pageNumber, size));
+        List<ModelResponse> response = toCollection(page.getContent(), ModelResponse.class);
+        return ResponseEntity.ok(new PageImpl<>(response, page.getPageable(), page.getTotalElements()));
     }
 
     @Override
@@ -71,7 +75,14 @@ public class ModelResource extends BaseResource<ModelResponse, ModelRequest, Mod
     @Override
     @PreAuthorize(Security.PreAutorize.Model.FILTER_MODELS)
     public ResponseEntity<List<ModelResponse>> findAll() {
-        return super.findAll();
+        List<ModelEntity> entities = modelService.findAll();
+        return ResponseEntity.ok(toCollection(entities, ModelResponse.class));
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Model.FILTER_MODELS)
+    public ResponseEntity<Page<ModelResponse>> findAll(int page, int size) {
+        return super.findAll(page, size);
     }
 
     @Override

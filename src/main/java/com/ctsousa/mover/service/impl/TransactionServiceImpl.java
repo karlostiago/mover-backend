@@ -76,6 +76,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public Page<TransactionEntity> findAll(Pageable pageable) {
+        return null;
+    }
+
+    @Override
     public TransactionEntity update(TransactionEntity entity) {
         throw new NotificationException("Método não suportado");
     }

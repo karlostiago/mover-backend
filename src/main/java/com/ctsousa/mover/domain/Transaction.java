@@ -62,7 +62,6 @@ public class Transaction extends DomainModel<TransactionEntity> {
         private final LocalDate dtFinal;
         private final List<Long> accountsId;
         private final String text;
-        private final int pageNumber;
         private final int hash;
 
         public Filter(final String uri) {
@@ -73,7 +72,6 @@ public class Transaction extends DomainModel<TransactionEntity> {
             dtFinal = DateUtil.getLastDay(monthAndYear);
             accountsId = buildAccountList(filters);
             text = filters.length > 2 ? filters[2] : null;
-            pageNumber = Integer.parseInt(filters[3]) - 1;
 
             hash = Objects.hash(dtInitial, dtFinal, accountsId, text);
         }

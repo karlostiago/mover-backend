@@ -9,6 +9,9 @@ import com.ctsousa.mover.repository.BrandRepository;
 import com.ctsousa.mover.repository.ModelRepository;
 import com.ctsousa.mover.service.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -47,10 +50,10 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelEntity, Long> impleme
     }
 
     @Override
-    public List<ModelEntity> findBy(String paramFilter) {
-        if (paramFilter == null || paramFilter.trim().isEmpty()) return modelRepository.findAll();
+    public Page<ModelEntity> findBy(String paramFilter, Pageable pageable) {
+        if (paramFilter == null || paramFilter.trim().isEmpty()) return modelRepository.findAll(pageable);
 
-        return modelRepository.findBy(paramFilter.toUpperCase());
+        return modelRepository.findBy(paramFilter.toUpperCase(), pageable);
     }
 
     @Override
@@ -58,5 +61,10 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelEntity, Long> impleme
         if (brandId == null) throw new NotificationException("Não foi informado o id da marca.");
 
         return modelRepository.findByBrandId(brandId);
+    }
+
+    @Override
+    public Page<ModelEntity> findAll(Pageable pageable) {
+        return modelRepository.findAll(pageable);
     }
 }

@@ -3,17 +3,19 @@ package com.ctsousa.mover.core.api;
 import com.ctsousa.mover.request.TransactionRequest;
 import com.ctsousa.mover.response.TransactionResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public interface TransactionApi {
 
     @GetMapping("/filterBy")
-    ResponseEntity<List<TransactionResponse>> filterBy(@RequestParam("search") String uri);
+    ResponseEntity<Page<TransactionResponse>> filterBy(@RequestParam("search") String uri,
+                                                       @RequestParam(defaultValue = "0") int pageNumber,
+                                                       @RequestParam(defaultValue = "100") int size);
 
     @PutMapping("/{id}/pay/{paymentDate}")
     ResponseEntity<TransactionResponse> pay(@PathVariable Long id, @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate paymentDate);

@@ -14,15 +14,18 @@ import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.mapper.Transform.toCollection;
@@ -31,8 +34,6 @@ import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 @RestController
 @RequestMapping("/transactions")
 public class TransactionResource extends BaseResource<TransactionResponse, TransactionRequest, TransactionEntity> implements TransactionApi {
-
-    private static Long REMAINING_PAGE = 0L;
 
     @Autowired
     private TransactionService transactionService;
@@ -102,18 +103,13 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
 
     @Override
     @PreAuthorize(Security.PreAutorize.Transaction.FILTER_TRANSACTIONS)
-    public ResponseEntity<List<TransactionResponse>> filterBy(String uri) {
+    public ResponseEntity<Page<TransactionResponse>> filterBy(String uri, int pageNumber, int size) {
         var filter = new Transaction.Filter(uri);
-
-        Page<TransactionEntity> page = transactionService.search(filter, PageRequest.of(filter.getPageNumber(), 100));
-
-        REMAINING_PAGE = BigDecimal.valueOf(page.getTotalPages() - (page.getNumber() + 1)).longValue();
-
-        List<TransactionEntity> entities = page.stream().toList();
+        Page<TransactionEntity> page = transactionService.search(filter, PageRequest.of(pageNumber, size));
+        List<TransactionEntity> entities = page.getContent();
         List<TransactionResponse> responses = toCollection(entities, TransactionResponse.class);
         updateResponse(responses, entities);
-
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(new PageImpl<>(responses, page.getPageable(), page.getTotalElements()));
     }
 
     @Override
@@ -162,7 +158,6 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
             TransactionResponse transactionResponse = responseMap.get(entity.getId());
             transactionResponse.setSubcategory(transactionResponse.getInvoice() ? "FATURA CARTÃO" : subcategory.getDescription());
             transactionResponse.setCategory(category.getDescription());
-            transactionResponse.setRemainingPages(REMAINING_PAGE);
             transactionResponse.setAccount(String.format("%s - %s", account.getName(), account.getNumber()));
 
             Optional.ofNullable(vehicle).ifPresent(v -> transactionResponse.setVehicle(

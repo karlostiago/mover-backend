@@ -2,8 +2,11 @@ package com.ctsousa.mover.core.api.resource;
 
 import com.ctsousa.mover.core.api.Api;
 import com.ctsousa.mover.core.service.BaseService;
-import com.ctsousa.mover.response.PaginationResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -25,6 +28,15 @@ public abstract class BaseResource<RESPONSE, REQUEST, T> implements Api<REQUEST,
         List<RESPONSE> response = (List<RESPONSE>) toCollection(entities, responseClass());
         updateResponse(response, entities);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<Page<RESPONSE>> findAll(int currentPage, int size) {
+        Page<T> page = service.findAll(PageRequest.of(currentPage, size));
+        List<RESPONSE> response = (List<RESPONSE>) toCollection(page.getContent(), responseClass());
+        updateResponse(response, page.getContent());
+        return ResponseEntity.ok(new PageImpl<>(response, page.getPageable(), page.getTotalElements()));
     }
 
     @Override

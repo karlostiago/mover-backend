@@ -2,6 +2,8 @@ package com.ctsousa.mover.repository;
 
 import com.ctsousa.mover.core.entity.ModelEntity;
 import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,6 +21,10 @@ public interface ModelRepository extends JpaRepository<ModelEntity, Long> {
     List<ModelEntity> findAll();
 
     @NonNull
+    @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand")
+    Page<ModelEntity> findAll(@NonNull Pageable pageable);
+
+    @NonNull
     @Override
     @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand WHERE m.id = :id")
     Optional<ModelEntity> findById(@NonNull @Param("id") Long id);
@@ -30,7 +36,7 @@ public interface ModelRepository extends JpaRepository<ModelEntity, Long> {
     boolean existsByNameAndBrandNameNotId(@Param("modelName") String modelName, @Param("brandName") String brandName, @Param("id") Long id);
 
     @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand b WHERE m.name LIKE %:name% OR b.name LIKE %:name%")
-    List<ModelEntity> findBy(@Param("name") String name);
+    Page<ModelEntity> findBy(@Param("name") String name, @NonNull Pageable pageable);
 
     @Query("SELECT m FROM ModelEntity m INNER JOIN FETCH m.brand b WHERE b.id = :brandId")
     List<ModelEntity> findByBrandId(@Param("brandId") Long brandId);
