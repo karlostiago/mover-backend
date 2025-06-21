@@ -1,5 +1,6 @@
 package com.ctsousa.mover.service.impl;
 
+import com.ctsousa.mover.core.event.TransactionCacheEvent;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.factory.*;
@@ -8,6 +9,7 @@ import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.BalanceNotificationService;
 import com.ctsousa.mover.service.TransactionService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +48,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final BalanceNotificationService balanceNotificationService;
 
-    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, ScheduleTransactionServiceFactory scheduleTransactionServiceFactory, UndoSchedulingTransactionServiceFactory undoSchedulingTransactionServiceFactory, TransactionRepository repository, BalanceNotificationService balanceNotificationService) {
+    private final ApplicationEventPublisher publisher;
+
+    public TransactionServiceImpl(CreateTransactionServiceFactory createTransactionServiceFactory, UpdateTransactionServiceFactory updateTransactionServiceFactory, FilterByIdTransactionServiceFactory filterTransactionServiceFactory, PaymentTransactionServiceFactory paymentTransactionServiceFactory, RefundTransactionServiceFactory refundTransactionServiceFactory, DeleteTransactionServiceFactory deleteTransactionServiceFactory, ScheduleTransactionServiceFactory scheduleTransactionServiceFactory, UndoSchedulingTransactionServiceFactory undoSchedulingTransactionServiceFactory, TransactionRepository repository, BalanceNotificationService balanceNotificationService, ApplicationEventPublisher publisher) {
         this.createTransactionServiceFactory = createTransactionServiceFactory;
         this.updateTransactionServiceFactory = updateTransactionServiceFactory;
         this.filterTransactionServiceFactory = filterTransactionServiceFactory;
@@ -57,6 +61,7 @@ public class TransactionServiceImpl implements TransactionService {
         this.undoSchedulingTransactionServiceFactory = undoSchedulingTransactionServiceFactory;
         this.repository = repository;
         this.balanceNotificationService = balanceNotificationService;
+        this.publisher = publisher;
     }
 
     @Override
@@ -95,6 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
         TransactionEntity entity = createTransactionServiceFactory.execute(type, transaction);
         balanceNotificationService.notifyBalanceChanged();
+        publisher.publishEvent(new TransactionCacheEvent());
         return entity;
     }
 
@@ -104,6 +110,7 @@ public class TransactionServiceImpl implements TransactionService {
         updateTransactionServiceFactory.batchUpdate(false);
         TransactionEntity entity = updateTransactionServiceFactory.execute(type, transaction);
         balanceNotificationService.notifyBalanceChanged();
+        publisher.publishEvent(new TransactionCacheEvent());
         return entity;
     }
 
@@ -121,6 +128,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setPaymentDate(paymentDate);
         TransactionEntity paidEntity = paymentTransactionServiceFactory.execute(type, transaction);
         balanceNotificationService.notifyBalanceChanged();
+        publisher.publishEvent(new TransactionCacheEvent());
         return paidEntity;
     }
 
@@ -144,6 +152,7 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         TransactionEntity refundEntity = refundTransactionServiceFactory.execute(type, new Transaction(id));
         balanceNotificationService.notifyBalanceChanged();
+        publisher.publishEvent(new TransactionCacheEvent());
         return refundEntity;
     }
 
@@ -154,6 +163,7 @@ public class TransactionServiceImpl implements TransactionService {
         deleteTransactionServiceFactory.batchDelete(false);
         deleteTransactionServiceFactory.execute(type, new Transaction(id));
         balanceNotificationService.notifyBalanceChanged();
+        publisher.publishEvent(new TransactionCacheEvent());
     }
 
     @Override
@@ -163,6 +173,7 @@ public class TransactionServiceImpl implements TransactionService {
         deleteTransactionServiceFactory.batchDelete(true);
         deleteTransactionServiceFactory.execute(type, toMapper(entity, Transaction.class));
         balanceNotificationService.notifyBalanceChanged();
+        publisher.publishEvent(new TransactionCacheEvent());
     }
 
     @Override
@@ -171,6 +182,7 @@ public class TransactionServiceImpl implements TransactionService {
         updateTransactionServiceFactory.batchUpdate(true);
         TransactionEntity entity = updateTransactionServiceFactory.execute(type, transaction);
         balanceNotificationService.notifyBalanceChanged();
+        publisher.publishEvent(new TransactionCacheEvent());
         return entity;
     }
 
