@@ -1,7 +1,7 @@
 package com.ctsousa.mover.service.impl;
 
-import com.ctsousa.mover.core.event.TransactionCacheEvent;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.event.TransactionCacheEvent;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.factory.*;
 import com.ctsousa.mover.domain.Transaction;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
@@ -194,8 +193,10 @@ public class TransactionServiceImpl implements TransactionService {
     private Page<TransactionEntity> search(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable) {
         var value = parseMonetary(text);
         text = value != null ? null : toUppercase(text);
-        Page<TransactionEntity> page;
+
+        Page<Long> page;
         List<TransactionEntity> entities;
+
         if (hasAccountAndText(accountListId, text)) {
             page = repository.findByPeriodAndAccountAndDescription(dtInitial, dtFinal, accountListId, text, pageable);
         }
@@ -215,7 +216,7 @@ public class TransactionServiceImpl implements TransactionService {
             page = repository.findByPeriod(dtInitial, dtFinal, pageable);
         }
 
-        entities = new ArrayList<>(page.stream().toList());
+        entities = repository.findByIdInWithDetails(page.getContent());
 
         return new PageImpl<>(entities, pageable, page.getTotalElements());
     }

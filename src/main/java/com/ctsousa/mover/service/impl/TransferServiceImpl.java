@@ -55,12 +55,14 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
             AccountEntity debitAccount = new AccountEntity((transaction.getAccount().getId()));
 
             TransactionEntity creditEntity = transaction.toEntity();
+            creditEntity.setDescription(String.format("%s (ENTRADA)", creditEntity.getDescription()));
             creditEntity.setTransactionType(TransactionType.CREDIT.name());
             creditEntity.setAccount(creditAccount);
             creditEntity.setValue(transaction.getValue().abs());
             entities.add(creditEntity);
 
             TransactionEntity debitEntity = transaction.toEntity();
+            debitEntity.setDescription(String.format("%s (SAÍDA)", debitEntity.getDescription()));
             debitEntity.setTransactionType(TransactionType.DEBIT.name());
             debitEntity.setAccount(debitAccount);
             debitEntity.setSignature(creditEntity.getSignature());
@@ -198,6 +200,11 @@ public class TransferServiceImpl extends BaseTransactionServiceImpl implements T
                 .orElseThrow(() -> new NotificationException("Nenhuma transação não encontrada."));
 
         entity.setDestinationAccount(account);
+
+        if ("CREDIT".equalsIgnoreCase(entity.getTransactionType())) {
+            entity.setDestinationAccount(entity.getAccount());
+            entity.setAccount(account);
+        }
 
         if ("DEBIT".equals(entity.getTransactionType())) {
             entity.setValue(invertSignal(entity.getValue()));

@@ -10,7 +10,9 @@ import com.ctsousa.mover.repository.ContractRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.repository.VehicleRepository;
 import com.ctsousa.mover.response.CardDashboardResponse;
+import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,13 +32,15 @@ public class DashboardResource  {
     private final ContractRepository contractRepository;
     private final VehicleRepository vehicleRepository;
     private final TransactionRepository transactionRepository;
+    private final InvoiceService invoiceService;
 
     private List<TransactionEntity> cached;
 
-    public DashboardResource(ContractRepository contractRepository, VehicleRepository vehicleRepository, TransactionRepository transactionRepository) {
+    public DashboardResource(ContractRepository contractRepository, VehicleRepository vehicleRepository, TransactionRepository transactionRepository, InvoiceService invoiceService) {
         this.contractRepository = contractRepository;
         this.vehicleRepository = vehicleRepository;
         this.transactionRepository = transactionRepository;
+        this.invoiceService = invoiceService;
     }
 
     @GetMapping("/contracts-active")
@@ -117,18 +121,42 @@ public class DashboardResource  {
     public ResponseEntity<CardDashboardResponse> maintenancePerformed() {
         loadCached();
 
-        List<TransactionEntity> entities = cached.stream()
+        List<TransactionEntity> transactions = cached.stream()
+                .filter(t -> !t.getInvoice())
                 .filter(t -> normalizer("MANUTENÇÃO")
                         .equalsIgnoreCase(normalizer(t.getSubcategory().getDescription())))
                 .toList();
 
-        BigDecimal value = entities.stream()
-                .map(TransactionEntity::getValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .abs();
+        List<TransactionEntity> invoices = cached.stream()
+                .filter(TransactionEntity::getInvoice)
+                .toList();
+
+        BigDecimal value = BigDecimal.ZERO;
+        int countItemsInvoice = 0;
+
+        for (TransactionEntity invoice : invoices) {
+            List<TransactionEntity> items = invoiceService.searchById(invoice.getId()).stream()
+                    .filter(t -> !t.getInvoice())
+                    .filter(t -> normalizer("MANUTENÇÃO")
+                            .equalsIgnoreCase(normalizer(t.getSubcategory().getDescription())))
+                    .toList();
+
+            value = value.add(
+                    items.stream().map(TransactionEntity::getValue)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add)
+                            .abs()
+            );
+            countItemsInvoice += items.size();
+        }
+
+        value = value.add(
+                transactions.stream().map(TransactionEntity::getValue)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .abs()
+        );
 
         CardDashboardResponse response = new CardDashboardResponse();
-        response.setQuantity(entities.size());
+        response.setQuantity(transactions.size() + countItemsInvoice);
         response.setValue(value);
         return ResponseEntity.ok(response);
     }
@@ -142,9 +170,8 @@ public class DashboardResource  {
         if (cached == null) {
             LocalDate dtInicial = DateUtil.getFirstDay(LocalDate.now().getYear(), LocalDate.now().getMonth().getValue());
             LocalDate dtFinal = DateUtil.getLastDay(LocalDate.now().getYear(), LocalDate.now().getMonth().getValue());
-            cached = transactionRepository
-                        .findByPeriod(dtInicial, dtFinal, PageRequest.of(0, Integer.MAX_VALUE))
-                        .getContent();
+            Page<Long> page = transactionRepository.findByPeriod(dtInicial, dtFinal, PageRequest.of(0, Integer.MAX_VALUE));
+            cached = transactionRepository.findByIdInWithDetails(page.getContent());
         }
     }
 }

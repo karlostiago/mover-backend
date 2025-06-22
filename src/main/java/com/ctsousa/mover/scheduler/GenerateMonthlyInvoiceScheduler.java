@@ -34,7 +34,7 @@ public class GenerateMonthlyInvoiceScheduler implements Scheduler {
 
         log.info("Inciando geração de fatura....");
 
-        Page<TransactionEntity> page = repository.findByPeriod(dtInitial, dtFim, PageRequest.of(0, Integer.MAX_VALUE));
+        Page<TransactionEntity> page = null;//repository.findByPeriod(dtInitial, dtFim, PageRequest.of(0, Integer.MAX_VALUE));
 
         List<TransactionEntity> entities = getCardTransactionOnly(page);
 
