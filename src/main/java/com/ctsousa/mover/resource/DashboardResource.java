@@ -10,6 +10,7 @@ import com.ctsousa.mover.repository.ContractRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.repository.VehicleRepository;
 import com.ctsousa.mover.response.CardDashboardResponse;
+import com.ctsousa.mover.response.ChartDoughnutResponse;
 import com.ctsousa.mover.service.AccountService;
 import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.InvoiceService;
@@ -24,7 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.StringUtil.normalizer;
 
@@ -291,47 +295,41 @@ public class DashboardResource  {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/maintenance-performed")
-    public ResponseEntity<CardDashboardResponse> maintenancePerformed() {
-        loadCached();
+    @GetMapping("/recipe-chart-category")
+    public ResponseEntity<ChartDoughnutResponse> recipeChartCategory() {
+        LocalDate dtInicial = DateUtil.getFirstDay(LocalDate.now().getYear(), LocalDate.now().getMonth().getValue());
+        LocalDate dtFinal = DateUtil.getLastDay(LocalDate.now().getYear(), LocalDate.now().getMonth().getValue());
+        List<TransactionEntity> entities = transactionRepository.findBy(dtInicial, dtFinal, "INCOME");
 
-        List<TransactionEntity> transactions = cached.stream()
-                .filter(t -> !t.getInvoice())
-                .filter(t -> normalizer("MANUTENÇÃO")
-                        .equalsIgnoreCase(normalizer(t.getSubcategory().getDescription())))
-                .toList();
+        Map<String, BigDecimal> grouped = entities.stream()
+                .collect(Collectors.groupingBy(
+                        t -> t.getSubcategory().getDescription(),
+                        LinkedHashMap::new,
+                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
+                ));
 
-        List<TransactionEntity> invoices = cached.stream()
-                .filter(TransactionEntity::getInvoice)
-                .toList();
+        ChartDoughnutResponse response = new ChartDoughnutResponse();
+        response.setLabels(new ArrayList<>(grouped.keySet()));
+        response.setValues(new ArrayList<>(grouped.values()));
+        return ResponseEntity.ok(response);
+    }
 
-        BigDecimal value = BigDecimal.ZERO;
-        int countItemsInvoice = 0;
+    @GetMapping("/expense-chart-category")
+    public ResponseEntity<ChartDoughnutResponse> expenseChartCategory() {
+        LocalDate dtInicial = DateUtil.getFirstDay(LocalDate.now().getYear(), LocalDate.now().getMonth().getValue());
+        LocalDate dtFinal = DateUtil.getLastDay(LocalDate.now().getYear(), LocalDate.now().getMonth().getValue());
+        List<TransactionEntity> entities = transactionRepository.findBy(dtInicial, dtFinal, "EXPENSE");
 
-        for (TransactionEntity invoice : invoices) {
-            List<TransactionEntity> items = invoiceService.searchById(invoice.getId()).stream()
-                    .filter(t -> !t.getInvoice())
-                    .filter(t -> normalizer("MANUTENÇÃO")
-                            .equalsIgnoreCase(normalizer(t.getSubcategory().getDescription())))
-                    .toList();
+        Map<String, BigDecimal> grouped = entities.stream()
+                .collect(Collectors.groupingBy(
+                        t -> t.getSubcategory().getDescription(),
+                        LinkedHashMap::new,
+                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
+                ));
 
-            value = value.add(
-                    items.stream().map(TransactionEntity::getValue)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add)
-                            .abs()
-            );
-            countItemsInvoice += items.size();
-        }
-
-        value = value.add(
-                transactions.stream().map(TransactionEntity::getValue)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add)
-                        .abs()
-        );
-
-        CardDashboardResponse response = new CardDashboardResponse();
-        response.setQuantity(transactions.size() + countItemsInvoice);
-        response.setValue(value);
+        ChartDoughnutResponse response = new ChartDoughnutResponse();
+        response.setLabels(new ArrayList<>(grouped.keySet()));
+        response.setValues(new ArrayList<>(grouped.values()));
         return ResponseEntity.ok(response);
     }
 

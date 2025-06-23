@@ -1,5 +1,6 @@
 package com.ctsousa.mover.repository;
 
+import com.ctsousa.mover.core.entity.SubCategoryEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
@@ -201,4 +202,15 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             ORDER BY CASE WHEN t.paymentDate IS NULL THEN t.dueDate ELSE t.paymentDate END DESC
             """)
     List<TransactionEntity> findByIdInWithDetails(@Param("ids") List<Long> ids);
+
+    @Query("""
+            SELECT t
+            FROM TransactionEntity t
+            JOIN FETCH t.subcategory sb
+            WHERE t.invoice = false
+              AND t.dueDate BETWEEN :dtInicial AND :dtFinal
+              AND t.categoryType = :categoryType
+            """)
+    List<TransactionEntity> findBy(@Param("dtInicial") LocalDate dtInicial, @Param("dtFinal") LocalDate dtFinal,
+                                   @Param("categoryType") String categoryType);
 }
