@@ -1,6 +1,5 @@
 package com.ctsousa.mover.core.service.impl;
 
-import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.domain.Transaction;
@@ -18,7 +17,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.newInstanceToLocalDate;
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
@@ -70,7 +68,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             entities.add(entity);
         }
 
-        updateAvailableBalance(transaction, transaction.getAccount().getId());
+//        updateAvailableBalance(transaction, transaction.getAccount().getId());
 
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Erro ao salvar lançamento."));
@@ -93,7 +91,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             return invoiceService.update(invoice, entity);
         }
 
-        updateAvailableBalance(transaction, entity.getAccount().getId());
+//        updateAvailableBalance(transaction, entity.getAccount().getId());
 
         return repository.save(entity);
     }
@@ -127,7 +125,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
         TransactionScheduler.add(entities);
 
-        updateAvailableBalance(transaction, entity.getAccount().getId());
+//        updateAvailableBalance(transaction, entity.getAccount().getId());
 
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Erro ao atualizar em lote de lançamentos."));
@@ -161,7 +159,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
                 .add(entity.getValue());
 
-        updateAccountBalance(entity.getAccount(), availableBalance);
+//        updateAccountBalance(entity.getAccount(), availableBalance);
 
         return entity;
     }
@@ -192,7 +190,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
                         .subtract(entity.getValue());
 
-        updateAccountBalance(entity.getAccount(), availableBalance);
+//        updateAccountBalance(entity.getAccount(), availableBalance);
 
         return entity;
     }
@@ -203,7 +201,7 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         if (entity.getPaid()) {
             BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
                     .add(entity.getValue().abs());
-            updateAccountBalance(entity.getAccount(), availableBalance);
+//            updateAccountBalance(entity.getAccount(), availableBalance);
         }
 
         repository.deleteById(id);
@@ -215,14 +213,14 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
                 .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
                 .toList();
 
-        Map<AccountEntity, BigDecimal> accumulatedBalance = entities.stream()
-                .filter(TransactionEntity::getPaid)
-                .collect(Collectors.groupingBy(
-                        TransactionEntity::getAccount,
-                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
-                ));
-
-        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
+//        Map<AccountEntity, BigDecimal> accumulatedBalance = entities.stream()
+//                .filter(TransactionEntity::getPaid)
+//                .collect(Collectors.groupingBy(
+//                        TransactionEntity::getAccount,
+//                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
+//                ));
+//
+//        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
 
         repository.deleteAll(entities);
     }
@@ -250,14 +248,14 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             });
         }
 
-        Map<AccountEntity, BigDecimal> accumulatedBalance = toDelete.stream()
-                .filter(TransactionEntity::getPaid)
-                .collect(Collectors.groupingBy(
-                        TransactionEntity::getAccount,
-                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
-                ));
-
-        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
+//        Map<AccountEntity, BigDecimal> accumulatedBalance = toDelete.stream()
+//                .filter(TransactionEntity::getPaid)
+//                .collect(Collectors.groupingBy(
+//                        TransactionEntity::getAccount,
+//                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
+//                ));
+//
+//        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
 
         if (hasInvoiceItem(entity)) {
             toDelete.forEach(invoiceService::delete);
@@ -300,23 +298,23 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         }
     }
 
-    protected void updateAvailableBalance(Transaction transaction, Long accountId) {
-        if (isPaymentStatusChanged(transaction)) {
-            AccountEntity account = accountService.findById(accountId);
-            BigDecimal availableBalance = account.getAvailableBalance();
-            if (transaction.getPaid()) {
-                availableBalance = availableBalance.subtract(transaction.getValue());
-            } else {
-                availableBalance = availableBalance.add(transaction.getValue());
-            }
-            updateAccountBalance(account, availableBalance);
-        }
-    }
+//    protected void updateAvailableBalance(Transaction transaction, Long accountId) {
+//        if (isPaymentStatusChanged(transaction)) {
+//            AccountEntity account = accountService.findById(accountId);
+//            BigDecimal availableBalance = account.getAvailableBalance();
+//            if (transaction.getPaid()) {
+//                availableBalance = availableBalance.subtract(transaction.getValue());
+//            } else {
+//                availableBalance = availableBalance.add(transaction.getValue());
+//            }
+//            updateAccountBalance(account, availableBalance);
+//        }
+//    }
 
-    protected void updateAccountBalance(AccountEntity account, BigDecimal balance) {
-        account.setAvailableBalance(balance);
-        accountService.save(account);
-    }
+//    protected void updateAccountBalance(AccountEntity account, BigDecimal balance) {
+//        account.setAvailableBalance(balance);
+//        accountService.save(account);
+//    }
 
     protected boolean isPaymentStatusChanged(final Transaction transaction) {
         if (transaction.getId() == null) {

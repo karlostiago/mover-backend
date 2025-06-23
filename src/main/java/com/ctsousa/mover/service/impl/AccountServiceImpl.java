@@ -5,10 +5,13 @@ import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.repository.AccountRepository;
+import com.ctsousa.mover.repository.BalanceRepository;
 import com.ctsousa.mover.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -16,9 +19,11 @@ public class AccountServiceImpl extends BaseServiceImpl<AccountEntity, Long> imp
 
     @Autowired
     private AccountRepository accountRepository;
+    private final BalanceRepository balanceRepository;
 
-    public AccountServiceImpl(AccountRepository accountRepository) {
+    public AccountServiceImpl(AccountRepository accountRepository, BalanceRepository balanceRepository) {
         super(accountRepository);
+        this.balanceRepository = balanceRepository;
     }
 
     @Override
@@ -39,6 +44,18 @@ public class AccountServiceImpl extends BaseServiceImpl<AccountEntity, Long> imp
     public List<AccountEntity> filterBy(String search) {
         if (search == null || search.isEmpty()) return accountRepository.findAll();
         return accountRepository.findBy(search);
+    }
+
+    @Override
+    public void recalculateBalance() {
+        List<AccountEntity> entities = findAll();
+        for (AccountEntity entity : entities) {
+            if (entity.getActive()) {
+                BigDecimal balance = balanceRepository.accountBalance(Collections.singletonList(entity.getId()));
+                entity.setAvailableBalance(balance);
+                save(entity);
+            }
+        }
     }
 
     @Override

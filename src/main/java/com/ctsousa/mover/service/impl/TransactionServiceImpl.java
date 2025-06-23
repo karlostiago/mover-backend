@@ -1,6 +1,7 @@
 package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.event.BalanceChangedEvent;
 import com.ctsousa.mover.core.event.TransactionCacheEvent;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.factory.*;
@@ -98,8 +99,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionEntity save(Transaction transaction) {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
         TransactionEntity entity = createTransactionServiceFactory.execute(type, transaction);
-        balanceNotificationService.notifyBalanceChanged();
-        publisher.publishEvent(new TransactionCacheEvent());
+        sendNotification();
         return entity;
     }
 
@@ -108,8 +108,7 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
         updateTransactionServiceFactory.batchUpdate(false);
         TransactionEntity entity = updateTransactionServiceFactory.execute(type, transaction);
-        balanceNotificationService.notifyBalanceChanged();
-        publisher.publishEvent(new TransactionCacheEvent());
+        sendNotification();
         return entity;
     }
 
@@ -126,8 +125,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setId(id);
         transaction.setPaymentDate(paymentDate);
         TransactionEntity paidEntity = paymentTransactionServiceFactory.execute(type, transaction);
-        balanceNotificationService.notifyBalanceChanged();
-        publisher.publishEvent(new TransactionCacheEvent());
+        sendNotification();
         return paidEntity;
     }
 
@@ -150,8 +148,7 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionEntity entity = findById(id);
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         TransactionEntity refundEntity = refundTransactionServiceFactory.execute(type, new Transaction(id));
-        balanceNotificationService.notifyBalanceChanged();
-        publisher.publishEvent(new TransactionCacheEvent());
+        sendNotification();
         return refundEntity;
     }
 
@@ -161,8 +158,7 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         deleteTransactionServiceFactory.batchDelete(false);
         deleteTransactionServiceFactory.execute(type, new Transaction(id));
-        balanceNotificationService.notifyBalanceChanged();
-        publisher.publishEvent(new TransactionCacheEvent());
+        sendNotification();
     }
 
     @Override
@@ -171,8 +167,7 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         deleteTransactionServiceFactory.batchDelete(true);
         deleteTransactionServiceFactory.execute(type, toMapper(entity, Transaction.class));
-        balanceNotificationService.notifyBalanceChanged();
-        publisher.publishEvent(new TransactionCacheEvent());
+        sendNotification();
     }
 
     @Override
@@ -180,8 +175,7 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
         updateTransactionServiceFactory.batchUpdate(true);
         TransactionEntity entity = updateTransactionServiceFactory.execute(type, transaction);
-        balanceNotificationService.notifyBalanceChanged();
-        publisher.publishEvent(new TransactionCacheEvent());
+        sendNotification();
         return entity;
     }
 
@@ -239,5 +233,11 @@ public class TransactionServiceImpl implements TransactionService {
 
     private boolean hasAccount(List<Long> accountListId) {
         return !accountListId.isEmpty();
+    }
+
+    private void sendNotification() {
+        balanceNotificationService.notifyBalanceChanged();
+        publisher.publishEvent(new TransactionCacheEvent());
+        publisher.publishEvent(new BalanceChangedEvent());
     }
 }

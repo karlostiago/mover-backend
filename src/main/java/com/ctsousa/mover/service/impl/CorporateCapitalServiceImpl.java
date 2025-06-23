@@ -22,20 +22,20 @@ public class CorporateCapitalServiceImpl extends BaseTransactionServiceImpl impl
         super(repository, installmentService, fixedInstallmentService);
     }
 
-    @Override
-    protected void updateAvailableBalance(Transaction transaction, Long accountId) {
-        if (isPaymentStatusChanged(transaction)) {
-            AccountEntity account = accountService.findById(accountId);
-            BigDecimal availableBalance = account.getAvailableBalance();
-            if (transaction.getPaid()) {
-                availableBalance = availableBalance.add(transaction.getValue());
-            } else {
-                availableBalance = availableBalance.subtract(transaction.getValue());
-            }
-            account.setAvailableBalance(availableBalance);
-            accountService.save(account);
-        }
-    }
+//    @Override
+//    protected void updateAvailableBalance(Transaction transaction, Long accountId) {
+//        if (isPaymentStatusChanged(transaction)) {
+//            AccountEntity account = accountService.findById(accountId);
+//            BigDecimal availableBalance = account.getAvailableBalance();
+//            if (transaction.getPaid()) {
+//                availableBalance = availableBalance.add(transaction.getValue());
+//            } else {
+//                availableBalance = availableBalance.subtract(transaction.getValue());
+//            }
+//            account.setAvailableBalance(availableBalance);
+//            accountService.save(account);
+//        }
+//    }
 
     @Override
     public void batchDelete(Long id) {
@@ -44,14 +44,14 @@ public class CorporateCapitalServiceImpl extends BaseTransactionServiceImpl impl
                 .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
                 .toList();
 
-        Map<AccountEntity, BigDecimal> accumulatedBalance = entities.stream()
-                .filter(TransactionEntity::getPaid)
-                .collect(Collectors.groupingBy(
-                        TransactionEntity::getAccount,
-                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
-                ));
-
-        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().subtract(balance)));
+//        Map<AccountEntity, BigDecimal> accumulatedBalance = entities.stream()
+//                .filter(TransactionEntity::getPaid)
+//                .collect(Collectors.groupingBy(
+//                        TransactionEntity::getAccount,
+//                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
+//                ));
+//
+//        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().subtract(balance)));
 
         repository.deleteAll(entities);
     }
@@ -71,7 +71,7 @@ public class CorporateCapitalServiceImpl extends BaseTransactionServiceImpl impl
                         Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
                 ));
 
-        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().subtract(balance)));
+//        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().subtract(balance)));
 
         repository.deleteAll(entities);
     }
@@ -82,7 +82,7 @@ public class CorporateCapitalServiceImpl extends BaseTransactionServiceImpl impl
         if (entity.getPaid()) {
             BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
                     .subtract(entity.getValue());
-            updateAccountBalance(entity.getAccount(), availableBalance);
+//            updateAccountBalance(entity.getAccount(), availableBalance);
         }
 
         repository.deleteById(id);

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -28,8 +29,24 @@ public interface BalanceRepository extends JpaRepository<TransactionEntity, Long
                 GROUP BY t.account_id
             ) t ON t.account_id = c.id
             WHERE c.id IN (:accounts)
+              AND c.active
             """, nativeQuery = true)
     BigDecimal accountBalance(@Param("accounts") List<Long> accounts);
+
+    @Query(value = """
+            SELECT IFNULL(SUM(IFNULL(tt.value, 0)), 0) FROM tb_transaction tt
+            WHERE tt.card_id IS NOT NULL
+              AND tt.due_date BETWEEN :dtInicial AND :dtFinal
+              AND tt.invoice
+              AND tt.card_id in (:cards)
+              AND NOT EXISTS (
+                SELECT distinct ipd.invoice_id
+                FROM tb_invoice_payment_detail ipd
+                WHERE ipd.invoice_id = tt.id
+              )
+            """, nativeQuery = true)
+    BigDecimal invoiceValue(@Param("cards") List<Long> cards,
+                            @Param("dtInicial") LocalDate dtInicial, @Param("dtFinal") LocalDate dtFinal);
 
     @Deprecated
     @Query(value = "SELECT SUM(t.value * -1) AS DESPESA FROM tb_transaction t WHERE AND t.invoice_id IS NUL AND t.category_type = 'EXPENSE'", nativeQuery = true)
