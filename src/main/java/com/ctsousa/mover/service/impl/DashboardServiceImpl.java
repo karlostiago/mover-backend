@@ -7,121 +7,145 @@ import com.ctsousa.mover.response.CardDashboardResponse;
 import com.ctsousa.mover.response.ChartDoughnutResponse;
 import com.ctsousa.mover.service.DashboardCacheLoaderService;
 import com.ctsousa.mover.service.DashboardService;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.CacheManager;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Component
-public class DashboardServiceImpl implements DashboardService {
+public class DashboardServiceImpl implements DashboardService, ApplicationListener<ApplicationReadyEvent> {
 
     private final DashboardCacheLoaderService dashboardCacheLoaderService;
-    private final CacheManager cacheManager;
 
     private final LocalDate dtInitial;
     private final LocalDate dtFinal;
 
     private volatile DashboardCache dashboardCache;
 
-    public DashboardServiceImpl(DashboardCacheLoaderService dashboardCacheLoaderService, CacheManager cacheManager) {
+    public DashboardServiceImpl(DashboardCacheLoaderService dashboardCacheLoaderService) {
         this.dashboardCacheLoaderService = dashboardCacheLoaderService;
-        this.cacheManager = cacheManager;
         this.dtInitial = DateUtil.getFirstDay(LocalDate.now().getYear(), LocalDate.now().getMonth().getValue());
         this.dtFinal = DateUtil.getLastDay(LocalDate.now().getYear(), LocalDate.now().getMonth().getValue());
-        realoadCache();
+    }
+
+    @Override
+    public void onApplicationEvent(@NonNull ApplicationReadyEvent event) {
+        dashboardCacheLoaderService.loadAsync(dtInitial, dtFinal).thenAccept(cache -> {
+            log.info("Dashboard cache carregado com sucesso.");
+            this.dashboardCache = cache;
+        })
+        .exceptionally(ex -> {
+            log.error("Erro ao carregar o dashboard cache", ex);
+            return null;
+        });
     }
 
     @Override
     public CardDashboardResponse activeContracts() {
-        return dashboardCache.getSummary().getOtherCard("activeContracts");
+        return getSafeCache().getSummary().getOtherCard("activeContracts");
     }
 
     @Override
     public CardDashboardResponse terminatedContracts() {
-        return dashboardCache.getSummary().getOtherCard("terminatedContracts");
+        return getSafeCache().getSummary().getOtherCard("terminatedContracts");
     }
 
     @Override
     public CardDashboardResponse rentalVehicles() {
-        return dashboardCache.getSummary().getOtherCard("rentalVehicles");
+        return getSafeCache().getSummary().getOtherCard("rentalVehicles");
     }
 
     @Override
     public CardDashboardResponse stoppedVehicles() {
-        return dashboardCache.getSummary().getOtherCard("stoppedVehicles");
+        return getSafeCache().getSummary().getOtherCard("stoppedVehicles");
     }
 
     @Override
     public CardDashboardResponse overdueRevenue() {
-        return dashboardCache.getSummary().getRevenueCard("overdueRevenue");
+        return getSafeCache().getSummary().getRevenueCard("overdueRevenue");
     }
 
     @Override
     public CardDashboardResponse realizedRevenue() {
-        return dashboardCache.getSummary().getRevenueCard("realizedRevenue");
+        return getSafeCache().getSummary().getRevenueCard("realizedRevenue");
     }
 
     @Override
     public CardDashboardResponse pendingRevenue() {
-        return dashboardCache.getSummary().getRevenueCard("pendingRevenue");
+        return getSafeCache().getSummary().getRevenueCard("pendingRevenue");
     }
 
     @Override
     public CardDashboardResponse grossRevenue() {
-        return dashboardCache.getSummary().getRevenueCard("grossRevenue");
+        return getSafeCache().getSummary().getRevenueCard("grossRevenue");
     }
 
     @Override
     public CardDashboardResponse overdueExpense() {
-        return dashboardCache.getSummary().getExpenseCard("overdueExpense");
+        return getSafeCache().getSummary().getExpenseCard("overdueExpense");
     }
 
     @Override
     public CardDashboardResponse realizedExpense() {
-        return dashboardCache.getSummary().getExpenseCard("realizedExpense");
+        return getSafeCache().getSummary().getExpenseCard("realizedExpense");
     }
 
     @Override
     public CardDashboardResponse pendingExpense() {
-        return dashboardCache.getSummary().getExpenseCard("pendingExpense");
+        return getSafeCache().getSummary().getExpenseCard("pendingExpense");
     }
 
     @Override
     public CardDashboardResponse grossExpense() {
-        return dashboardCache.getSummary().getExpenseCard("grossExpense");
+        return getSafeCache().getSummary().getExpenseCard("grossExpense");
     }
 
     @Override
     public List<CardDashboardResponse> balanceAccounts() {
-        return dashboardCache.getSummary().getAccountBalances();
+        return getSafeCache().getSummary().getAccountBalances();
     }
 
     @Override
     public List<CardDashboardResponse> invoices() {
-        return dashboardCache.getSummary().getInvoices();
+        return getSafeCache().getSummary().getInvoices();
     }
 
     @Override
     public ChartDoughnutResponse recipeChartCategory() {
-        return dashboardCache.getSummary().getRevenueChart();
+        return getSafeCache().getSummary().getRevenueChart();
     }
 
     @Override
     public ChartDoughnutResponse expenseChartCategory() {
-        return dashboardCache.getSummary().getExpenseChart();
+        return getSafeCache().getSummary().getExpenseChart();
     }
 
     @Override
+    @EventListener
     public void handleTransactionCacheEvent(TransactionCacheEvent event) {
-        Objects.requireNonNull(cacheManager.getCache("dashboardData")).clear();
-        realoadCache();
+        updateCache();
     }
 
-    private void realoadCache() {
-        dashboardCache = dashboardCacheLoaderService.load(dtInitial, dtFinal);
+    private void updateCache() {
+        try {
+            this.dashboardCache = dashboardCacheLoaderService.load(dtInitial, dtFinal);
+            log.info("Dashboard atualizado com sucesso.");
+        } catch (Exception ex) {
+            log.error("Erro ao atualizar dashboard", ex);
+        }
+    }
+
+    private DashboardCache getSafeCache() {
+        if (dashboardCache == null) {
+            log.warn("Dashboard cache ainda não carregado. Carregando sincronicamente como fallback.");
+            updateCache();
+        }
+        return dashboardCache;
     }
 }

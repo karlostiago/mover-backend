@@ -35,6 +35,19 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query("""
             SELECT t.id
             FROM TransactionEntity t
+            WHERE t.invoiceId IS NULL AND ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
+              AND t.value != 0
+              AND NOT EXISTS (
+                   SELECT DISTINCT ipd.invoice.id
+                   FROM InvoicePaymentDetailEntity ipd
+                   WHERE ipd.invoice.id = t.id
+               )
+            """)
+    List<Long> findByPeriod(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal);
+
+    @Query("""
+            SELECT t.id
+            FROM TransactionEntity t
             WHERE ((t.paymentDate IS NULL AND t.dueDate BETWEEN :dtInitial AND :dtFinal) OR (t.paymentDate BETWEEN :dtInitial AND :dtFinal))
               AND ABS(t.value) = :value
               AND t.invoiceId IS NULL

@@ -5,58 +5,46 @@ import com.ctsousa.mover.domain.DashboardCache;
 import com.ctsousa.mover.domain.DashboardSummary;
 import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.enumeration.Situation;
-import com.ctsousa.mover.repository.ContractRepository;
-import com.ctsousa.mover.repository.TransactionRepository;
-import com.ctsousa.mover.repository.VehicleRepository;
 import com.ctsousa.mover.response.CardDashboardResponse;
-import com.ctsousa.mover.service.AccountService;
-import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.DashboardCacheLoaderService;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import com.ctsousa.mover.service.DashboardDataReaderService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
 
-    private final TransactionRepository transactionRepository;
-    private final AccountService accountService;
-    private final CardService cardService;
-    private final ContractRepository contractRepository;
-    private final VehicleRepository vehicleRepository;
+    private final DashboardDataReaderService dashboardDataReaderService;
 
-    public DashboardLoaderServiceImpl(TransactionRepository transactionRepository, AccountService accountService, CardService cardService, ContractRepository contractRepository, VehicleRepository vehicleRepository) {
-        this.transactionRepository = transactionRepository;
-        this.accountService = accountService;
-        this.cardService = cardService;
-        this.contractRepository = contractRepository;
-        this.vehicleRepository = vehicleRepository;
+    public DashboardLoaderServiceImpl(DashboardDataReaderService dashboardDataReaderService) {
+        this.dashboardDataReaderService = dashboardDataReaderService;
+    }
+
+    @Async
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public CompletableFuture<DashboardCache> loadAsync(LocalDate dtInitial, LocalDate dtFinal) {
+        DashboardCache cache = loadWithoutCache(dtInitial, dtFinal);
+        return CompletableFuture.completedFuture(cache);
     }
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    @Cacheable("dashboardData")
     public DashboardCache load(LocalDate dtInitial, LocalDate dtFinal) {
-        List<Long> ids = new ArrayList<>();
-        int pageNumber = 0, pageSize = 100;
-        Page<Long> page;
+        return loadWithoutCache(dtInitial, dtFinal);
+    }
 
-        do {
-            page = transactionRepository.findByPeriod(dtInitial, dtFinal, PageRequest.of(pageNumber++, pageSize));
-            ids.addAll(page.getContent());
-        } while (page.hasNext());
+    private DashboardCache loadWithoutCache(LocalDate dtInitial, LocalDate dtFinal) {
+        List<Long> ids = dashboardDataReaderService.findAllTransactionIds(dtInitial, dtFinal);
+        List<TransactionEntity> transactions = dashboardDataReaderService.findAllTransactions(ids);
 
-        List<TransactionEntity> transactions = ids.isEmpty() ? Collections.emptyList() : transactionRepository.findByIdInWithDetails(ids);
-
-        List<AccountEntity> accounts = accountService.findAll();
+        List<AccountEntity> accounts = dashboardDataReaderService.findAllAccounts();
         List<CardDashboardResponse> invoices = getInvoices(dtInitial, dtFinal);
 
         DashboardSummary dashboardSummary = new DashboardSummary(transactions, accounts, invoices);
@@ -69,7 +57,7 @@ public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
     }
 
     private CardDashboardResponse getActiveContracts() {
-        List<ContractEntity> entities = contractRepository.findBy(Situation.ONGOING);
+        List<ContractEntity> entities = dashboardDataReaderService.findContractBy(Situation.ONGOING);
         return CardDashboardResponse.builder()
                 .loading(true)
                 .quantity(entities.size())
@@ -77,7 +65,7 @@ public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
     }
 
     private CardDashboardResponse getTerminatedContracts() {
-        List<ContractEntity> entities = contractRepository.findBy(Situation.CLOSED);
+        List<ContractEntity> entities = dashboardDataReaderService.findContractBy(Situation.CLOSED);
         return CardDashboardResponse.builder()
                 .loading(true)
                 .quantity(entities.size())
@@ -85,8 +73,8 @@ public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
     }
 
     private CardDashboardResponse getRentalVehicles() {
-        List<VehicleEntity> allEntities = vehicleRepository.findAll();
-        List<VehicleEntity> avaliabbleEntities = vehicleRepository.onlyAvailable();
+        List<VehicleEntity> allEntities = dashboardDataReaderService.findAllVehicle();
+        List<VehicleEntity> avaliabbleEntities = dashboardDataReaderService.onlyVehicleAvailable();
         return CardDashboardResponse.builder()
                 .loading(true)
                 .quantity(allEntities.size() - avaliabbleEntities.size())
@@ -96,18 +84,18 @@ public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
     private CardDashboardResponse getStoppedVehicles() {
         return CardDashboardResponse.builder()
                 .loading(true)
-                .quantity( vehicleRepository.onlyAvailable().size())
+                .quantity(dashboardDataReaderService.onlyVehicleAvailable().size())
                 .build();
     }
 
     private List<CardDashboardResponse> getInvoices(LocalDate dtInitial, LocalDate dtFinal) {
-        return cardService.findAll().stream()
+        return dashboardDataReaderService.findAllCards().stream()
                 .filter(CardEntity::getActive)
                 .map(card -> CardDashboardResponse.builder()
                         .description(card.getName())
                         .loading(true)
                         .iconPath(Icon.toName(card.getIcon()).getUrlImage())
-                        .value(cardService.calculateInvoiceValue(card, dtInitial, dtFinal))
+                        .value(dashboardDataReaderService.calculateInvoiceValue(card, dtInitial, dtFinal))
                         .build())
                 .toList();
     }
