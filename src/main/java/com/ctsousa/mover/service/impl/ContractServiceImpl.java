@@ -2,6 +2,7 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.ClientEntity;
 import com.ctsousa.mover.core.entity.ContractEntity;
+import com.ctsousa.mover.core.event.TransactionCacheEvent;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
@@ -10,10 +11,13 @@ import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.ContractRepository;
 import com.ctsousa.mover.service.ClientService;
 import com.ctsousa.mover.service.ContractService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,13 +33,16 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
 
     private final ClientService clientService;
 
+    private final ApplicationEventPublisher publisher;
+
     public ContractServiceImpl(ContractRepository repository,
                                ClientRepository clientRepository,
-                               ClientService clientService) {
+                               ClientService clientService, ApplicationEventPublisher publisher) {
         super(repository);
         this.repository = repository;
         this.clientRepository = clientRepository;
         this.clientService = clientService;
+        this.publisher = publisher;
     }
 
     @Override
@@ -51,13 +58,17 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
         ContractEntity entitySaved = super.save(entity);
 
         if (Situation.CLOSED.equals(entity.getSituation())) {
-            return close(entitySaved);
+            ContractEntity closedEntity = close(entitySaved);
+            sendNotification();
+            return closedEntity;
         }
 
+        sendNotification();
         return entitySaved;
     }
 
     @Override
+    @Transactional
     public ContractEntity close(ContractEntity entity) {
         entity.setClient(clientService.findById(entity.getClient().getId()));
         ClientEntity clientEntity = entity.getClient();
@@ -68,7 +79,8 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
         entity.setActive(Boolean.FALSE);
         entity.setEndDate(LocalDate.now());
         repository.save(entity);
-        
+        sendNotification();
+
         return entity;
     }
 
@@ -78,9 +90,11 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         try {
             super.deleteById(id);
+            sendNotification();
         } catch (Exception e) {
             throw new NotificationException("Esse contrato está em uso e não pode ser excluído.", Severity.ERROR);
         }
@@ -150,5 +164,14 @@ public class ContractServiceImpl extends BaseServiceImpl<ContractEntity, Long> i
         if (entity.getRecurrenceValue().compareTo(BigDecimal.ZERO) == 0) {
             throw new NotificationException("Valor recorrência não pode ser zero.");
         }
+    }
+
+    private void sendNotification() {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                publisher.publishEvent(new TransactionCacheEvent());
+            }
+        });
     }
 }

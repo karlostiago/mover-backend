@@ -236,8 +236,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void sendNotification() {
-        balanceNotificationService.notifyBalanceChanged();
-        publisher.publishEvent(new TransactionCacheEvent());
         publisher.publishEvent(new BalanceChangedEvent());
+        publisher.publishEvent(new TransactionCacheEvent());
+        balanceNotificationService.notifyBalanceChanged();
     }
 }
