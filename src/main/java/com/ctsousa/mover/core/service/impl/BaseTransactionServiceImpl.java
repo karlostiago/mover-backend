@@ -156,9 +156,8 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
         repository.save(entity);
 
-        BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
-                .add(entity.getValue());
-
+//        BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
+//                .add(entity.getValue());
 //        updateAccountBalance(entity.getAccount(), availableBalance);
 
         return entity;
@@ -187,9 +186,8 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
         repository.save(entity);
 
-        BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
-                        .subtract(entity.getValue());
-
+//        BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
+//                        .subtract(entity.getValue());
 //        updateAccountBalance(entity.getAccount(), availableBalance);
 
         return entity;
@@ -198,13 +196,13 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
     public void delete(Long id) {
         TransactionEntity entity = findById(id);
 
-        if (entity.getPaid()) {
-            BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
-                    .add(entity.getValue().abs());
+//        if (entity.getPaid()) {
+//            BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
+//                    .add(entity.getValue().abs());
 //            updateAccountBalance(entity.getAccount(), availableBalance);
-        }
+//        }
 
-        repository.deleteById(id);
+        repository.deleteById(entity.getId());
     }
 
     public void batchDelete(Long id) {

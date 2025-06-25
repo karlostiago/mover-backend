@@ -4,6 +4,7 @@ import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.entity.InvoicePaymentDetailEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.event.BalanceChangedEvent;
 import com.ctsousa.mover.core.event.TransactionCacheEvent;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
@@ -13,7 +14,6 @@ import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.InvoicePaymentDetailRepository;
 import com.ctsousa.mover.repository.InvoiceRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
-import com.ctsousa.mover.service.BalanceNotificationService;
 import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.InvoicePaymentService;
 import com.ctsousa.mover.service.InvoiceService;
@@ -43,15 +43,13 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     private final CardService cardService;
     private final InvoicePaymentService invoicePaymentService;
     private final InvoicePaymentDetailRepository invoicePaymentDetailRepository;
-    private final BalanceNotificationService balanceNotificationService;
     private final ApplicationEventPublisher publisher;
 
-    public InvoiceServiceImpl(TransactionRepository repository, CardService cardService, InvoicePaymentService invoicePaymentService, InvoicePaymentDetailRepository invoicePaymentDetailRepository, BalanceNotificationService balanceNotificationService, ApplicationEventPublisher publisher) {
+    public InvoiceServiceImpl(TransactionRepository repository, CardService cardService, InvoicePaymentService invoicePaymentService, InvoicePaymentDetailRepository invoicePaymentDetailRepository, ApplicationEventPublisher publisher) {
         super(repository);
         this.cardService = cardService;
         this.invoicePaymentService = invoicePaymentService;
         this.invoicePaymentDetailRepository = invoicePaymentDetailRepository;
-        this.balanceNotificationService = balanceNotificationService;
         this.publisher = publisher;
     }
 
@@ -74,10 +72,7 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
             return invoiceUpdated;
         }
 
-        TransactionEntity invoiceSaved = save(create(entity, createDescription(card, dueDate)));
-        sendNotification();
-
-        return invoiceSaved;
+        return save(create(entity, createDescription(card, dueDate)));
     }
 
     @Override
@@ -218,6 +213,7 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
             updateRefundAndPaidAndResidualValue(entities);
             entities.forEach(this::save);
         }
+
         sendNotification();
         return paymentDetail.getInvoice();
     }
@@ -255,7 +251,7 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     }
 
     private void sendNotification() {
-        balanceNotificationService.notifyBalanceChanged();
+        publisher.publishEvent(new BalanceChangedEvent());
         publisher.publishEvent(new TransactionCacheEvent());
     }
 
