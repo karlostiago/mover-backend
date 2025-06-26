@@ -1,12 +1,12 @@
 package com.ctsousa.mover.resource;
 
+import com.ctsousa.mover.core.api.DashboardApi;
 import com.ctsousa.mover.core.event.TransactionCacheEvent;
 import com.ctsousa.mover.response.CardDashboardResponse;
 import com.ctsousa.mover.response.ChartDoughnutResponse;
 import com.ctsousa.mover.service.DashboardService;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/dashboard")
-public class DashboardResource  {
+public class DashboardResource  implements DashboardApi {
 
     private final DashboardService dashboardService;
 
@@ -22,88 +22,88 @@ public class DashboardResource  {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping("/refresh")
+    @Override
     public ResponseEntity<Void> refresh() {
         handleTransactionCacheEvent(new TransactionCacheEvent());
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/contracts-active")
+    @Override
     public ResponseEntity<CardDashboardResponse> activeContracts() {
         return ResponseEntity.ok(dashboardService.activeContracts());
     }
 
-    @GetMapping("/terminated-contracts")
+    @Override
     public ResponseEntity<CardDashboardResponse> terminatedContracts() {
         return ResponseEntity.ok(dashboardService.terminatedContracts());
     }
 
-    @GetMapping("/rental-vehicles")
+    @Override
     public ResponseEntity<CardDashboardResponse> rentalVehicles() {
         return ResponseEntity.ok(dashboardService.rentalVehicles());
     }
 
-    @GetMapping("/stopped-vehicles")
+    @Override
     public ResponseEntity<CardDashboardResponse> stoppedVehicles() {
         return ResponseEntity.ok(dashboardService.stoppedVehicles());
     }
 
-    @GetMapping("/overdue-revenue")
+    @Override
     public ResponseEntity<CardDashboardResponse> overdueRevenue() {
         return ResponseEntity.ok(dashboardService.overdueRevenue());
     }
 
-    @GetMapping("/realized-revenue")
+    @Override
     public ResponseEntity<CardDashboardResponse> realizedRevenue() {
         return ResponseEntity.ok(dashboardService.realizedRevenue());
     }
 
-    @GetMapping("/pending-revenue")
+    @Override
     public ResponseEntity<CardDashboardResponse> pendingRevenue() {
         return ResponseEntity.ok(dashboardService.pendingRevenue());
     }
 
-    @GetMapping("/gross-revenue")
+    @Override
     public ResponseEntity<CardDashboardResponse> grossRevenue() {
         return ResponseEntity.ok(dashboardService.grossRevenue());
     }
 
-    @GetMapping("/overdue-expense")
+    @Override
     public ResponseEntity<CardDashboardResponse> overdueExpense() {
         return ResponseEntity.ok(dashboardService.overdueExpense());
     }
 
-    @GetMapping("/realized-expense")
+    @Override
     public ResponseEntity<CardDashboardResponse> realizedExpense() {
         return ResponseEntity.ok(dashboardService.realizedExpense());
     }
 
-    @GetMapping("/pending-expense")
+    @Override
     public ResponseEntity<CardDashboardResponse> pendingExpense() {
         return ResponseEntity.ok(dashboardService.pendingExpense());
     }
 
-    @GetMapping("/gross-expense")
+    @Override
     public ResponseEntity<CardDashboardResponse> grossExpense() {
         return ResponseEntity.ok(dashboardService.grossExpense());
     }
 
-    @GetMapping("/balance-accounts")
+    @Override
     public ResponseEntity<List<CardDashboardResponse>> balanceAccounts() {
         return ResponseEntity.ok(dashboardService.balanceAccounts());
     }
 
-    @GetMapping("/invoices")
+    @Override
     public ResponseEntity<List<CardDashboardResponse>> invoices() {
         return ResponseEntity.ok(dashboardService.invoices());
     }
 
-    @GetMapping("/recipe-chart-category")
+    @Override
     public ResponseEntity<ChartDoughnutResponse> recipeChartCategory() {
         return ResponseEntity.ok(dashboardService.recipeChartCategory());
     }
 
-    @GetMapping("/expense-chart-category")
+    @Override
     public ResponseEntity<ChartDoughnutResponse> expenseChartCategory() {
         return ResponseEntity.ok(dashboardService.expenseChartCategory());
     }
