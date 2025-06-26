@@ -13,7 +13,6 @@ import com.ctsousa.mover.service.InstallmentService;
 import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -68,8 +67,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             entities.add(entity);
         }
 
-//        updateAvailableBalance(transaction, transaction.getAccount().getId());
-
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Erro ao salvar lançamento."));
     }
@@ -90,8 +87,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
             invoice = invoiceRepository.findBy(entity.getDueDate(), entity.getCard());
             return invoiceService.update(invoice, entity);
         }
-
-//        updateAvailableBalance(transaction, entity.getAccount().getId());
 
         return repository.save(entity);
     }
@@ -125,8 +120,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
         TransactionScheduler.add(entities);
 
-//        updateAvailableBalance(transaction, entity.getAccount().getId());
-
         return entities.stream().findFirst()
                 .orElseThrow(() -> new NotificationException("Erro ao atualizar em lote de lançamentos."));
     }
@@ -155,11 +148,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         entity.setHour(LocalTime.now());
 
         repository.save(entity);
-
-//        BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
-//                .add(entity.getValue());
-//        updateAccountBalance(entity.getAccount(), availableBalance);
-
         return entity;
     }
 
@@ -185,23 +173,11 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         entity.setHour(LocalTime.now());
 
         repository.save(entity);
-
-//        BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
-//                        .subtract(entity.getValue());
-//        updateAccountBalance(entity.getAccount(), availableBalance);
-
         return entity;
     }
 
     public void delete(Long id) {
         TransactionEntity entity = findById(id);
-
-//        if (entity.getPaid()) {
-//            BigDecimal availableBalance = entity.getAccount().getAvailableBalance()
-//                    .add(entity.getValue().abs());
-//            updateAccountBalance(entity.getAccount(), availableBalance);
-//        }
-
         repository.deleteById(entity.getId());
     }
 
@@ -210,15 +186,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         List<TransactionEntity> entities = repository.findBySignature(entity.getSignature())
                 .stream().filter(t -> t.getInstallment() >= entity.getInstallment())
                 .toList();
-
-//        Map<AccountEntity, BigDecimal> accumulatedBalance = entities.stream()
-//                .filter(TransactionEntity::getPaid)
-//                .collect(Collectors.groupingBy(
-//                        TransactionEntity::getAccount,
-//                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
-//                ));
-//
-//        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
 
         repository.deleteAll(entities);
     }
@@ -245,15 +212,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
                 repository.save(prev);
             });
         }
-
-//        Map<AccountEntity, BigDecimal> accumulatedBalance = toDelete.stream()
-//                .filter(TransactionEntity::getPaid)
-//                .collect(Collectors.groupingBy(
-//                        TransactionEntity::getAccount,
-//                        Collectors.reducing(BigDecimal.ZERO, TransactionEntity::getValue, BigDecimal::add)
-//                ));
-//
-//        accumulatedBalance.forEach((account, balance) -> updateAccountBalance(account, account.getAvailableBalance().add(balance.abs())));
 
         if (hasInvoiceItem(entity)) {
             toDelete.forEach(invoiceService::delete);
@@ -294,39 +252,6 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
         if ("IN_INSTALLMENTS".equals(transaction.getPaymentType()) && (transaction.getFrequency() == null || transaction.getFrequency().isEmpty() || Integer.valueOf(0).equals(transaction.getInstallment()))) {
             throw new NotificationException("Erro ao salvar, para lançamento parcelado é necessário informar a frenquência e o número de parcelas.");
         }
-    }
-
-//    protected void updateAvailableBalance(Transaction transaction, Long accountId) {
-//        if (isPaymentStatusChanged(transaction)) {
-//            AccountEntity account = accountService.findById(accountId);
-//            BigDecimal availableBalance = account.getAvailableBalance();
-//            if (transaction.getPaid()) {
-//                availableBalance = availableBalance.subtract(transaction.getValue());
-//            } else {
-//                availableBalance = availableBalance.add(transaction.getValue());
-//            }
-//            updateAccountBalance(account, availableBalance);
-//        }
-//    }
-
-//    protected void updateAccountBalance(AccountEntity account, BigDecimal balance) {
-//        account.setAvailableBalance(balance);
-//        accountService.save(account);
-//    }
-
-    protected boolean isPaymentStatusChanged(final Transaction transaction) {
-        if (transaction.getId() == null) {
-            return transaction.getPaid();
-        }
-        return isPaymentStatusChanged(transaction.getId(), transaction.getPaid());
-    }
-
-    private boolean isPaymentStatusChanged(final Long id, Boolean paid) {
-        if (id == null) {
-            return paid;
-        }
-        TransactionEntity entity = findById(id);
-        return !entity.getPaid().equals(paid);
     }
 
     private String format(String description, String type, int installment, int totalInstallment) {

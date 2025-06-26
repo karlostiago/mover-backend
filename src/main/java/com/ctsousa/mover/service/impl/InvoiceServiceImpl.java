@@ -158,7 +158,12 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     @Override
     public TransactionEntity pay(Long id, LocalDate paymentDate, BigDecimal value, AccountEntity account) {
         List<TransactionEntity> entities = searchById(id);
-        entities.forEach(t -> t.setPaid(true));
+
+        entities.forEach(t -> {
+            t.setRefund(false);
+            t.setPaid(true);
+            t.setPaymentDate(paymentDate);
+        });
 
         TransactionEntity invoice = entities.stream().filter(t -> t.getId().equals(id))
                 .findFirst()
@@ -250,15 +255,11 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         return invoice;
     }
 
-    private void sendNotification() {
-        publisher.publishEvent(new BalanceChangedEvent());
-        publisher.publishEvent(new TransactionCacheEvent());
-    }
-
     private void updateRefundAndPaidAndResidualValue(List<TransactionEntity> entities) {
         entities.forEach(t -> {
             t.setRefund(true);
             t.setPaid(false);
+            t.setPaymentDate(null);
             if (Boolean.TRUE.equals(t.getInvoice())) {
                 t.setResidualValue(BigDecimal.ZERO);
             }
@@ -432,5 +433,10 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
         sendNotification();
         return entity;
+    }
+
+    private void sendNotification() {
+        publisher.publishEvent(new BalanceChangedEvent());
+        publisher.publishEvent(new TransactionCacheEvent());
     }
 }

@@ -43,7 +43,7 @@ public class DashboardSummary {
                 .toList();
 
         var expenseTransactions = transactions.stream()
-                .filter(t -> TypeCategory.EXPENSE.name().equalsIgnoreCase(t.getCategoryType()))
+                .filter(this::isExpense)
                 .toList();
 
         revenueCards.put("overdueRevenue", buildCard(
@@ -108,6 +108,11 @@ public class DashboardSummary {
 
     public CardDashboardResponse getExpenseCard(String key) {
         return expenseCards.get(key);
+    }
+
+    private boolean isExpense(TransactionEntity entity) {
+        return TypeCategory.EXPENSE.name().equalsIgnoreCase(entity.getCategoryType())
+                || TypeCategory.INVESTMENT.name().equalsIgnoreCase(entity.getCategoryType());
     }
 
     private CardDashboardResponse buildCard(List<TransactionEntity> transactions, String description) {

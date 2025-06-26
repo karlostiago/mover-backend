@@ -22,6 +22,12 @@ public class DashboardResource  {
         this.dashboardService = dashboardService;
     }
 
+    @GetMapping("/refresh")
+    public ResponseEntity<Void> refresh() {
+        handleTransactionCacheEvent(new TransactionCacheEvent());
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/contracts-active")
     public ResponseEntity<CardDashboardResponse> activeContracts() {
         return ResponseEntity.ok(dashboardService.activeContracts());
@@ -103,7 +109,7 @@ public class DashboardResource  {
     }
 
     @EventListener
-    public void hendleTransactionCacheEvent(TransactionCacheEvent event) {
+    public void handleTransactionCacheEvent(TransactionCacheEvent event) {
         dashboardService.handleTransactionCacheEvent(event);
     }
 }
