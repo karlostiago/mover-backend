@@ -51,3 +51,10 @@ mover:
   root-user: ${ROOT_USER}
   root-user-password: ${ROOT_USER_PASSWORD}
   secret-key: ${SECRET_KEY}
+
+corpvs:
+  base-url: https://apitelemetria.vanguardatech.com:3333
+  auth-path: /api/auth/login
+  report-path: /api/report/daily_path
+  email: meucarro@integracao.com
+  password: integracao2024
