@@ -80,12 +80,12 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
 
         if (Objects.nonNull(entity.getInvoiceId())) {
             invoice = findById(entity.getInvoiceId());
-            return invoiceService.update(invoice, entity);
+            return invoiceService.update(invoice, entity, true);
         }
 
         if (Objects.nonNull(entity.getCard())) {
             invoice = invoiceRepository.findBy(entity.getDueDate(), entity.getCard());
-            return invoiceService.update(invoice, entity);
+            return invoiceService.update(invoice, entity, true);
         }
 
         return repository.save(entity);

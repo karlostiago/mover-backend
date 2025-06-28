@@ -3,8 +3,8 @@ package com.ctsousa.mover.service.impl;
 import com.ctsousa.mover.core.entity.FipeEntity;
 import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.core.util.HashUtil;
-import com.ctsousa.mover.integration.fipe.parallelum.entity.*;
-import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
+import com.ctsousa.mover.integration.parallelum.ParallelumGateway;
+import com.ctsousa.mover.integration.parallelum.domain.*;
 import com.ctsousa.mover.repository.FipeRepository;
 import com.ctsousa.mover.response.FipeValueResponse;
 import com.ctsousa.mover.response.HistoryFipeResponse;
@@ -23,19 +23,19 @@ import java.util.List;
 import static com.ctsousa.mover.core.util.NumberUtil.toBigDecimal;
 import static com.ctsousa.mover.core.util.StringUtil.removeLastPoint;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
-import static com.ctsousa.mover.integration.fipe.parallelum.util.DateUtil.toMonthPtBr;
+import static com.ctsousa.mover.integration.parallelum.util.DateUtil.toMonthPtBr;
 
 @Slf4j
 @Component
 public class FipeServiceImpl implements FipeService {
 
-    private final FipeParallelumGateway gateway;
+    private final ParallelumGateway gateway;
     private final FipeRepository fipeRepository;
     private final VehicleService vehicleService;
 
     private String hash;
 
-    public FipeServiceImpl(FipeParallelumGateway gateway, FipeRepository fipeRepository, VehicleService vehicleService) {
+    public FipeServiceImpl(ParallelumGateway gateway, FipeRepository fipeRepository, VehicleService vehicleService) {
         this.gateway = gateway;
         this.fipeRepository = fipeRepository;
         this.vehicleService = vehicleService;
@@ -108,31 +108,31 @@ public class FipeServiceImpl implements FipeService {
         return response;
     }
 
-    private FipeValueResponse byIntegration(String brand, String model, String fuelType, Integer modelYear, LocalDate reference) {
+    private FipeValueResponse byIntegration(String brandName, String modelName, String fuelType, Integer modelYear, LocalDate reference) {
         try {
-            FipeParallelumBrandEntity brandEntity = gateway.findByBrand(brand);
-            FipeParallelumModelEntity modelEntity = gateway.findByModel(brandEntity.getCode(), model);
-            FipeParallelumYearEntity yearEntity = gateway.findByYear(brandEntity.getCode(), modelEntity.getCode(), modelYear, fuelType);
-            FipeParallelumReferenceEntity referenceEntity = gateway.findReferenceByMonthAndYear(reference);
-            FipeParallelumFipeEntity fipeEntity = gateway.findByFipe(brandEntity.getCode(), modelEntity.getCode(), yearEntity.getCode(), referenceEntity.getCode());
-            saveFipe(fipeEntity);
-            return new FipeValueResponse(fipeEntity.getPrice(), fipeEntity.getCodeFipe());
+            Brand brand = gateway.findBrand(brandName);
+            Model model = gateway.findModel(brand.getCode(), modelName);
+            Year year = gateway.findYear(brand.getCode(), model.getCode(), modelYear, fuelType);
+            Reference ref = gateway.findReference(reference);
+            Fipe fipe = gateway.findFipe(brand.getCode(), model.getCode(), year.getCode(), ref.getCode());
+            saveFipe(fipe);
+            return new FipeValueResponse(fipe.getPrice(), fipe.getCodeFipe());
         } catch (Exception e) {
             return new FipeValueResponse("0.00", null);
         }
     }
 
-    private void saveFipe(FipeParallelumFipeEntity fipeEntity) {
+    private void saveFipe(Fipe fipe) {
         try {
             FipeEntity entity = new FipeEntity();
-            entity.setModel(removeLastPoint(toUppercase(fipeEntity.getModel())));
-            entity.setBrand(toUppercase(fipeEntity.getBrand()));
-            entity.setCode(fipeEntity.getCodeFipe());
-            entity.setModelYear(fipeEntity.getModelYear());
-            entity.setReferenceMonth(toUppercase(fipeEntity.getReferenceMonth().split(" ")[0]));
-            entity.setReferenceYear(Integer.parseInt(fipeEntity.getReferenceMonth().split(" ")[2]));
-            entity.setPrice(toBigDecimal(fipeEntity.getPrice()));
-            entity.setFuel(toUppercase(fipeEntity.getFuel()));
+            entity.setModel(removeLastPoint(toUppercase(fipe.getModel())));
+            entity.setBrand(toUppercase(fipe.getBrand()));
+            entity.setCode(fipe.getCodeFipe());
+            entity.setModelYear(fipe.getModelYear());
+            entity.setReferenceMonth(toUppercase(fipe.getReferenceMonth().split(" ")[0]));
+            entity.setReferenceYear(Integer.parseInt(fipe.getReferenceMonth().split(" ")[2]));
+            entity.setPrice(toBigDecimal(fipe.getPrice()));
+            entity.setFuel(toUppercase(fipe.getFuel()));
             entity.setHash(hash);
             fipeRepository.save(entity);
         } catch (Exception e) {

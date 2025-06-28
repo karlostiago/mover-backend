@@ -43,11 +43,11 @@ public class TransactionScheduler implements Scheduler {
                 for (TransactionEntity entity : entities) {
                     if (entity.getInvoiceId() != null) {
                         TransactionEntity invoice = invoiceService.findById(entity.getInvoiceId());
-                        invoiceService.update(invoice, entity);
+                        invoiceService.update(invoice, entity, true);
                         continue;
                     }
                     if (entity.getCard() != null) {
-                        TransactionEntity invoice = invoiceService.toGenerate(entity);
+                        TransactionEntity invoice = invoiceService.toGenerateSendNotification(entity);
                         entity.setInvoiceId(invoice.getId());
                     }
                     repository.save(entity);

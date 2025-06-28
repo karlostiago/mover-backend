@@ -46,4 +46,9 @@ public class CardEntity extends AbstractEntity {
     public CardEntity(Long id) {
         setId(id);
     }
+
+    @Override
+    public String toString() {
+        return String.format("[ID]=%d [CARD]=%s", this.getId(), this.getName());
+    }
 }

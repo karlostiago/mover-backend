@@ -1,11 +1,11 @@
-package com.ctsousa.mover.integration.viacep.entity;
+package com.ctsousa.mover.integration.viacep.domain;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ViaCepEntity {
+public class ViaCep {
     private String cep;
     private String logradouro;
     private String bairro;

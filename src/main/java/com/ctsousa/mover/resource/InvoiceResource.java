@@ -55,7 +55,7 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
     public ResponseEntity<TransactionResponse> update(Long id, TransactionRequest request) {
         TransactionEntity invoice = invoiceService.findById(request.getInvoiceId());
         Transaction domain = toMapper(request, Transaction.class);
-        TransactionEntity updatedEntity = invoiceService.update(invoice, domain.toEntity());
+        TransactionEntity updatedEntity = invoiceService.update(invoice, domain.toEntity(), true);
         return ResponseEntity.ok(toMapper(updatedEntity, TransactionResponse.class));
     }
 

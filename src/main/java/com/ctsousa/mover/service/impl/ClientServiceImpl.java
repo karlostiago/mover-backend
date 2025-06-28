@@ -10,8 +10,8 @@ import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.core.validation.CpfValidator;
 import com.ctsousa.mover.enumeration.BrazilianStates;
 import com.ctsousa.mover.enumeration.Situation;
-import com.ctsousa.mover.integration.viacep.entity.ViaCepEntity;
-import com.ctsousa.mover.integration.viacep.gateway.ViaCepGateway;
+import com.ctsousa.mover.integration.viacep.ViaCepGateway;
+import com.ctsousa.mover.integration.viacep.domain.ViaCep;
 import com.ctsousa.mover.repository.ClientRepository;
 import com.ctsousa.mover.repository.ContractRepository;
 import com.ctsousa.mover.repository.UserRepository;
@@ -38,10 +38,10 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
     private final ViaCepGateway viaCepGateway;
     private final ContractRepository contractRepository;
 
-    public ClientServiceImpl(ClientRepository clientRepository, UserRepository userRepository, ViaCepGateway viaCepGateway, ContractRepository contractRepository) {
+    public ClientServiceImpl(ClientRepository clientRepository, UserRepository userRepository, ViaCepGateway viaCepGateway, com.ctsousa.mover.integration.viacep.ViaCepGateway viaCepGateway1, ContractRepository contractRepository) {
         super(clientRepository);
         this.userRepository = userRepository;
-        this.viaCepGateway = viaCepGateway;
+        this.viaCepGateway = viaCepGateway1;
         this.contractRepository = contractRepository;
     }
 
@@ -73,7 +73,7 @@ public class ClientServiceImpl extends BaseServiceImpl<ClientEntity, Long> imple
 
     @Override
     public ClientEntity findByAddress(Integer postalCode) {
-        ViaCepEntity viaCepEntity = viaCepGateway.findByPostalCode(postalCode);
+        ViaCep viaCepEntity = viaCepGateway.findPostalCode(postalCode);
 
         if (viaCepEntity.isErro()) {
             return null;

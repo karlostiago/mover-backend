@@ -1,11 +1,11 @@
-package com.ctsousa.mover.integration.fipe.parallelum.entity;
+package com.ctsousa.mover.integration.parallelum.domain;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class FipeParallelumFipeEntity {
+public class Fipe extends Domain {
     private String vehicleType;
     private String price;
     private String brand;

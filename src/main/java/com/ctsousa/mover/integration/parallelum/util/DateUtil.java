@@ -1,4 +1,4 @@
-package com.ctsousa.mover.integration.fipe.parallelum.util;
+package com.ctsousa.mover.integration.parallelum.util;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

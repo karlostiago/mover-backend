@@ -54,25 +54,13 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     }
 
     @Override
-    public TransactionEntity toGenerate(TransactionEntity entity) {
+    public TransactionEntity toGenerateSendNotification(TransactionEntity entity) {
+        return process(entity, true);
+    }
 
-        if (hasNotCard(entity)) return entity;
-
-        CardEntity card = cardService.findById(entity.getCard().getId());
-        LocalDate dueDate = entity.getDueDate();
-
-        TransactionEntity invoiceFound = repository.findBy(dueDate, card);
-
-        if (invoiceFound != null) {
-            BigDecimal value = invoiceFound.getValue().add(entity.getValue());
-            updateTransactionTypeAndTypeCategoryWhenCredit(value, invoiceFound);
-            invoiceFound.setValue(value);
-            TransactionEntity invoiceUpdated = save(invoiceFound);
-            sendNotification();
-            return invoiceUpdated;
-        }
-
-        return save(create(entity, createDescription(card, dueDate)));
+    @Override
+    public TransactionEntity toGenerateWithoutSendNotification(TransactionEntity entity) {
+        return process(entity, false);
     }
 
     @Override
@@ -97,7 +85,7 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     }
 
     @Override
-    public TransactionEntity update(TransactionEntity invoice, TransactionEntity entity) {
+    public TransactionEntity update(TransactionEntity invoice, TransactionEntity entity, boolean sendNotify) {
         TransactionEntity savedEntity = findById(entity.getId());
 
         BigDecimal newValue = entity.getValue();
@@ -124,7 +112,9 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
 
         updateTransactionTypeAndTypeCategoryWhenCredit(invoice.getValue(), invoice);
         repository.save(invoice);
-        sendNotification();
+
+        if (sendNotify) sendNotification();
+
         return entity;
     }
 
@@ -253,6 +243,26 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         if (invoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
 
         return invoice;
+    }
+
+    private TransactionEntity process(TransactionEntity entity, boolean notify) {
+        if (hasNotCard(entity)) {
+            return entity;
+        }
+        CardEntity card = cardService.findById(entity.getCard().getId());
+        LocalDate dueDate = entity.getDueDate();
+        TransactionEntity invoiceFound = repository.findBy(dueDate, card);
+        if (invoiceFound != null) {
+            BigDecimal value = invoiceFound.getValue().add(entity.getValue());
+            updateTransactionTypeAndTypeCategoryWhenCredit(value, invoiceFound);
+            invoiceFound.setValue(value);
+            TransactionEntity invoiceUpdated = save(invoiceFound);
+            if (notify) {
+                sendNotification();
+            }
+            return invoiceUpdated;
+        }
+        return save(create(entity, createDescription(card, dueDate)));
     }
 
     private void updateRefundAndPaidAndResidualValue(List<TransactionEntity> entities) {
@@ -418,7 +428,7 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
             nextInvoice.setValue(calculateUpdatedValue(nextInvoice.getValue(), BigDecimal.ZERO, newValue));
             toProcess.addAll(List.of(entity, invoice, nextInvoice));
         } else {
-            nextInvoice = toGenerate(entity);
+            nextInvoice = toGenerateSendNotification(entity);
             entity.setInvoiceId(nextInvoice.getId());
             invoice.setValue(calculateUpdatedValue(invoice.getValue(), previousValue, BigDecimal.ZERO));
             toProcess.addAll(List.of(entity, invoice));

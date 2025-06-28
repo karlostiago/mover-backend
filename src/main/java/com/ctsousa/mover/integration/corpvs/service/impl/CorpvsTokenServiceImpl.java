@@ -32,7 +32,7 @@ public class CorpvsTokenServiceImpl implements CorpvsTokenService {
     private Instant expiration;
 
     @Override
-    public synchronized String create() {
+    public synchronized Token create() {
         if (token == null || Instant.now().isAfter(expiration)) {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -52,6 +52,6 @@ public class CorpvsTokenServiceImpl implements CorpvsTokenService {
                 throw new RuntimeException("Erro ao obter token da Corpvs");
             }
         }
-        return token.getToken();
+        return token;
     }
 }

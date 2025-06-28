@@ -2,8 +2,8 @@ package com.ctsousa.mover.scheduler;
 
 import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.core.util.HashUtil;
-import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumFipeEntity;
-import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
+import com.ctsousa.mover.integration.parallelum.ParallelumGateway;
+import com.ctsousa.mover.integration.parallelum.domain.Fipe;
 import com.ctsousa.mover.repository.FipeRepository;
 import com.ctsousa.mover.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +19,8 @@ public class FipeInsertMonthlyScheduler extends FipeBaseScheduler implements Sch
 
     private final VehicleService vehicleService;
 
-    public FipeInsertMonthlyScheduler(VehicleService vehicleService, FipeParallelumGateway gateway, FipeRepository fipeRepository) {
-        super(gateway, fipeRepository);
+    public FipeInsertMonthlyScheduler(VehicleService vehicleService, FipeRepository fipeRepository, ParallelumGateway parallelumGateway) {
+        super(fipeRepository, parallelumGateway);
         this.vehicleService = vehicleService;
     }
 
@@ -44,10 +44,10 @@ public class FipeInsertMonthlyScheduler extends FipeBaseScheduler implements Sch
 
                 if (fipeRepository.existsByHash(hash)) continue;
 
-                FipeParallelumFipeEntity fipeEntity = findByFipeIntegration(brandName, modelName, fuelType, modelYear, reference);
+                Fipe fipe = findByFipeIntegration(brandName, modelName, fuelType, modelYear, reference);
 
-                if (fipeEntity != null) {
-                    saveFipeIntegration(fipeEntity);
+                if (fipe != null) {
+                    saveFipeIntegration(fipe);
                 }
             }
         }

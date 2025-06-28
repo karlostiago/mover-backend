@@ -2,8 +2,8 @@ package com.ctsousa.mover.scheduler;
 
 import com.ctsousa.mover.core.entity.VehicleEntity;
 import com.ctsousa.mover.core.util.HashUtil;
-import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumFipeEntity;
-import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
+import com.ctsousa.mover.integration.parallelum.ParallelumGateway;
+import com.ctsousa.mover.integration.parallelum.domain.Fipe;
 import com.ctsousa.mover.repository.FipeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,8 +19,8 @@ public class FipeInsertCurrentDateScheduler extends FipeBaseScheduler implements
 
     public static final Queue<VehicleEntity> buffers = new ConcurrentLinkedQueue<>();
 
-    public FipeInsertCurrentDateScheduler(FipeParallelumGateway gateway, FipeRepository fipeRepository) {
-        super(gateway, fipeRepository);
+    public FipeInsertCurrentDateScheduler(FipeRepository fipeRepository, ParallelumGateway parallelumGateway) {
+        super(fipeRepository, parallelumGateway);
     }
 
     @Override
@@ -41,10 +41,10 @@ public class FipeInsertCurrentDateScheduler extends FipeBaseScheduler implements
 
             if (fipeRepository.existsByHash(hash)) return;
 
-            FipeParallelumFipeEntity fipeEntity = findByFipeIntegration(brandName, modelName, fuelType, modelYear, reference);
+            Fipe fipe = findByFipeIntegration(brandName, modelName, fuelType, modelYear, reference);
 
-            if (fipeEntity != null) {
-                saveFipeIntegration(fipeEntity);
+            if (fipe != null) {
+                saveFipeIntegration(fipe);
             }
         }
     }

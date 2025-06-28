@@ -3,9 +3,9 @@ package com.ctsousa.mover.scheduler;
 import com.ctsousa.mover.core.entity.BrandEntity;
 import com.ctsousa.mover.core.entity.ModelEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
-import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumBrandEntity;
-import com.ctsousa.mover.integration.fipe.parallelum.entity.FipeParallelumModelEntity;
-import com.ctsousa.mover.integration.fipe.parallelum.gateway.FipeParallelumGateway;
+import com.ctsousa.mover.integration.parallelum.ParallelumGateway;
+import com.ctsousa.mover.integration.parallelum.domain.Brand;
+import com.ctsousa.mover.integration.parallelum.domain.Model;
 import com.ctsousa.mover.service.BrandService;
 import com.ctsousa.mover.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +28,9 @@ public class ModelScheduler implements Scheduler {
 
     private final BrandService brandService;
     private final ModelService modelService;
-    private final FipeParallelumGateway gateway;
+    private final ParallelumGateway gateway;
 
-    public ModelScheduler(BrandService brandService, ModelService modelService, FipeParallelumGateway gateway) {
+    public ModelScheduler(BrandService brandService, ModelService modelService, ParallelumGateway gateway) {
         this.brandService = brandService;
         this.modelService = modelService;
         this.gateway = gateway;
@@ -50,9 +50,9 @@ public class ModelScheduler implements Scheduler {
                     .findFirst().orElse(null);
 
             if (brandEntity != null) {
-                FipeParallelumBrandEntity fipeBrandEntity = gateway.findByBrand(brandEntity.getName());
-                if (fipeBrandEntity != null) {
-                    List<ModelEntity> entities = findModel(brandEntity,fipeBrandEntity.getCode());
+                Brand brand = gateway.findBrand(brandEntity.getName());
+                if (brand != null) {
+                    List<ModelEntity> entities = findModel(brandEntity, brand.getCode());
                     save(entities);
                 }
             }
@@ -62,10 +62,10 @@ public class ModelScheduler implements Scheduler {
 
     private List<ModelEntity> findModel(BrandEntity brandEntity, String codeBrand) {
         List<ModelEntity> entities = new ArrayList<>();
-        List<FipeParallelumModelEntity> fipeParallelumModelEntities = gateway.listModels(codeBrand);
-        for (FipeParallelumModelEntity fipeParallelumModel : fipeParallelumModelEntities) {
+        List<Model> models = gateway.listModels(codeBrand);
+        for (Model model : models) {
             ModelEntity entity = new ModelEntity();
-            entity.setName(removeLastPoint(fipeParallelumModel.getName().toUpperCase()));
+            entity.setName(removeLastPoint(model.getName().toUpperCase()));
             entity.setBrand(brandEntity);
             entities.add(entity);
         }

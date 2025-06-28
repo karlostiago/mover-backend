@@ -12,9 +12,11 @@ public interface InvoiceService extends BaseService<TransactionEntity, Long> {
 
     List<TransactionEntity> searchById(Long id);
 
-    TransactionEntity toGenerate(TransactionEntity entity);
+    TransactionEntity toGenerateSendNotification(TransactionEntity entity);
 
-    TransactionEntity update(TransactionEntity invoice, TransactionEntity entity);
+    TransactionEntity toGenerateWithoutSendNotification(TransactionEntity entity);
+
+    TransactionEntity update(TransactionEntity invoice, TransactionEntity entity, boolean sendNotify);
 
     TransactionEntity schedule(final Long id);
 
