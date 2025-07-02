@@ -4,6 +4,7 @@ import com.ctsousa.mover.core.api.BalanceApi;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.response.BalanceResponse;
+import com.ctsousa.mover.response.DailyBalanceResponse;
 import com.ctsousa.mover.service.BalanceService;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/balances")
@@ -33,6 +36,13 @@ public class BalanceResource implements BalanceApi {
 
         BalanceResponse response = balanceService.calculateBalances(filter.getAccountsId(), page.stream().toList());
 
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<List<DailyBalanceResponse>> daily(String filterURI) {
+        var filter = new Transaction.Filter(filterURI);
+        List<DailyBalanceResponse> response = balanceService.findDailyBalances(filter.getAccountsId(), filter.getDtInitial(), filter.getDtFinal());
         return ResponseEntity.ok(response);
     }
 }

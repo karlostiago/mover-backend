@@ -17,9 +17,9 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
 
     TransactionEntity filterById(final Long id, TypeCategory typeCategory);
 
-    TransactionEntity pay(final Long id, LocalDate paymentDate);
+    TransactionEntity pay(final TransactionEntity entity, LocalDate paymentDate);
 
-    TransactionEntity refund(final Long id);
+    TransactionEntity refund(TransactionEntity entity);
 
     void batchDelete(final Long id);
 

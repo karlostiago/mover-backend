@@ -66,6 +66,7 @@ public class TransactionResponse {
     private BigDecimal residualValue;
     private BigDecimal amountPaid;
     private String signature;
+    private BigDecimal dailyBalance;
 
     public void setCategoryType(String categoryType) {
         TypeCategory type = TypeCategory.toDescription(categoryType);

@@ -118,11 +118,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionEntity pay(Long id, LocalDate paymentDate) {
-        TransactionEntity entity = findById(id);
+    public TransactionEntity pay(TransactionEntity entity, LocalDate paymentDate) {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         Transaction transaction = new Transaction();
-        transaction.setId(id);
+        transaction.setId(entity.getId());
         transaction.setPaymentDate(paymentDate);
         TransactionEntity paidEntity = paymentTransactionServiceFactory.execute(type, transaction);
         sendNotification();
@@ -144,10 +143,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionEntity refund(Long id) {
-        TransactionEntity entity = findById(id);
+    public TransactionEntity refund(TransactionEntity entity) {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
-        TransactionEntity refundEntity = refundTransactionServiceFactory.execute(type, new Transaction(id));
+        TransactionEntity refundEntity = refundTransactionServiceFactory.execute(type, new Transaction(entity.getId()));
         sendNotification();
         return refundEntity;
     }
