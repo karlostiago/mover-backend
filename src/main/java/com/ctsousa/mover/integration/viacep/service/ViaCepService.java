@@ -13,7 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class ViaCepService implements ViaCepGateway {
 
-    @Value("${viacep.base-url}")
+    @Value("${mover.integration.viacep.base-url}")
     private String baseUrl;
 
     @Override

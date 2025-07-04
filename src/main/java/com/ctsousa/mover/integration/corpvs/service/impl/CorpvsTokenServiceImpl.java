@@ -16,16 +16,16 @@ import java.time.temporal.ChronoUnit;
 @Component
 public class CorpvsTokenServiceImpl implements CorpvsTokenService {
 
-    @Value("${corpvs.base-url}")
+    @Value("${mover.integration.corpvs.base-url}")
     private String baseUrl;
 
-    @Value("${corpvs.auth-path}")
+    @Value("${mover.integration.corpvs.auth-path}")
     private String authPath;
 
-    @Value("${corpvs.email}")
+    @Value("${mover.integration.corpvs.email}")
     private String email;
 
-    @Value("${corpvs.password}")
+    @Value("${mover.integration.corpvs.password}")
     private String password;
 
     private Token token;

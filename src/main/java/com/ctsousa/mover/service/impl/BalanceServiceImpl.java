@@ -2,10 +2,14 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.entity.AccountBalancePhotoEntity;
 import com.ctsousa.mover.core.entity.AccountEntity;
-import com.ctsousa.mover.core.entity.DailyBalanceEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.enumeration.TransactionType;
-import com.ctsousa.mover.repository.*;
+import com.ctsousa.mover.enumeration.TypeCategory;
+import com.ctsousa.mover.repository.AccountBalancePhotoRepository;
+import com.ctsousa.mover.repository.AccountRepository;
+import com.ctsousa.mover.repository.BalanceRepository;
+import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.BalanceResponse;
 import com.ctsousa.mover.response.DailyBalanceResponse;
 import com.ctsousa.mover.service.BalanceService;
@@ -13,120 +17,67 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+
+import static com.ctsousa.mover.core.util.DateUtil.isFutureDate;
+import static com.ctsousa.mover.core.util.DateUtil.minusMonth;
 
 @Component
 public class BalanceServiceImpl implements BalanceService {
     private final BalanceRepository balanceRepository;
     private final AccountRepository accountRepository;
-    private final DailyBalanceRepository dailyBalanceRepository;
     private final TransactionRepository transactionRepository;
     private final AccountBalancePhotoRepository accountBalancePhotoRepository;
 
-    public BalanceServiceImpl(BalanceRepository balanceRepository, AccountRepository accountRepository, DailyBalanceRepository dailyBalanceRepository, TransactionRepository transactionRepository, AccountBalancePhotoRepository accountBalancePhotoRepository) {
+    public BalanceServiceImpl(BalanceRepository balanceRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, AccountBalancePhotoRepository accountBalancePhotoRepository) {
         this.balanceRepository = balanceRepository;
         this.accountRepository = accountRepository;
-        this.dailyBalanceRepository = dailyBalanceRepository;
         this.transactionRepository = transactionRepository;
         this.accountBalancePhotoRepository = accountBalancePhotoRepository;
     }
 
     @Override
-    public void updateDailyBalance(LocalDate period, TransactionEntity entity) {
-        LocalDate periodFinal = period.with(TemporalAdjusters.lastDayOfMonth());
-        List<DailyBalanceEntity> dailyBalances = dailyBalanceRepository.balances(period, periodFinal, List.of(entity.getAccount()));
-        for (DailyBalanceEntity dailyBalance : dailyBalances) {
-            calculateDailyBalance(dailyBalance, entity);
-            dailyBalanceRepository.save(dailyBalance);
-        }
-    }
+    public List<DailyBalanceResponse> calculateExpectedBalanceOnDay(List<Long> listAccountId, LocalDate periodInitial, LocalDate periodFinal) {
+        List<AccountEntity> accounts = findAccounts(listAccountId);
+        LocalDate today = LocalDate.now();
+        boolean isFutureDate = isFutureDate(periodInitial);
 
-    @Override
-    public List<DailyBalanceResponse> findDailyBalances(List<Long> listAccountId, LocalDate periodInitial, LocalDate periodFinal) {
-        List<AccountEntity> accounts = accountRepository.findAll();
-//        BigDecimal accountBalance;
-
-        if (!listAccountId.isEmpty()) {
-            accounts = accounts.stream()
-                    .filter(account -> listAccountId.contains(account.getId()))
-                    .toList();
-        }
-//
-//        AccountBalancePhotoEntity accountBalancePhoto = accountBalancePhotoRepository.snapshot(periodInitial,  periodFinal)
-//                .orElse(null);
-//
-//        if (accountBalancePhoto == null) {
-//            accountBalance = accounts.stream()
-//                    .map(AccountEntity::getAvailableBalance)
-//                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-//            accountBalancePhoto = new AccountBalancePhotoEntity();
-//            accountBalancePhoto.setAccountBalance(accountBalance);
-//            accountBalancePhoto.setPeriod(periodFinal);
-//            accountBalancePhoto = accountBalancePhotoRepository.save(accountBalancePhoto);
-//        } else {
-//            accountBalance = accountBalancePhoto.getAccountBalance();
-//        }
-//
-//        List<Long> ids = transactionRepository.findByPeriod(periodInitial, periodFinal);
-//        List<TransactionEntity> transactions = transactionRepository.findByIdInWithDetails(ids);
-//
-//        Map<LocalDate, List<TransactionEntity>> groupedTransactions = transactions.stream()
-//                .collect(Collectors.groupingBy(
-//                    t -> Boolean.TRUE.equals(t.getPaid()) ? t.getPaymentDate() : t.getDueDate(),
-//                    TreeMap::new,
-//                    Collectors.toList()
-//                ));
-//
-//        List<DailyBalanceResponse> responses = new ArrayList<>();
-//
-//        for (Map.Entry<LocalDate, List<TransactionEntity>> entry : groupedTransactions.entrySet()) {
-//            LocalDate period = entry.getKey();
-//            BigDecimal balanceTransaction = entry.getValue().stream()
-//                    .map(TransactionEntity::getValue)
-//                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-//
-//            accountBalance = balanceTransaction.add(accountBalance);
-//
-//            DailyBalanceResponse response = new DailyBalanceResponse();
-//            response.setPeriod(period);
-//            response.setBalance(accountBalance);
-//            responses.add(response);
-//        }
-
-        List<DailyBalanceEntity> entities = dailyBalanceRepository.balances(periodInitial, periodFinal, accounts);
-
-        if (entities.isEmpty()) {
-            var onlyAccountsActive = accounts.stream()
-                    .filter(acc -> acc.getActive() && !acc.getCaution())
-                    .toList();
-
-            var currentDate = periodInitial;
-            for (AccountEntity acc : onlyAccountsActive) {
-                while(!currentDate.isAfter(periodFinal)) {
-                    DailyBalanceEntity balance = new DailyBalanceEntity();
-                    balance.setAccount(acc);
-                    balance.setPeriod(currentDate);
-                    balance.setBalance(acc.getAvailableBalance());
-                    dailyBalanceRepository.save(balance);
-                    currentDate = currentDate.plusDays(1);
-                }
-                currentDate = periodInitial;
-            }
-
-            entities = dailyBalanceRepository.balances(periodInitial, periodFinal, accounts);
+        if (isFutureDate) {
+            periodInitial = today.withDayOfMonth(1);
         }
 
-        Map<LocalDate, BigDecimal> groupedDailyBalance = groupDailyBalanceByPeriod(entities);
+        LocalDate previousInitialDate = minusMonth(periodInitial, 1);
+        LocalDate previousFinalDate = minusMonth(periodFinal,1);
 
-        int DAYS_IN_MONTH = 31;
-        List<DailyBalanceResponse> responses = new ArrayList<>(DAYS_IN_MONTH);
-        for (Map.Entry<LocalDate, BigDecimal> entry : groupedDailyBalance.entrySet()) {
-            DailyBalanceResponse response = new DailyBalanceResponse();
-            response.setBalance(entry.getValue());
-            response.setPeriod(entry.getKey());
-            responses.add(response);
+        AccountBalancePhotoEntity snapshot = findSnapshot(accounts, previousInitialDate, previousFinalDate);
+        List<TransactionEntity> transactions = findTransactions(periodInitial, periodFinal);
+        Map<LocalDate, List<TransactionEntity>> groupedTransactions = groupedTransactionsByPeriod(transactions);
+        List<DailyBalanceResponse> responses = new ArrayList<>(31);
+        BigDecimal balance = snapshot.getBalance();
+
+        if (isFutureDate) {
+            balance = accounts.stream()
+                        .map(AccountEntity::getAvailableBalance)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        for (Map.Entry<LocalDate, List<TransactionEntity>> entry : groupedTransactions.entrySet()) {
+            LocalDate date = entry.getKey();
+
+            BigDecimal previousBalance = entry.getValue().stream()
+                    .map(this::adjustTransationValue)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            balance = balance.add(previousBalance);
+
+            DailyBalanceResponse dailyBalanceResponse = new DailyBalanceResponse();
+            dailyBalanceResponse.setPeriod(date);
+            dailyBalanceResponse.setBalance(balance);
+            responses.add(dailyBalanceResponse);
         }
 
         return responses;
@@ -162,45 +113,63 @@ public class BalanceServiceImpl implements BalanceService {
     }
 
     private boolean isExpense(TransactionEntity entity) {
-        return "EXPENSE".equals(entity.getCategoryType())
-                || "INVESTMENT".equals(entity.getCategoryType());
+        return TypeCategory.EXPENSE.name().equalsIgnoreCase(entity.getCategoryType())
+                || TypeCategory.INVESTMENT.name().equalsIgnoreCase(entity.getCategoryType());
     }
 
     private boolean isIncome(TransactionEntity entity) {
-        return "CORPORATE_CAPITAL".equals(entity.getCategoryType())
-                || "INCOME".equals(entity.getCategoryType());
+        return TypeCategory.CORPORATE_CAPITAL.name().equalsIgnoreCase(entity.getCategoryType())
+                || TypeCategory.INCOME.name().equalsIgnoreCase(entity.getCategoryType());
     }
 
-    private Map<LocalDate, BigDecimal> groupDailyBalanceByPeriod(List<DailyBalanceEntity> entities) {
-        return entities.stream()
+    private List<AccountEntity> findAccounts(List<Long> listAccountId) {
+        List<AccountEntity> accounts = accountRepository.findAll().stream()
+                .filter(AccountEntity::getActive)
+                .toList();
+
+        if (accounts.isEmpty()) throw new NotificationException("Não foi encontrada nenhuma conta ativa.");
+
+        if (!listAccountId.isEmpty()) {
+            accounts = accounts.stream()
+                    .filter(account -> listAccountId.contains(account.getId()))
+                    .toList();
+        }
+
+        return accounts;
+    }
+
+    private AccountBalancePhotoEntity findSnapshot(List<AccountEntity> accounts, LocalDate periodInitial, LocalDate periodFinal) {
+        List<AccountBalancePhotoEntity> snapshots = accountBalancePhotoRepository.snapshot(periodInitial, periodFinal, accounts);
+        if (!snapshots.isEmpty()) {
+            return snapshots.stream().peek(snap -> {
+                        BigDecimal balance = snapshots.stream()
+                                .map(AccountBalancePhotoEntity::getBalance)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                        snap.setBalance(balance);
+                    })
+                    .toList().get(0);
+        }
+        AccountBalancePhotoEntity snapshot = new AccountBalancePhotoEntity();
+        snapshot.setBalance(BigDecimal.ZERO);
+        return snapshot;
+    }
+
+    private List<TransactionEntity> findTransactions(LocalDate periodInitial, LocalDate periodFinal) {
+        List<Long> ids = transactionRepository.findByPeriod(periodInitial, periodFinal);
+        return transactionRepository.findByIdInWithDetails(ids);
+    }
+
+    private Map<LocalDate, List<TransactionEntity>> groupedTransactionsByPeriod(List<TransactionEntity> transactions) {
+        return transactions.stream()
                 .collect(Collectors.groupingBy(
-                        DailyBalanceEntity::getPeriod,
-                        Collectors.mapping(
-                                DailyBalanceEntity::getBalance,
-                                Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)
-                        )
+                        t -> Boolean.TRUE.equals(t.getPaid()) ? t.getPaymentDate() : t.getDueDate(),
+                        TreeMap::new,
+                        Collectors.toList()
                 ));
     }
 
-    private void calculateDailyBalance(DailyBalanceEntity dailyBalance, TransactionEntity entity) {
+    private BigDecimal adjustTransationValue(TransactionEntity entity) {
         BigDecimal value = entity.getValue().abs();
-        if (TransactionType.CREDIT.name().equalsIgnoreCase(entity.getTransactionType())) {
-            dailyBalance.setBalance(entity.getPaid() ? dailyBalance.getBalance().add(value)
-                    : dailyBalance.getBalance().subtract(value));
-        } else {
-            dailyBalance.setBalance(entity.getPaid() ? dailyBalance.getBalance().subtract(value)
-                    : dailyBalance.getBalance().add(value));
-        }
-    }
-
-    private void calculateDailyBalance(DailyBalanceResponse dailyBalance, TransactionEntity entity) {
-        BigDecimal value = entity.getValue().abs();
-        if (TransactionType.CREDIT.name().equalsIgnoreCase(entity.getTransactionType())) {
-            dailyBalance.setBalance(entity.getPaid() ? dailyBalance.getBalance().add(value)
-                    : dailyBalance.getBalance().subtract(value));
-        } else {
-            dailyBalance.setBalance(entity.getPaid() ? dailyBalance.getBalance().subtract(value)
-                    : dailyBalance.getBalance().add(value));
-        }
+        return TransactionType.CREDIT.name().equalsIgnoreCase(entity.getTransactionType()) ? value : value.negate();
     }
 }

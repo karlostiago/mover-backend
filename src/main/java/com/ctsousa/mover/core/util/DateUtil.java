@@ -140,6 +140,14 @@ public final class DateUtil {
         );
     }
 
+    public static boolean isFutureDate(LocalDate date) {
+        return date.isAfter(LocalDate.now());
+    }
+
+    public static LocalDate minusMonth(LocalDate date, int months) {
+        return date.minusMonths(months);
+    }
+
     private static List<DateTimeFormatter> formatters() {
         return Arrays.asList(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"),

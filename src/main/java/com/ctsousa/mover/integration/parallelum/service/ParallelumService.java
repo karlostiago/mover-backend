@@ -25,13 +25,13 @@ import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
 @Service
 public class ParallelumService implements ParallelumGateway {
 
-    @Value("${parallelum.base-url}")
+    @Value("${mover.integration.parallelum.base-url}")
     private String baseUrl;
 
-    @Value("${parallelum.car-path}")
+    @Value("${mover.integration.parallelum.car-path}")
     private String carPath;
 
-    @Value("${parallelum.reference-path}")
+    @Value("${mover.integration.parallelum.reference-path}")
     private String referencePath;
 
     private final Object brandLock = new Object();

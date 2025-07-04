@@ -10,7 +10,6 @@ import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.request.TransactionRequest;
 import com.ctsousa.mover.response.TransactionResponse;
-import com.ctsousa.mover.service.BalanceService;
 import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +39,10 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     private TransactionService transactionService;
 
     private final CardService cardService;
-    private final BalanceService balanceService;
 
-    public TransactionResource(TransactionService transactionService, CardService cardService, BalanceService balanceService) {
+    public TransactionResource(TransactionService transactionService, CardService cardService) {
         super(transactionService);
         this.cardService = cardService;
-        this.balanceService = balanceService;
     }
 
     @Override
@@ -80,7 +77,6 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<TransactionResponse> pay(Long id, LocalDate paymentDate) {
         TransactionEntity entity = transactionService.findById(id);
         TransactionEntity paidEntity = transactionService.pay(entity, paymentDate);
-        balanceService.updateDailyBalance(paymentDate, paidEntity);
         return ResponseEntity.ok(toMapper(paidEntity, TransactionResponse.class));
     }
 
@@ -89,7 +85,6 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<TransactionResponse> refund(Long id) {
         TransactionEntity entity = transactionService.findById(id);
         TransactionEntity entityReversed = transactionService.refund(entity);
-        balanceService.updateDailyBalance(entity.getPaymentDate(), entityReversed);
         return ResponseEntity.ok(toMapper(entityReversed, TransactionResponse.class));
     }
 

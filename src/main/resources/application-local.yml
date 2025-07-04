@@ -51,19 +51,17 @@ mover:
   root-user: ${ROOT_USER}
   root-user-password: ${ROOT_USER_PASSWORD}
   secret-key: ${SECRET_KEY}
-
-corpvs:
-  base-url: ${CORPVS_BASE_URL}
-  auth-path: /api/auth/login
-  report-path: /api/report/daily_path
-  registration-path: /api/registration/vehicle
-  email: ${CORPVS_INTEGRACAO_EMAIL}
-  password: ${CORPVS_INTEGRACAO_PASS}
-
-parallelum:
-  base-url: https://fipe.parallelum.com.br/api/v2
-  car-path: /cars/brands
-  reference-path: /references
-
-viacep:
-  base-url: https://viacep.com.br/ws/
+  integration:
+    corpvs:
+      base-url: ${CORPVS_BASE_URL}
+      auth-path: /api/auth/login
+      report-path: /api/report/daily_path
+      registration-path: /api/registration/vehicle
+      email: ${CORPVS_INTEGRACAO_EMAIL}
+      password: ${CORPVS_INTEGRACAO_PASS}
+    parallelum:
+      base-url: https://fipe.parallelum.com.br/api/v2
+      car-path: /cars/brands
+      reference-path: /references
+    viacep:
+      base-url: https://viacep.com.br/ws/

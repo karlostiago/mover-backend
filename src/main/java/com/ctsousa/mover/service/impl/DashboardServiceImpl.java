@@ -35,15 +35,15 @@ public class DashboardServiceImpl implements DashboardService, ApplicationListen
     }
 
     @Override
-    public void onApplicationEvent(@NonNull ApplicationReadyEvent event) {
+    public void onApplicationEvent(ApplicationReadyEvent event) {
         dashboardCacheLoaderService.loadAsync(dtInitial, dtFinal).thenAccept(cache -> {
-            log.info("Dashboard cache carregado com sucesso.");
-            this.dashboardCache = cache;
-        })
-        .exceptionally(ex -> {
-            log.error("Erro ao carregar o dashboard cache", ex);
-            return null;
-        });
+                    log.info("Dashboard cache carregado com sucesso.");
+                    this.dashboardCache = cache;
+                })
+                .exceptionally(ex -> {
+                    log.error("Erro ao carregar o dashboard cache", ex);
+                    return null;
+                });
     }
 
     @Override

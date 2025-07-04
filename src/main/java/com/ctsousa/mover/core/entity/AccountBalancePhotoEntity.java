@@ -1,8 +1,6 @@
 package com.ctsousa.mover.core.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +20,10 @@ public class AccountBalancePhotoEntity extends AbstractEntity {
     @Column(name = "period", nullable = false)
     private LocalDate period;
 
-    @Column(name = "account_balance", nullable = false)
-    private BigDecimal accountBalance;
+    @Column(name = "balance", nullable = false)
+    private BigDecimal balance;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "account_id", nullable = false)
+    private AccountEntity account;
 }

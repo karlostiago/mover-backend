@@ -24,13 +24,13 @@ import java.util.List;
 @Component
 public class CorpvsGatewayServiceImpl implements CorpvsGateway {
 
-    @Value("${corpvs.base-url}")
+    @Value("${mover.integration.corpvs.base-url}")
     private String baseUrl;
 
-    @Value("${corpvs.report-path}")
+    @Value("${mover.integration.corpvs.report-path}")
     private String reportPath;
 
-    @Value("${corpvs.registration-path}")
+    @Value("${mover.integration.corpvs.registration-path}")
     private String registrationPath;
 
     private final CorpvsTokenService tokenService;
