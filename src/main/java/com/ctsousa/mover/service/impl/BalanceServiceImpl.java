@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,41 +44,37 @@ public class BalanceServiceImpl implements BalanceService {
     @Override
     public List<DailyBalanceResponse> calculateExpectedBalanceOnDay(List<Long> listAccountId, LocalDate periodInitial, LocalDate periodFinal) {
         List<AccountEntity> accounts = findAccounts(listAccountId);
-        LocalDate today = LocalDate.now();
         boolean isFutureDate = isFutureDate(periodInitial);
 
         if (isFutureDate) {
-            periodInitial = today.withDayOfMonth(1);
+            periodInitial = LocalDate.now().withDayOfMonth(1);
         }
+
+        YearMonth targetMonth = YearMonth.from(periodFinal);
+        LocalDate monthStart = targetMonth.atDay(1);
+        LocalDate monthEnd = targetMonth.atEndOfMonth();
 
         LocalDate previousInitialDate = minusMonth(periodInitial, 1);
         LocalDate previousFinalDate = minusMonth(periodFinal,1);
 
-        AccountBalancePhotoEntity snapshot = findSnapshot(accounts, previousInitialDate, previousFinalDate);
         List<TransactionEntity> transactions = findTransactions(periodInitial, periodFinal);
-        Map<LocalDate, List<TransactionEntity>> groupedTransactions = groupedTransactionsByPeriod(transactions);
-        List<DailyBalanceResponse> responses = new ArrayList<>(31);
-        BigDecimal balance = snapshot.getBalance();
 
-        if (isFutureDate) {
-            balance = accounts.stream()
-                        .map(AccountEntity::getAvailableBalance)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-        }
+        Map<LocalDate, BigDecimal> dailySums = groupBalanceDay(transactions);
 
-        for (Map.Entry<LocalDate, List<TransactionEntity>> entry : groupedTransactions.entrySet()) {
+        BigDecimal balance =  isFutureDate
+                ? accounts.stream().map(AccountEntity::getAvailableBalance).reduce(BigDecimal.ZERO, BigDecimal::add)
+                : findSnapshot(accounts, previousInitialDate, previousFinalDate).getBalance();
+
+        List<DailyBalanceResponse> responses = new ArrayList<>(dailySums.size());
+        for (Map.Entry<LocalDate, BigDecimal> entry : dailySums.entrySet()) {
             LocalDate date = entry.getKey();
-
-            BigDecimal previousBalance = entry.getValue().stream()
-                    .map(this::adjustTransationValue)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            balance = balance.add(previousBalance);
-
-            DailyBalanceResponse dailyBalanceResponse = new DailyBalanceResponse();
-            dailyBalanceResponse.setPeriod(date);
-            dailyBalanceResponse.setBalance(balance);
-            responses.add(dailyBalanceResponse);
+            balance = balance.add(entry.getValue());
+            if (!date.isBefore(monthStart) && !date.isAfter(monthEnd)) {
+                DailyBalanceResponse dailyBalanceResponse = new DailyBalanceResponse();
+                dailyBalanceResponse.setPeriod(date);
+                dailyBalanceResponse.setBalance(balance);
+                responses.add(dailyBalanceResponse);
+            }
         }
 
         return responses;
@@ -159,12 +156,12 @@ public class BalanceServiceImpl implements BalanceService {
         return transactionRepository.findByIdInWithDetails(ids);
     }
 
-    private Map<LocalDate, List<TransactionEntity>> groupedTransactionsByPeriod(List<TransactionEntity> transactions) {
+    private Map<LocalDate, BigDecimal> groupBalanceDay(List<TransactionEntity> transactions) {
         return transactions.stream()
                 .collect(Collectors.groupingBy(
                         t -> Boolean.TRUE.equals(t.getPaid()) ? t.getPaymentDate() : t.getDueDate(),
                         TreeMap::new,
-                        Collectors.toList()
+                        Collectors.reducing(BigDecimal.ZERO, this::adjustTransationValue, BigDecimal::add)
                 ));
     }
 
