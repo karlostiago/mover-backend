@@ -1,17 +1,17 @@
 package com.ctsousa.mover.service.impl;
 
-import com.ctsousa.mover.core.entity.AccountBalancePhotoEntity;
+import com.ctsousa.mover.core.entity.SnapshotBalanceEntity;
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
-import com.ctsousa.mover.repository.AccountBalancePhotoRepository;
+import com.ctsousa.mover.repository.SnapshotBalanceRepository;
 import com.ctsousa.mover.repository.AccountRepository;
 import com.ctsousa.mover.repository.BalanceRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.BalanceResponse;
-import com.ctsousa.mover.response.DailyBalanceResponse;
+import com.ctsousa.mover.response.ExpectedBalanceResponse;
 import com.ctsousa.mover.service.BalanceService;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.isFutureDate;
@@ -29,55 +30,65 @@ import static com.ctsousa.mover.core.util.DateUtil.minusMonth;
 
 @Component
 public class BalanceServiceImpl implements BalanceService {
+    private static final Map<String, List<ExpectedBalanceResponse>> expectedBalanceCache = new ConcurrentHashMap<>();
+
     private final BalanceRepository balanceRepository;
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
-    private final AccountBalancePhotoRepository accountBalancePhotoRepository;
+    private final SnapshotBalanceRepository snapshotBalanceRepository;
 
-    public BalanceServiceImpl(BalanceRepository balanceRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, AccountBalancePhotoRepository accountBalancePhotoRepository) {
+    public BalanceServiceImpl(BalanceRepository balanceRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, SnapshotBalanceRepository snapshotBalanceRepository) {
         this.balanceRepository = balanceRepository;
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
-        this.accountBalancePhotoRepository = accountBalancePhotoRepository;
+        this.snapshotBalanceRepository = snapshotBalanceRepository;
     }
 
     @Override
-    public List<DailyBalanceResponse> calculateExpectedBalanceOnDay(List<Long> listAccountId, LocalDate periodInitial, LocalDate periodFinal) {
+    public List<ExpectedBalanceResponse> calculateExpectedBalanceOnDay(List<Long> listAccountId, LocalDate initialDate, LocalDate finalDate) {
         List<AccountEntity> accounts = findAccounts(listAccountId);
-        boolean isFutureDate = isFutureDate(periodInitial);
+
+        boolean isFutureDate = isFutureDate(initialDate);
 
         if (isFutureDate) {
-            periodInitial = LocalDate.now().withDayOfMonth(1);
+            initialDate = LocalDate.now().withDayOfMonth(1);
         }
 
-        YearMonth targetMonth = YearMonth.from(periodFinal);
+        String key = createKeyCache(accounts, initialDate, finalDate);
+
+        if (expectedBalanceCache.containsKey(key)) {
+            return expectedBalanceCache.get(key);
+        }
+
+        YearMonth targetMonth = YearMonth.from(finalDate);
         LocalDate monthStart = targetMonth.atDay(1);
         LocalDate monthEnd = targetMonth.atEndOfMonth();
 
-        LocalDate previousInitialDate = minusMonth(periodInitial, 1);
-        LocalDate previousFinalDate = minusMonth(periodFinal,1);
+        LocalDate previousInitialDate = minusMonth(initialDate, 1);
+        LocalDate previousFinalDate = minusMonth(finalDate,1);
 
-        List<TransactionEntity> transactions = findTransactions(periodInitial, periodFinal);
+        List<TransactionEntity> transactions = findTransactions(initialDate, finalDate);
 
         Map<LocalDate, BigDecimal> dailySums = groupBalanceDay(transactions);
 
         BigDecimal balance =  isFutureDate
                 ? accounts.stream().map(AccountEntity::getAvailableBalance).reduce(BigDecimal.ZERO, BigDecimal::add)
-                : findSnapshot(accounts, previousInitialDate, previousFinalDate).getBalance();
+                : searchLastSnapshot(accounts, previousInitialDate, previousFinalDate).getBalance();
 
-        List<DailyBalanceResponse> responses = new ArrayList<>(dailySums.size());
+        List<ExpectedBalanceResponse> response = new ArrayList<>(dailySums.size());
         for (Map.Entry<LocalDate, BigDecimal> entry : dailySums.entrySet()) {
             LocalDate date = entry.getKey();
             balance = balance.add(entry.getValue());
             if (!date.isBefore(monthStart) && !date.isAfter(monthEnd)) {
-                DailyBalanceResponse dailyBalanceResponse = new DailyBalanceResponse();
-                dailyBalanceResponse.setPeriod(date);
-                dailyBalanceResponse.setBalance(balance);
-                responses.add(dailyBalanceResponse);
+                response.add(ExpectedBalanceResponse.builder()
+                        .period(date)
+                        .balance(balance)
+                        .build());
             }
         }
 
-        return responses;
+        expectedBalanceCache.put(key, response);
+        return response;
     }
 
     @Override
@@ -135,24 +146,24 @@ public class BalanceServiceImpl implements BalanceService {
         return accounts;
     }
 
-    private AccountBalancePhotoEntity findSnapshot(List<AccountEntity> accounts, LocalDate periodInitial, LocalDate periodFinal) {
-        List<AccountBalancePhotoEntity> snapshots = accountBalancePhotoRepository.snapshot(periodInitial, periodFinal, accounts);
+    private SnapshotBalanceEntity searchLastSnapshot(List<AccountEntity> accounts, LocalDate initialDate, LocalDate finalDate) {
+        List<SnapshotBalanceEntity> snapshots = snapshotBalanceRepository.findBy(initialDate, finalDate, accounts);
         if (!snapshots.isEmpty()) {
             return snapshots.stream().peek(snap -> {
                         BigDecimal balance = snapshots.stream()
-                                .map(AccountBalancePhotoEntity::getBalance)
+                                .map(SnapshotBalanceEntity::getBalance)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add);
                         snap.setBalance(balance);
                     })
                     .toList().get(0);
         }
-        AccountBalancePhotoEntity snapshot = new AccountBalancePhotoEntity();
+        SnapshotBalanceEntity snapshot = new SnapshotBalanceEntity();
         snapshot.setBalance(BigDecimal.ZERO);
         return snapshot;
     }
 
-    private List<TransactionEntity> findTransactions(LocalDate periodInitial, LocalDate periodFinal) {
-        List<Long> ids = transactionRepository.findByPeriod(periodInitial, periodFinal);
+    private List<TransactionEntity> findTransactions(LocalDate initialDate, LocalDate finalDate) {
+        List<Long> ids = transactionRepository.findByPeriod(initialDate, finalDate);
         return transactionRepository.findByIdInWithDetails(ids);
     }
 
@@ -168,5 +179,12 @@ public class BalanceServiceImpl implements BalanceService {
     private BigDecimal adjustTransationValue(TransactionEntity entity) {
         BigDecimal value = entity.getValue().abs();
         return TransactionType.CREDIT.name().equalsIgnoreCase(entity.getTransactionType()) ? value : value.negate();
+    }
+
+    private String createKeyCache(List<AccountEntity> accounts, LocalDate initialDate, LocalDate finalDate) {
+        return accounts.stream()
+                .map(AccountEntity::getId)
+                .map(String::valueOf)
+                .collect(Collectors.joining()) + "_" + initialDate + "_" + finalDate;
     }
 }

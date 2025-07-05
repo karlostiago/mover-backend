@@ -14,8 +14,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tb_account_balance_photo")
-public class AccountBalancePhotoEntity extends AbstractEntity {
+@Table(name = "tb_snapshot_balance")
+public class SnapshotBalanceEntity extends AbstractEntity {
 
     @Column(name = "period", nullable = false)
     private LocalDate period;

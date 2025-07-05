@@ -148,6 +148,10 @@ public final class DateUtil {
         return date.minusMonths(months);
     }
 
+    public static boolean isFirstDayOfMonth(LocalDate date) {
+        return date.getDayOfMonth() == 1;
+    }
+
     private static List<DateTimeFormatter> formatters() {
         return Arrays.asList(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"),
