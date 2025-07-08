@@ -6,6 +6,7 @@ import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
+import com.ctsousa.mover.domain.Vehicle;
 import com.ctsousa.mover.enumeration.Icon;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.request.TransactionRequest;
@@ -162,9 +163,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
             transactionResponse.setCategory(category.getDescription());
             transactionResponse.setAccount(String.format("%s - %s", account.getName(), account.getNumber()));
 
-            Optional.ofNullable(vehicle).ifPresent(v -> transactionResponse.setVehicle(
-                    String.format("%s - %s - %s", v.getBrand().getName(), v.getModel().getName(), v.getLicensePlate())
-            ));
+            Optional.ofNullable(vehicle).ifPresent(v -> transactionResponse.setVehicle(Vehicle.shortName(vehicle)));
 
             Optional.ofNullable(card).ifPresent(c -> transactionResponse.setCard(c.getName()));
             Optional.ofNullable(contract).ifPresent(c -> transactionResponse.setContract(c.getNumber()));

@@ -158,7 +158,10 @@ public class BalanceServiceImpl implements BalanceService {
                     .toList().get(0);
         }
         SnapshotBalanceEntity snapshot = new SnapshotBalanceEntity();
-        snapshot.setBalance(BigDecimal.ZERO);
+        snapshot.setBalance(accounts.stream()
+                .map(AccountEntity::getAvailableBalance)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+
         return snapshot;
     }
 

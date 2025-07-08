@@ -6,6 +6,7 @@ import com.ctsousa.mover.core.entity.ContractEntity;
 import com.ctsousa.mover.core.mapper.Transform;
 import com.ctsousa.mover.core.security.Security;
 import com.ctsousa.mover.domain.Contract;
+import com.ctsousa.mover.domain.Vehicle;
 import com.ctsousa.mover.enumeration.DayOfWeek;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.enumeration.Situation;
@@ -151,11 +152,8 @@ public class ContractResource extends BaseResource<ContractResponse, ContractReq
                 .collect(Collectors.toMap(ContractResponse::getId, r -> r));
 
         for (ContractEntity entity : entities) {
-            String fullNameVehicle = entity.getVehicle().getBrand().getName() + " - " +
-                    entity.getVehicle().getModel().getName() + " - " +
-                    entity.getVehicle().getLicensePlate();
             ContractResponse contractResponse = responseMap.get(entity.getId());
-            contractResponse.setVehicleName(fullNameVehicle);
+            contractResponse.setVehicleName(Vehicle.shortName(entity.getVehicle()));
             contractResponse.setPaymentFrequency(entity.getPaymentFrequency());
             contractResponse.setClientContact(entity.getClient().getCellPhone());
         }

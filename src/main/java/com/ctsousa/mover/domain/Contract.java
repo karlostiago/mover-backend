@@ -1,8 +1,6 @@
 package com.ctsousa.mover.domain;
 
-import com.ctsousa.mover.core.entity.ClientEntity;
-import com.ctsousa.mover.core.entity.ContractEntity;
-import com.ctsousa.mover.core.entity.VehicleEntity;
+import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.enumeration.DayOfWeek;
 import com.ctsousa.mover.enumeration.PaymentFrequency;
 import com.ctsousa.mover.enumeration.Situation;

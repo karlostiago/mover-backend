@@ -55,4 +55,12 @@ public class Vehicle extends DomainModel<VehicleEntity> {
         entity.setFuelType(fuelType.getDescription());
         return entity;
     }
+
+    public static String shortName(VehicleEntity entity) {
+        String brand = entity.getBrand().getName();
+        String model = entity.getModel().getName();
+        String [] modelParts = model.split(" ");
+        return String.format(brand + " %s %s - %s",
+                modelParts[0], modelParts[1], entity.getLicensePlate());
+    }
 }
