@@ -15,6 +15,7 @@ import com.ctsousa.mover.service.TransactionService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -192,9 +193,9 @@ public class TransactionServiceImpl implements TransactionService {
         if (dashboardType == null) {
             return search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
         }
-        Page<Long> page = repository.findByPeriod(filter.getDtInitial(), filter.getDtFinal(), pageable);
-        List<TransactionEntity> entities = repository.findByIdInWithDetails(page.getContent());
-        return new PageImpl<>(DashboardSummary.from(entities, dashboardType), pageable, page.getTotalElements());
+        List<Long> listIds = repository.findByPeriod(filter.getDtInitial(), filter.getDtFinal());
+        List<TransactionEntity> entities = repository.findByIdInWithDetails(listIds);
+        return new PageImpl<>(DashboardSummary.from(entities, dashboardType), PageRequest.of(0, entities.size()), entities.size());
     }
 
     private Page<TransactionEntity> search(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable) {

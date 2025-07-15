@@ -62,9 +62,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
         private final LocalDate dtFinal;
         private final List<Long> accountsId;
         private final String text;
-
-        @Setter
-        private boolean comeToDashboard;
+        private final boolean comeToDashboard;
 
         public Filter(final String uri) {
             String [] filters = uri.split(";");
