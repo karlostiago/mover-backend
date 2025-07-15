@@ -1,30 +1,28 @@
 package com.ctsousa.mover.service.impl;
 
-import com.ctsousa.mover.core.CacheEntry;
-import com.ctsousa.mover.core.entity.SnapshotBalanceEntity;
 import com.ctsousa.mover.core.entity.AccountEntity;
+import com.ctsousa.mover.core.entity.SnapshotBalanceEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.enumeration.TransactionType;
 import com.ctsousa.mover.enumeration.TypeCategory;
-import com.ctsousa.mover.repository.SnapshotBalanceRepository;
 import com.ctsousa.mover.repository.AccountRepository;
 import com.ctsousa.mover.repository.BalanceRepository;
+import com.ctsousa.mover.repository.SnapshotBalanceRepository;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.response.BalanceResponse;
 import com.ctsousa.mover.response.ExpectedBalanceResponse;
 import com.ctsousa.mover.service.BalanceService;
+import com.ctsousa.mover.service.ExpectedBalanceCacheService;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.isFutureDate;
@@ -32,19 +30,18 @@ import static com.ctsousa.mover.core.util.DateUtil.minusMonth;
 
 @Component
 public class BalanceServiceImpl implements BalanceService {
-    private static final Map<String, CacheEntry<List<ExpectedBalanceResponse>>> expectedBalanceCache = new ConcurrentHashMap<>();
-    private final Duration CACHE_TTL = Duration.ofMinutes(5);
-
     private final BalanceRepository balanceRepository;
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final SnapshotBalanceRepository snapshotBalanceRepository;
+    private final ExpectedBalanceCacheService expectedBalanceCacheService;
 
-    public BalanceServiceImpl(BalanceRepository balanceRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, SnapshotBalanceRepository snapshotBalanceRepository) {
+    public BalanceServiceImpl(BalanceRepository balanceRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, SnapshotBalanceRepository snapshotBalanceRepository, ExpectedBalanceCacheService expectedBalanceCacheService) {
         this.balanceRepository = balanceRepository;
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.snapshotBalanceRepository = snapshotBalanceRepository;
+        this.expectedBalanceCacheService = expectedBalanceCacheService;
     }
 
     @Override
@@ -57,9 +54,9 @@ public class BalanceServiceImpl implements BalanceService {
         }
 
         String key = createKeyCache(accounts, initialDate, finalDate);
-        CacheEntry<List<ExpectedBalanceResponse>> cacheEntry = expectedBalanceCache.get(key);
-        if (cacheEntry != null && cacheEntry.isNotExpired(CACHE_TTL)) {
-            return cacheEntry.getValue();
+        List<ExpectedBalanceResponse> cache = expectedBalanceCacheService.get(key);
+        if (cache != null) {
+            return cache;
         }
 
         YearMonth targetMonth = YearMonth.from(finalDate);
@@ -89,8 +86,7 @@ public class BalanceServiceImpl implements BalanceService {
             }
         }
 
-        expectedBalanceCache.remove(key);
-        expectedBalanceCache.put(key, new CacheEntry<>(response));
+        expectedBalanceCacheService.put(key, response);
         return response;
     }
 
