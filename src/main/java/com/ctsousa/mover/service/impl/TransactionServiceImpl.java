@@ -5,7 +5,9 @@ import com.ctsousa.mover.core.event.BalanceChangedEvent;
 import com.ctsousa.mover.core.event.TransactionCacheEvent;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.factory.*;
+import com.ctsousa.mover.domain.DashboardSummary;
 import com.ctsousa.mover.domain.Transaction;
+import com.ctsousa.mover.enumeration.DashboardType;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.TransactionRepository;
 import com.ctsousa.mover.service.BalanceNotificationService;
@@ -179,7 +181,20 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Page<TransactionEntity> search(Transaction.Filter filter, Pageable pageable) {
+        if (filter.isComeToDashboard()) {
+            return searchFromDashboard(filter, pageable);
+        }
         return search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
+    }
+
+    private Page<TransactionEntity> searchFromDashboard(Transaction.Filter filter, Pageable pageable) {
+        DashboardType dashboardType = DashboardType.from(filter.getText()).orElse(null);
+        if (dashboardType == null) {
+            return search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
+        }
+        Page<Long> page = repository.findByPeriod(filter.getDtInitial(), filter.getDtFinal(), pageable);
+        List<TransactionEntity> entities = repository.findByIdInWithDetails(page.getContent());
+        return new PageImpl<>(DashboardSummary.from(entities, dashboardType), pageable, page.getTotalElements());
     }
 
     private Page<TransactionEntity> search(LocalDate dtInitial, LocalDate dtFinal, List<Long> accountListId, String text, Pageable pageable) {

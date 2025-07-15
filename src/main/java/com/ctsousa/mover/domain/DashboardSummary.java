@@ -2,14 +2,13 @@ package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
+import com.ctsousa.mover.enumeration.DashboardType;
 import com.ctsousa.mover.enumeration.Icon;
-import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.response.CardDashboardResponse;
 import com.ctsousa.mover.response.ChartDoughnutResponse;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,55 +35,15 @@ public class DashboardSummary {
     public DashboardSummary(List<TransactionEntity> transactions,
                             List<AccountEntity> accounts,
                             List<CardDashboardResponse> invoices) {
-        LocalDate today = LocalDate.now();
 
-        var incomeTransactions = transactions.stream()
-                .filter(t -> TypeCategory.INCOME.name().equalsIgnoreCase(t.getCategoryType()))
-                .toList();
-
-        var expenseTransactions = transactions.stream()
-                .filter(this::isExpense)
-                .toList();
-
-        revenueCards.put("overdueRevenue", buildCard(
-                incomeTransactions.stream()
-                        .filter(t -> t.getDueDate().isBefore(today) && !t.getPaid())
-                        .toList(),
-                "Overdue Revenue"));
-
-        revenueCards.put("realizedRevenue", buildCard(
-                incomeTransactions.stream()
-                        .filter(TransactionEntity::getPaid)
-                        .toList(),
-                "Realized Revenue"));
-
-        revenueCards.put("pendingRevenue", buildCard(
-                incomeTransactions.stream()
-                        .filter(t -> !t.getDueDate().isBefore(today) && !t.getPaid())
-                        .toList(),
-                "Pending Revenue"));
-
-        revenueCards.put("grossRevenue", buildCard(incomeTransactions, "Gross Revenue"));
-
-        expenseCards.put("overdueExpense", buildCard(
-                expenseTransactions.stream()
-                        .filter(t -> t.getDueDate().isBefore(today) && !t.getPaid())
-                        .toList(),
-                "Overdue Expense"));
-
-        expenseCards.put("realizedExpense", buildCard(
-                expenseTransactions.stream()
-                        .filter(TransactionEntity::getPaid)
-                        .toList(),
-                "Realized Expense"));
-
-        expenseCards.put("pendingExpense", buildCard(
-                expenseTransactions.stream()
-                        .filter(t -> !t.getDueDate().isBefore(today) && !t.getPaid())
-                        .toList(),
-                "Pending Expense"));
-
-        expenseCards.put("grossExpense", buildCard(expenseTransactions, "Gross Expense"));
+        revenueCards.put("overdueRevenue", buildCard(from(transactions, DashboardType.OVERDUE_REVENUE), "Overdue Revenue"));
+        revenueCards.put("realizedRevenue", buildCard(from(transactions, DashboardType.REALIZED_REVENUE), "Realized Revenue"));
+        revenueCards.put("pendingRevenue", buildCard(from(transactions, DashboardType.PENDING_REVENUE), "Pending Revenue"));
+        revenueCards.put("grossRevenue", buildCard(from(transactions, DashboardType.GROSS_REVENUE), "Gross Revenue"));
+        expenseCards.put("overdueExpense", buildCard(from(transactions, DashboardType.OVERDUE_EXPENSE), "Overdue Expense"));
+        expenseCards.put("realizedExpense", buildCard(from(transactions, DashboardType.REALIZED_EXPENSE), "Realized Expense"));
+        expenseCards.put("pendingExpense", buildCard(from(transactions, DashboardType.PENDING_EXPENSE), "Pending Expense"));
+        expenseCards.put("grossExpense", buildCard(from(transactions, DashboardType.GROSS_EXPENSE), "Gross Expense"));
 
         this.accountBalances = accounts.stream()
                 .filter(AccountEntity::getActive)
@@ -98,8 +57,14 @@ public class DashboardSummary {
 
         this.invoices = invoices;
 
-        this.revenueChart = buildChart(incomeTransactions);
-        this.expenseChart = buildChart(expenseTransactions);
+        this.revenueChart = buildChart(from(transactions, DashboardType.GROSS_REVENUE));
+        this.expenseChart = buildChart(from(transactions, DashboardType.GROSS_EXPENSE));
+    }
+
+    public static List<TransactionEntity> from(List<TransactionEntity> entities, DashboardType dashboardType) {
+       return DashboardType.from(dashboardType.name())
+                .map(type -> type.filter(entities))
+                .orElse(Collections.emptyList());
     }
 
     public CardDashboardResponse getRevenueCard(String key) {
@@ -108,11 +73,6 @@ public class DashboardSummary {
 
     public CardDashboardResponse getExpenseCard(String key) {
         return expenseCards.get(key);
-    }
-
-    private boolean isExpense(TransactionEntity entity) {
-        return TypeCategory.EXPENSE.name().equalsIgnoreCase(entity.getCategoryType())
-                || TypeCategory.INVESTMENT.name().equalsIgnoreCase(entity.getCategoryType());
     }
 
     private CardDashboardResponse buildCard(List<TransactionEntity> transactions, String description) {
