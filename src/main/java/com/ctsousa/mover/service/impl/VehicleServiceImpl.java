@@ -30,11 +30,11 @@ public class VehicleServiceImpl extends BaseServiceImpl<VehicleEntity, Long> imp
             if (repository.existsByLicensePlate(entity.getLicensePlate())) {
                 throw new NotificationException("Já existe um veículo com a placa informada.");
             }
-            if (repository.existsByRenavam(entity.getRenavam())) {
+            if (repository.existsByRenavam(entity.getNationalRegistryCode())) {
                 throw new NotificationException("Já existe um veículo com renavam informada.");
             }
         } else if (!entity.isNew()) {
-            if (repository.existsByLicensePlateOrRenavamNotId(entity.getRenavam(), entity.getLicensePlate(), entity.getId())) {
+            if (repository.existsByLicensePlateOrRenavamNotId(entity.getNationalRegistryCode(), entity.getLicensePlate(), entity.getId())) {
                 throw new NotificationException("Não foi possível atualizar, pois já tem um veículo, com o renavam ou placa informado.", Severity.WARNING);
             }
         }

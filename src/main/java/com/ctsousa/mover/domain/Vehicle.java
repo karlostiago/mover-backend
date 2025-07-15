@@ -18,7 +18,7 @@ public class Vehicle extends DomainModel<VehicleEntity> {
     private String licensePlate;
     private Integer yearManufacture;
     private Integer modelYear;
-    private String renavam;
+    private String nationalRegistryCode; // Renavam
     private BigDecimal fipeValueAtAcquisition;
     private BigDecimal acquisitionValue;
     private LocalDate acquisitionDate;
@@ -29,6 +29,7 @@ public class Vehicle extends DomainModel<VehicleEntity> {
     private String color;
     private String situation;
     private String fuelType;
+    private BigDecimal odometer;
 
     @Override
     public VehicleEntity toEntity() {
@@ -37,7 +38,7 @@ public class Vehicle extends DomainModel<VehicleEntity> {
         entity.setLicensePlate(this.getLicensePlate().toUpperCase());
         entity.setYearManufacture(this.getYearManufacture());
         entity.setModelYear(this.getModelYear());
-        entity.setRenavam(this.getRenavam());
+        entity.setNationalRegistryCode(this.getNationalRegistryCode());
         entity.setFipeValueAtAcquisition(this.getFipeValueAtAcquisition());
         entity.setAcquisitionValue(this.getAcquisitionValue());
         entity.setAcquisitionDate(this.getAcquisitionDate());
@@ -47,6 +48,7 @@ public class Vehicle extends DomainModel<VehicleEntity> {
         entity.setFipeDepreciation(this.getFipeDepreciation());
         entity.setColor(this.getColor().toUpperCase());
         entity.setActive(this.getActive());
+        entity.setOdometer(this.getOdometer());
 
         Situation situation = Situation.toDescription(this.getSituation());
         entity.setSituation(situation.getDescription());

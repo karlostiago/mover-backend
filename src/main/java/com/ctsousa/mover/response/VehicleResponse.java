@@ -18,9 +18,10 @@ public class VehicleResponse {
     private String licensePlate;
     private Integer yearManufacture;
     private Integer modelYear;
-    private String renavam;
+    private String nationalRegistryCode;
     private BigDecimal fipeValueAtAcquisition;
     private BigDecimal acquisitionValue;
+    private BigDecimal odometer;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate acquisitionDate;

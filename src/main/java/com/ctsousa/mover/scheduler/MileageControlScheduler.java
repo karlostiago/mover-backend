@@ -38,7 +38,7 @@ public class MileageControlScheduler implements Scheduler {
         Map<String, VehicleEntity> vehicleMap = vehicleService.findAll()
                 .stream()
                 .filter(VehicleEntity::getActive)
-                .collect(Collectors.toMap(VehicleEntity::getRenavam, v -> v));
+                .collect(Collectors.toMap(VehicleEntity::getNationalRegistryCode, v -> v));
 
         List<MileageControlEntity> controls = new ArrayList<>(vehicleMap.size());
 
@@ -46,7 +46,7 @@ public class MileageControlScheduler implements Scheduler {
         LocalDate yesterday = LocalDate.now().minusDays(1);
 
         for (Vehicle vehicle : vehicles) {
-            Double odometer = gateway.totalOdometer(vehicle.getVeiId().intValue(), yesterday);
+            Double odometer = gateway.odometer(vehicle.getVeiId().intValue(), yesterday);
             VehicleEntity entity = vehicleMap.get(vehicle.getVeiRen());
             if (entity != null) {
                 MileageControlEntity control = new MileageControlEntity();

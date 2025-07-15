@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface CorpvsGateway {
 
-    Double totalOdometer(Integer veiId, LocalDate date);
+    Double odometer(Integer veiId, LocalDate date);
 
     List<Vehicle> allVehicles();
 }

@@ -29,7 +29,7 @@ public class VehicleRequest {
     private Integer modelYear;
 
     @NotEmpty(message = "Renavam não pode ser vázio")
-    private String renavam;
+    private String nationalRegistryCode;
 
     @NotEmpty(message = "Valor fipe de aquisição não pode ser vázio")
     private BigDecimal fipeValueAtAcquisition;
@@ -64,4 +64,6 @@ public class VehicleRequest {
     private String fuelType;
 
     private Boolean active;
+
+    private BigDecimal odometer;
 }

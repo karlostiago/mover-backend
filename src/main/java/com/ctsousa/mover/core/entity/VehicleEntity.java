@@ -32,8 +32,8 @@ public class VehicleEntity extends AbstractEntity {
     @Column(name = "model_year", nullable = false)
     private Integer modelYear;
 
-    @Column(name = "renavam", nullable = false)
-    private String renavam;
+    @Column(name = "national_registry_code", nullable = false)
+    private String nationalRegistryCode; // Renavam
 
     @Column(name = "fipe_value_at_acquisition", nullable = false)
     private BigDecimal fipeValueAtAcquisition;
@@ -64,6 +64,9 @@ public class VehicleEntity extends AbstractEntity {
 
     @Column(name = "fuel_type", nullable = false)
     private String fuelType;
+
+    @Column(name = "odometer", nullable = false)
+    private BigDecimal odometer;
 
     public VehicleEntity() { }
 

@@ -40,7 +40,7 @@ public class CorpvsGatewayServiceImpl implements CorpvsGateway {
     }
 
     @Override
-    public Double totalOdometer(Integer veiId, LocalDate date) {
+    public Double odometer(Integer veiId, LocalDate date) {
         try {
             Token token = tokenService.create();
 
@@ -62,9 +62,9 @@ public class CorpvsGatewayServiceImpl implements CorpvsGateway {
             CorpvsResponse corpvsResponse = response.getBody();
 
             assert corpvsResponse != null;
-            BigDecimal total = BigDecimal.valueOf(corpvsResponse.getData().get(0)
+            BigDecimal odometer = BigDecimal.valueOf(corpvsResponse.getData().get(0)
                     .getDistance().doubleValue()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
-            return total.doubleValue();
+            return odometer.doubleValue();
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw new NotificationException(ex.getMessage());
         }

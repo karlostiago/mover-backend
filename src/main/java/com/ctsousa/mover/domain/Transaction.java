@@ -62,7 +62,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
         private final LocalDate dtFinal;
         private final List<Long> accountsId;
         private final String text;
-        private final int hash;
+        private final boolean comeToDashboard;
 
         public Filter(final String uri) {
             String [] filters = uri.split(";");
@@ -72,8 +72,7 @@ public class Transaction extends DomainModel<TransactionEntity> {
             dtFinal = DateUtil.getLastDay(monthAndYear);
             accountsId = buildAccountList(filters);
             text = filters.length > 2 ? filters[2] : null;
-
-            hash = Objects.hash(dtInitial, dtFinal, accountsId, text);
+            comeToDashboard = filters.length > 3 && "true".equalsIgnoreCase(filters[3]);
         }
 
         private List<Long> buildAccountList(String [] filters) {

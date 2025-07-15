@@ -26,16 +26,16 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
     @Query("SELECT v FROM VehicleEntity v JOIN FETCH v.brand JOIN FETCH v.model WHERE 1 = 1")
     List<VehicleEntity> findAll();
 
-    @Query("SELECT v FROM VehicleEntity v JOIN FETCH v.brand JOIN FETCH v.model WHERE v.licensePlate LIKE %:licensePlate% OR v.renavam LIKE %:renavam%")
+    @Query("SELECT v FROM VehicleEntity v JOIN FETCH v.brand JOIN FETCH v.model WHERE v.licensePlate LIKE %:licensePlate% OR v.nationalRegistryCode LIKE %:renavam%")
     List<VehicleEntity> findBy(@Param("licensePlate") String licensePlate, @Param("renavam") String renavam);
 
     @Query("SELECT CASE WHEN COUNT(v.id) > 0 THEN TRUE ELSE FALSE END FROM VehicleEntity v WHERE v.licensePlate = :licensePlate")
     boolean existsByLicensePlate(@Param("licensePlate") String licensePlate);
 
-    @Query("SELECT CASE WHEN COUNT(v.id) > 0 THEN TRUE ELSE FALSE END FROM VehicleEntity v WHERE v.renavam = :renavam")
+    @Query("SELECT CASE WHEN COUNT(v.id) > 0 THEN TRUE ELSE FALSE END FROM VehicleEntity v WHERE v.nationalRegistryCode = :renavam")
     boolean existsByRenavam(@Param("renavam") String renavam);
 
-    @Query("SELECT CASE WHEN COUNT(v.id) > 0 THEN TRUE ELSE FALSE END FROM VehicleEntity v WHERE (v.renavam = :renavam OR v.licensePlate = :licensePlate) AND v.id NOT IN (:id) ")
+    @Query("SELECT CASE WHEN COUNT(v.id) > 0 THEN TRUE ELSE FALSE END FROM VehicleEntity v WHERE (v.nationalRegistryCode = :renavam OR v.licensePlate = :licensePlate) AND v.id NOT IN (:id) ")
     boolean existsByLicensePlateOrRenavamNotId(@Param("renavam") String renavam, @Param("licensePlate") String licensePlate, @Param("id") Long id);
 
     @Query(value = """
