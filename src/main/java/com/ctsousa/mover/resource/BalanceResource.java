@@ -40,7 +40,7 @@ public class BalanceResource implements BalanceApi {
     }
 
     @Override
-    public ResponseEntity<List<ExpectedBalanceResponse>> daily(String filterURI) {
+    public ResponseEntity<List<ExpectedBalanceResponse>> expectedBalanceOnDay(String filterURI) {
         var filter = new Transaction.Filter(filterURI);
         List<ExpectedBalanceResponse> response = balanceService.calculateExpectedBalanceOnDay(filter.getAccountsId(), filter.getDtInitial(), filter.getDtFinal());
         return ResponseEntity.ok(response);

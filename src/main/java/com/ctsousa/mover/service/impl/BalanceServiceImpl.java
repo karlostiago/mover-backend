@@ -1,5 +1,6 @@
 package com.ctsousa.mover.service.impl;
 
+import com.ctsousa.mover.core.CacheEntry;
 import com.ctsousa.mover.core.entity.SnapshotBalanceEntity;
 import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
@@ -16,6 +17,7 @@ import com.ctsousa.mover.service.BalanceService;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -30,7 +32,8 @@ import static com.ctsousa.mover.core.util.DateUtil.minusMonth;
 
 @Component
 public class BalanceServiceImpl implements BalanceService {
-    private static final Map<String, List<ExpectedBalanceResponse>> expectedBalanceCache = new ConcurrentHashMap<>();
+    private static final Map<String, CacheEntry<List<ExpectedBalanceResponse>>> expectedBalanceCache = new ConcurrentHashMap<>();
+    private final Duration CACHE_TTL = Duration.ofMinutes(5);
 
     private final BalanceRepository balanceRepository;
     private final AccountRepository accountRepository;
@@ -49,15 +52,14 @@ public class BalanceServiceImpl implements BalanceService {
         List<AccountEntity> accounts = findAccounts(listAccountId);
 
         boolean isFutureDate = isFutureDate(initialDate);
-
         if (isFutureDate) {
             initialDate = LocalDate.now().withDayOfMonth(1);
         }
 
         String key = createKeyCache(accounts, initialDate, finalDate);
-
-        if (expectedBalanceCache.containsKey(key)) {
-            return expectedBalanceCache.get(key);
+        CacheEntry<List<ExpectedBalanceResponse>> cacheEntry = expectedBalanceCache.get(key);
+        if (cacheEntry != null && cacheEntry.isNotExpired(CACHE_TTL)) {
+            return cacheEntry.getValue();
         }
 
         YearMonth targetMonth = YearMonth.from(finalDate);
@@ -87,7 +89,8 @@ public class BalanceServiceImpl implements BalanceService {
             }
         }
 
-        expectedBalanceCache.put(key, response);
+        expectedBalanceCache.remove(key);
+        expectedBalanceCache.put(key, new CacheEntry<>(response));
         return response;
     }
 

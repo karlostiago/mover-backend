@@ -13,6 +13,6 @@ public interface BalanceApi {
     @GetMapping
     ResponseEntity<BalanceResponse> balances(@RequestParam("filterURI") String filterURI);
 
-    @GetMapping("/daily")
-    ResponseEntity<List<ExpectedBalanceResponse>> daily(@RequestParam("filterURI") String filterURI);
+    @GetMapping("/expected-balance-on-day")
+    ResponseEntity<List<ExpectedBalanceResponse>> expectedBalanceOnDay(@RequestParam("filterURI") String filterURI);
 }
