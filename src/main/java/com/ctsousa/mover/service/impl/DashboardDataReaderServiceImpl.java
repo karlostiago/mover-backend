@@ -1,21 +1,19 @@
 package com.ctsousa.mover.service.impl;
 
+import com.ctsousa.mover.core.InvoiceProjection;
 import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.enumeration.Situation;
-import com.ctsousa.mover.repository.AccountRepository;
-import com.ctsousa.mover.repository.ContractRepository;
-import com.ctsousa.mover.repository.TransactionRepository;
-import com.ctsousa.mover.repository.VehicleRepository;
+import com.ctsousa.mover.repository.*;
 import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.DashboardDataReaderService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class DashboardDataReaderServiceImpl implements DashboardDataReaderService {
@@ -25,13 +23,15 @@ public class DashboardDataReaderServiceImpl implements DashboardDataReaderServic
     private final CardService cardService;
     private final ContractRepository contractRepository;
     private final VehicleRepository vehicleRepository;
+    private final BalanceRepository balanceRepository;
 
-    public DashboardDataReaderServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, CardService cardService, ContractRepository contractRepository, VehicleRepository vehicleRepository) {
+    public DashboardDataReaderServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, CardService cardService, ContractRepository contractRepository, VehicleRepository vehicleRepository, BalanceRepository balanceRepository) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.cardService = cardService;
         this.contractRepository = contractRepository;
         this.vehicleRepository = vehicleRepository;
+        this.balanceRepository = balanceRepository;
     }
 
     @Override
@@ -62,8 +62,8 @@ public class DashboardDataReaderServiceImpl implements DashboardDataReaderServic
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public BigDecimal calculateInvoiceValue(CardEntity entity, LocalDate dtInitial, LocalDate dtFinal) {
-        return cardService.calculateInvoiceValue(entity, dtInitial, dtFinal);
+    public InvoiceProjection calculateInvoiceValue(CardEntity entity, LocalDate dtInitial, LocalDate dtFinal) {
+        return balanceRepository.invoiceValue(entity.getId(), dtInitial, dtFinal);
     }
 
     @Override
@@ -82,5 +82,13 @@ public class DashboardDataReaderServiceImpl implements DashboardDataReaderServic
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<VehicleEntity> onlyVehicleAvailable() {
         return vehicleRepository.onlyAvailable();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean allPreviousInvoicesPaid(List<CardEntity> entities, LocalDate dtInicial, LocalDate dtFinal) {
+        List<Long> cardIds = entities.stream().map(CardEntity::getId)
+                .collect(Collectors.toList());
+        return balanceRepository.existsInvoiceToPay(cardIds, dtInicial, dtFinal) == 1L;
     }
 }

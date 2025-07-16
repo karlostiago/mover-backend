@@ -4,15 +4,12 @@ import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
-import com.ctsousa.mover.repository.BalanceRepository;
 import com.ctsousa.mover.repository.CardRepository;
 import com.ctsousa.mover.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
@@ -22,11 +19,9 @@ public class CardServiceImpl extends BaseServiceImpl<CardEntity, Long> implement
 
     @Autowired
     private CardRepository repository;
-    private final BalanceRepository balanceRepository;
 
-    public CardServiceImpl(CardRepository repository, BalanceRepository balanceRepository) {
+    public CardServiceImpl(CardRepository repository) {
         super(repository);
-        this.balanceRepository = balanceRepository;
     }
 
     @Override
@@ -76,10 +71,5 @@ public class CardServiceImpl extends BaseServiceImpl<CardEntity, Long> implement
         }
 
         return referenceMonth.withDayOfMonth(dueDate).plusMonths(2);
-    }
-
-    @Override
-    public BigDecimal calculateInvoiceValue(CardEntity entity, LocalDate dtInicial, LocalDate dtFinal) {
-        return balanceRepository.invoiceValue(Collections.singletonList(entity.getId()), dtInicial, dtFinal);
     }
 }

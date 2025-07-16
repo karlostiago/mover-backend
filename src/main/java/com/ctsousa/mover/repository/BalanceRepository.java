@@ -1,5 +1,6 @@
 package com.ctsousa.mover.repository;
 
+import com.ctsousa.mover.core.InvoiceProjection;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -34,19 +35,42 @@ public interface BalanceRepository extends JpaRepository<TransactionEntity, Long
     BigDecimal accountBalance(@Param("accounts") List<Long> accounts);
 
     @Query(value = """
-            SELECT IFNULL(SUM(IFNULL(tt.value, 0)), 0) FROM tb_transaction tt
+            SELECT
+                IFNULL(SUM(IFNULL(tt.value, 0)), 0) AS value,
+                MAX(CASE WHEN tt.paid = 1 THEN TRUE ELSE FALSE END) AS paid,
+                MAX(tt.due_date) AS dueDate
+            FROM tb_transaction tt
             WHERE tt.card_id IS NOT NULL
               AND tt.due_date BETWEEN :dtInicial AND :dtFinal
               AND tt.invoice
-              AND tt.card_id in (:cards)
+              AND tt.card_id = :cardId
               AND NOT EXISTS (
                 SELECT distinct ipd.invoice_id
                 FROM tb_invoice_payment_detail ipd
                 WHERE ipd.invoice_id = tt.id
               )
             """, nativeQuery = true)
-    BigDecimal invoiceValue(@Param("cards") List<Long> cards,
-                            @Param("dtInicial") LocalDate dtInicial, @Param("dtFinal") LocalDate dtFinal);
+    InvoiceProjection invoiceValue(@Param("cardId") Long cardId,
+                                   @Param("dtInicial") LocalDate dtInicial, @Param("dtFinal") LocalDate dtFinal);
+
+    @Query(value = """
+            SELECT EXISTS(
+               SELECT 1
+               FROM tb_transaction t
+               WHERE t.card_id IN (:cardsId)
+                 AND t.invoice
+                 AND t.due_date BETWEEN :dtInicial AND :dtFinal
+                 AND t.paid = 0
+                 AND NOT EXISTS (
+                   SELECT distinct ipd.invoice_id
+                   FROM tb_invoice_payment_detail ipd
+                   WHERE ipd.invoice_id = t.id
+                 )
+            )
+            """, nativeQuery = true)
+    Long existsInvoiceToPay(@Param("cardsId") List<Long> cardsId,
+                            @Param("dtInicial") LocalDate dtInicial,
+                            @Param("dtFinal") LocalDate dtFinal);
 
     @Deprecated
     @Query(value = "SELECT SUM(t.value * -1) AS DESPESA FROM tb_transaction t WHERE AND t.invoice_id IS NUL AND t.category_type = 'EXPENSE'", nativeQuery = true)

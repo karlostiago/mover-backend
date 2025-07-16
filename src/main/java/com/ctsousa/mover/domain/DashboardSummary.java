@@ -36,14 +36,17 @@ public class DashboardSummary {
                             List<AccountEntity> accounts,
                             List<CardDashboardResponse> invoices) {
 
+        List<TransactionEntity> incomeTransactions = from(transactions, DashboardType.GROSS_REVENUE);
+        List<TransactionEntity> expenseTransactions = from(transactions, DashboardType.GROSS_EXPENSE);
+
         revenueCards.put("overdueRevenue", buildCard(from(transactions, DashboardType.OVERDUE_REVENUE), "Overdue Revenue"));
         revenueCards.put("realizedRevenue", buildCard(from(transactions, DashboardType.REALIZED_REVENUE), "Realized Revenue"));
         revenueCards.put("pendingRevenue", buildCard(from(transactions, DashboardType.PENDING_REVENUE), "Pending Revenue"));
-        revenueCards.put("grossRevenue", buildCard(from(transactions, DashboardType.GROSS_REVENUE), "Gross Revenue"));
+        revenueCards.put("grossRevenue", buildCard(incomeTransactions, "Gross Revenue"));
         expenseCards.put("overdueExpense", buildCard(from(transactions, DashboardType.OVERDUE_EXPENSE), "Overdue Expense"));
         expenseCards.put("realizedExpense", buildCard(from(transactions, DashboardType.REALIZED_EXPENSE), "Realized Expense"));
         expenseCards.put("pendingExpense", buildCard(from(transactions, DashboardType.PENDING_EXPENSE), "Pending Expense"));
-        expenseCards.put("grossExpense", buildCard(from(transactions, DashboardType.GROSS_EXPENSE), "Gross Expense"));
+        expenseCards.put("grossExpense", buildCard(expenseTransactions, "Gross Expense"));
 
         this.accountBalances = accounts.stream()
                 .filter(AccountEntity::getActive)
@@ -57,8 +60,8 @@ public class DashboardSummary {
 
         this.invoices = invoices;
 
-        this.revenueChart = buildChart(from(transactions, DashboardType.GROSS_REVENUE));
-        this.expenseChart = buildChart(from(transactions, DashboardType.GROSS_EXPENSE));
+        this.revenueChart = buildChart(incomeTransactions);
+        this.expenseChart = buildChart(expenseTransactions);
     }
 
     public static List<TransactionEntity> from(List<TransactionEntity> entities, DashboardType dashboardType) {

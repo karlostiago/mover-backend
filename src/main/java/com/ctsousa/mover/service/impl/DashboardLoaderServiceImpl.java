@@ -1,5 +1,6 @@
 package com.ctsousa.mover.service.impl;
 
+import com.ctsousa.mover.core.InvoiceProjection;
 import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.domain.DashboardCache;
 import com.ctsousa.mover.domain.DashboardSummary;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -89,14 +91,31 @@ public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
     }
 
     private List<CardDashboardResponse> getInvoices(LocalDate dtInitial, LocalDate dtFinal) {
-        return dashboardDataReaderService.findAllCards().stream()
+        List<CardEntity> cards = dashboardDataReaderService.findAllCards()
+                .stream()
                 .filter(CardEntity::getActive)
-                .map(card -> CardDashboardResponse.builder()
-                        .description(card.getName())
-                        .loading(true)
-                        .iconPath(Icon.toName(card.getIcon()).getUrlImage())
-                        .value(dashboardDataReaderService.calculateInvoiceValue(card, dtInitial, dtFinal))
-                        .build())
                 .toList();
+
+        boolean allPreviousPaid = dashboardDataReaderService.allPreviousInvoicesPaid(cards, dtInitial, dtFinal);
+
+        List<CardDashboardResponse> response = new ArrayList<>(cards.size());
+        for (CardEntity card : cards) {
+            InvoiceProjection projection = dashboardDataReaderService.calculateInvoiceValue(card, dtInitial, dtFinal);
+
+            if (projection.getPaid() == 1 && !allPreviousPaid) {
+                projection = dashboardDataReaderService.calculateInvoiceValue(card, dtInitial.plusMonths(1), dtFinal.plusMonths(1));
+            }
+
+            response.add(CardDashboardResponse.builder()
+                    .description(card.getName())
+                    .loading(true)
+                    .iconPath(Icon.toName(card.getIcon()).getUrlImage())
+                    .value(projection.getValue())
+                    .paid(projection.getPaid() == 1)
+                    .dueDate(projection.getDueDate())
+                    .build());
+        }
+
+        return response;
     }
 }
