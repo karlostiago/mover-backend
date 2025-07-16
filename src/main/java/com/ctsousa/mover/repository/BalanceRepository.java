@@ -37,7 +37,7 @@ public interface BalanceRepository extends JpaRepository<TransactionEntity, Long
     @Query(value = """
             SELECT
                 IFNULL(SUM(IFNULL(tt.value, 0)), 0) AS value,
-                MAX(CASE WHEN tt.paid = 1 THEN TRUE ELSE FALSE END) AS paid,
+                IFNULL(MAX(CASE WHEN tt.paid = 1 THEN TRUE ELSE FALSE END), FALSE) AS paid,
                 MAX(tt.due_date) AS dueDate
             FROM tb_transaction tt
             WHERE tt.card_id IS NOT NULL
