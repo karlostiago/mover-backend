@@ -56,6 +56,11 @@ public enum Functionality {
     UNDO_SCHEDULING_TRANSACTIONS(16, Menu.MY_MONEY,"Permite desfazer agendamento lançamentos"),
     CALCULATE_CUT_OFF_DATE_TRANSACTIONS(17, Menu.MY_MONEY,"Permite calcular data de corte lançamentos"),
 
+    REGISTER_FINES(18, Menu.MY_MONEY, "Permite salvar multas"),
+    UPDATE_FINES(19, Menu.MY_MONEY, "Permite atualizar multas"),
+    DELETE_FINES(20, Menu.MY_MONEY, "Permite deletar multas"),
+    FILTER_FINES(21, Menu.MY_MONEY, "Permite consultar multas"),
+
     REGISTER_ACCOUNTS(1, Menu.CONFIGURATION, "Permite salvar contas"),
     UPDATE_ACCOUNTS(2, Menu.CONFIGURATION, "Permite atualizar contas"),
     DELETE_ACCOUNTS(3, Menu.CONFIGURATION, "Permite deletar contas"),

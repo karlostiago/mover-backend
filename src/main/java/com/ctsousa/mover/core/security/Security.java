@@ -85,6 +85,11 @@ public abstract class Security {
             public final static String UNDO_SCHEDULING_TRANSACTIONS = "hasAnyRole('ROLE_UNDO_SCHEDULING_TRANSACTIONS')";
             public final static String SCHEDULE_TRANSACTIONS = "hasAnyRole('ROLE_SCHEDULE_TRANSACTIONS')";
             public final static String CALCULATE_CUT_OFF_DATE_TRANSACTIONS = "hasAnyRole('ROLE_CALCULATE_CUT_OFF_DATE_TRANSACTIONS')";
+
+            public final static String REGISTER_FINES = "hasAnyRole('ROLE_REGISTER_FINES')";
+            public final static String UPDATE_FINES = "hasAnyRole('ROLE_UPDATE_FINES')";
+            public final static String DELETE_FINES = "hasAnyRole('ROLE_DELETE_FINES')";
+            public final static String FILTER_FINES = "hasAnyRole('ROLE_FILTER_FINES')";
         }
 
         public static class Maintenance {
