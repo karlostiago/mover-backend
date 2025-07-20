@@ -12,7 +12,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
@@ -84,6 +83,20 @@ public class Transaction extends DomainModel<TransactionEntity> {
             }
             return accountsId;
         }
+    }
+
+    public TransactionEntity from(Fine fine) {
+        if (fine == null) {
+            return null;
+        }
+        this.setDescription(fine.getDescription());
+        this.setDueDate(fine.getDueDate());
+        this.setValue(fine.getValue());
+        this.setRegisterDate(LocalDate.now());
+        this.setCard(fine.getCard());
+        this.setAccount(fine.getAccount());
+        this.setVehicle(fine.getVehicle());
+        return toEntity();
     }
 
     @Override

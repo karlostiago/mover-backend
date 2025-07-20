@@ -34,6 +34,9 @@ public class FineEntity extends AbstractEntity {
     @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
 
+    @Column(name = "expiration_infraction", nullable = false)
+    private LocalDate expirationInfraction;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     private ClientEntity client;
@@ -44,6 +47,9 @@ public class FineEntity extends AbstractEntity {
 
     @Column(name = "`value`", nullable = false)
     private BigDecimal value;
+
+    @Column(name = "original_value", nullable = false)
+    private BigDecimal originalValue;
 
     @Column(name = "description", nullable = false, columnDefinition = "LONGTEXT")
     private String description;
