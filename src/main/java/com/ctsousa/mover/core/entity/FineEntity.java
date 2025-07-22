@@ -48,6 +48,9 @@ public class FineEntity extends AbstractEntity {
     @Column(name = "`value`", nullable = false)
     private BigDecimal value;
 
+    @Column(name = "discount", columnDefinition = "DECIMAL(10,2) DEFAULT 0")
+    private BigDecimal discount;
+
     @Column(name = "original_value", nullable = false)
     private BigDecimal originalValue;
 
@@ -64,4 +67,7 @@ public class FineEntity extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id")
     private CardEntity card;
+
+    @Column(name = "signature", nullable = false)
+    private String signature;
 }

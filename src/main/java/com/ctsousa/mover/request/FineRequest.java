@@ -1,5 +1,8 @@
 package com.ctsousa.mover.request;
 
+import com.ctsousa.mover.core.annotation.DateFormat;
+import com.ctsousa.mover.core.deserializer.LocalDateDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,10 +17,17 @@ public class FineRequest {
     private Long id;
     private String description;
     private String infractionNotice;
-    private String numberRenainf;
+    private BigInteger numberRenainf;
     private BigInteger infractionCode;
+
     private LocalDateTime dateTimeOfCommitment;
+
+    @DateFormat(message = "Data inválida")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate dueDate;
+
+    @DateFormat(message = "Data inválida")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate expirationInfraction;
     private Long clientId;
     private Long vehicleId;

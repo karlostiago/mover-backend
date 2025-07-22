@@ -1,6 +1,6 @@
 package com.ctsousa.mover.domain;
 
-import com.ctsousa.mover.core.entity.FineEntity;
+import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.mapper.MapperToEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +27,8 @@ public class Fine implements MapperToEntity<FineEntity> {
     private Boolean realOffender;
     private Account account;
     private Card card;
+    private String signature;
+    private BigDecimal discount;
 
     @Override
     public FineEntity toEntity() {
@@ -37,14 +39,15 @@ public class Fine implements MapperToEntity<FineEntity> {
         entity.setDateTimeOfCommitment(dateTimeOfCommitment);
         entity.setDueDate(dueDate);
         entity.setExpirationInfraction(expirationInfraction);
-        entity.setClient(client != null ? client.toEntity() : null);
-        entity.setVehicle(vehicle != null ? vehicle.toEntity() : null);
+        entity.setClient(client != null ? new ClientEntity(client.getId()) : null);
+        entity.setVehicle(vehicle != null ? new VehicleEntity(vehicle.getId()) : null);
         entity.setValue(value);
         entity.setOriginalValue(originalValue);
         entity.setDescription(description);
         entity.setRealOffender(realOffender);
-        entity.setAccount(account != null ? account.toEntity() : null);
-        entity.setCard(card != null ? card.toEntity() : null);
+        entity.setAccount(account != null ? new AccountEntity(account.getId()) : null);
+        entity.setCard(card != null ? new CardEntity(card.getId()) : null);
+        entity.setDiscount(this.discount != null ? this.discount : BigDecimal.ZERO);
         return entity;
     }
 }

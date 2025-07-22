@@ -23,7 +23,7 @@ public class CategoryEntity extends AbstractEntity {
     @Column(name = "type", nullable = false)
     private TypeCategory type;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<SubCategoryEntity> subcategories = new ArrayList<>();
 
     public CategoryEntity() { }

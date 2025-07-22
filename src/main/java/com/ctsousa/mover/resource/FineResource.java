@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
 @RestController
@@ -28,8 +30,10 @@ public class FineResource extends BaseResource<FineResponse, FineRequest, FineEn
 
     @Override
     public ResponseEntity<FineResponse> add(FineRequest request) {
-        Fine domain = toMapper(request, Fine.class);
-        return null;
+        Fine fine = toMapper(request, Fine.class);
+        Transaction transaction = toMapper(new Transaction().from(fine), Transaction.class);
+        FineEntity fineEntity = fineService.save(fine.toEntity(), transaction);
+        return ResponseEntity.ok(toMapper(fineEntity, FineResponse.class));
     }
 
     @Override
@@ -40,5 +44,10 @@ public class FineResource extends BaseResource<FineResponse, FineRequest, FineEn
     @Override
     public Class<?> responseClass() {
         return FineResponse.class;
+    }
+
+    @Override
+    public void updateResponse(List<FineResponse> response, List<FineEntity> entities) {
+        super.updateResponse(response, entities);
     }
 }

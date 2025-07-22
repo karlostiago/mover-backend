@@ -89,14 +89,8 @@ public class Transaction extends DomainModel<TransactionEntity> {
         if (fine == null) {
             return null;
         }
-        this.setDescription(fine.getDescription());
-        this.setDueDate(fine.getDueDate());
-        this.setValue(fine.getValue());
-        this.setRegisterDate(LocalDate.now());
-        this.setCard(fine.getCard());
-        this.setAccount(fine.getAccount());
-        this.setVehicle(fine.getVehicle());
-        return toEntity();
+        return from(fine.getDescription(), fine.getDueDate(), fine.getValue().negate(),
+                fine.getCard(), fine.getAccount(), fine.getVehicle());
     }
 
     @Override
@@ -163,5 +157,23 @@ public class Transaction extends DomainModel<TransactionEntity> {
         entity.setResidualValue(BigDecimal.ZERO);
 
         return entity;
+    }
+
+    private TransactionEntity from(String description, LocalDate dueDate, BigDecimal value, Card card,
+                                   Account account, Vehicle vehicle) {
+        this.setDescription(description);
+        this.setDueDate(dueDate);
+        this.setValue(value);
+        this.setRegisterDate(LocalDate.now());
+        this.setCard(card);
+        this.setAccount(account);
+        this.setVehicle(vehicle);
+        this.setScheduled(false);
+        this.setPaid(false);
+        this.setCategoryType(TypeCategory.EXPENSE.name());
+        this.setTransactionType(TypeCategory.EXPENSE.getTransactionType().name());
+        this.setInvoice(false);
+        this.setActive(Boolean.TRUE);
+        return toEntity();
     }
 }

@@ -23,6 +23,7 @@ public class JacksonConfig {
         objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.setTimeZone(java.util.TimeZone.getTimeZone("America/Sao_Paulo"));
         return objectMapper;
     }
 
