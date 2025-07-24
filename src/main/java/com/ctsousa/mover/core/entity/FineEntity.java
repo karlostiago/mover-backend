@@ -70,4 +70,7 @@ public class FineEntity extends AbstractEntity {
 
     @Column(name = "signature", nullable = false)
     private String signature;
+
+    @Transient
+    private Boolean paid;
 }

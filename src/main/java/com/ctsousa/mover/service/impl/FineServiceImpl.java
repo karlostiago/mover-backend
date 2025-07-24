@@ -15,6 +15,9 @@ import com.ctsousa.mover.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Component
 public class FineServiceImpl extends BaseServiceImpl<FineEntity, Long> implements FineService {
 
@@ -48,6 +51,23 @@ public class FineServiceImpl extends BaseServiceImpl<FineEntity, Long> implement
         }
 
         return fineSaved;
+    }
+
+    @Override
+    public List<FineEntity> findAll() {
+        return fineRepository.findAllWithProjection()
+                .stream()
+                .map(fineProjection -> {
+                    FineEntity fine = new FineEntity();
+                    fine.setId(fineProjection.getId());
+                    fine.setDescription(fineProjection.getDescription());
+                    fine.setValue(fineProjection.getValue());
+                    fine.setDueDate(fineProjection.getDueDate());
+                    fine.setDateTimeOfCommitment(fineProjection.getDateTimeOfCommitment());
+                    fine.setPaid(fineProjection.getPaid().compareTo(BigDecimal.ZERO) > 0);
+                    return fine;
+                })
+                .toList();
     }
 
     private SubCategoryEntity getSubCategory() {

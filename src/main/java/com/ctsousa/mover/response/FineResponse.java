@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Getter
 @Setter
@@ -39,4 +40,18 @@ public class FineResponse {
     private Boolean realOffender;
     private Long accountId;
     private Long cardId;
+    private Status status;
+
+    public void setStatus(String status) {
+        this.status = Arrays.stream(Status.values())
+                .filter(s -> s.name().equalsIgnoreCase(status))
+                .findFirst()
+                .orElse(null);
+    }
+
+    enum Status {
+        PENDING,
+        PAID,
+        OVERDUE
+    }
 }
