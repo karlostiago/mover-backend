@@ -1,8 +1,7 @@
 package com.ctsousa.mover.service.impl;
 
-import com.ctsousa.mover.core.entity.CategoryEntity;
-import com.ctsousa.mover.core.entity.FineEntity;
-import com.ctsousa.mover.core.entity.SubCategoryEntity;
+import com.ctsousa.mover.core.FineProjection;
+import com.ctsousa.mover.core.entity.*;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
 import com.ctsousa.mover.domain.SubCategory;
@@ -39,17 +38,16 @@ public class FineServiceImpl extends BaseServiceImpl<FineEntity, Long> implement
 
     @Override
     public FineEntity save(FineEntity fine, Transaction transaction) {
-        fine.setSignature(transaction.getSignature());
         transaction.setSubcategory(new SubCategory(getSubCategory().getId()));
+        TransactionEntity savedTransaction = saveTransaction(transaction);
+        fine.setSignature(savedTransaction.getSignature());
         FineEntity fineSaved;
-
         try {
             fineSaved = fineRepository.save(fine);
-            transactionService.save(transaction);
         } catch (Exception e) {
+            transactionService.deleteById(savedTransaction.getId());
             throw new NotificationException("Erro ao salvar a multa: " + e.getMessage());
         }
-
         return fineSaved;
     }
 
@@ -65,6 +63,7 @@ public class FineServiceImpl extends BaseServiceImpl<FineEntity, Long> implement
                     fine.setDueDate(fineProjection.getDueDate());
                     fine.setDateTimeOfCommitment(fineProjection.getDateTimeOfCommitment());
                     fine.setPaid(fineProjection.getPaid().compareTo(BigDecimal.ZERO) > 0);
+                    fine.setVehicle(getVehicle(fineProjection, fine));
                     return fine;
                 })
                 .toList();
@@ -77,5 +76,25 @@ public class FineServiceImpl extends BaseServiceImpl<FineEntity, Long> implement
         return category.getSubcategories()
                 .stream().filter(s -> s.getDescription().equalsIgnoreCase("MULTA"))
                 .findFirst().orElseThrow(() -> new NotificationException("Subcategoria não encontrada"));
+    }
+
+    private TransactionEntity saveTransaction(Transaction transaction) {
+        try {
+            return transactionService.save(transaction);
+        } catch (Exception e) {
+            throw new NotificationException("Erro ao salvar a multa, não foi possivel gerar o lançamento para pagamento. " + e.getMessage());
+        }
+    }
+
+    private VehicleEntity getVehicle(FineProjection projection, FineEntity entity) {
+        VehicleEntity vehicle = new VehicleEntity();
+        vehicle.setLicensePlate(projection.getLicensePlate());
+        ModelEntity model = new ModelEntity();
+        model.setName(projection.getModel());
+        BrandEntity brand = new BrandEntity();
+        brand.setName(projection.getBrand());
+        vehicle.setModel(model);
+        vehicle.setBrand(brand);
+        return vehicle;
     }
 }

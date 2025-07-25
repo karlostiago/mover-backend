@@ -5,6 +5,8 @@ import com.ctsousa.mover.core.api.resource.BaseResource;
 import com.ctsousa.mover.core.entity.FineEntity;
 import com.ctsousa.mover.domain.Fine;
 import com.ctsousa.mover.domain.Transaction;
+import com.ctsousa.mover.domain.Vehicle;
+import com.ctsousa.mover.enumeration.FineStatus;
 import com.ctsousa.mover.request.FineRequest;
 import com.ctsousa.mover.response.FineResponse;
 import com.ctsousa.mover.service.FineService;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
 
@@ -42,12 +46,26 @@ public class FineResource extends BaseResource<FineResponse, FineRequest, FineEn
     }
 
     @Override
+    public ResponseEntity<List<FineResponse>> findAll() {
+        return super.findAll();
+    }
+
+    @Override
     public Class<?> responseClass() {
         return FineResponse.class;
     }
 
     @Override
     public void updateResponse(List<FineResponse> response, List<FineEntity> entities) {
+        Map<Long, FineResponse> responseMap = response.stream()
+                .collect(Collectors.toMap(FineResponse::getId, r -> r, (existing, replacement) -> existing));
+
+        for (FineEntity entity : entities) {
+            FineResponse fineResponse = responseMap.get(entity.getId());
+            fineResponse.setStatus(FineStatus.getDescriptionByStatus(entity.getDueDate(), entity.getPaid()));
+            fineResponse.setVehicleShortName(Vehicle.shortName(entity.getVehicle()));
+        }
+
         super.updateResponse(response, entities);
     }
 }

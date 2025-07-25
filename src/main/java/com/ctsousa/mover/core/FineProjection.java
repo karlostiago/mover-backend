@@ -12,4 +12,7 @@ public interface FineProjection {
     Long getVehicleId();
     BigDecimal getValue();
     BigDecimal getPaid();
+    String getLicensePlate();
+    String getModel();
+    String getBrand();
 }
