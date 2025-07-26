@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static com.ctsousa.mover.core.util.NumberUtil.invertSignal;
 import static com.ctsousa.mover.core.util.StringUtil.toUppercase;
@@ -91,6 +92,12 @@ public class Transaction extends DomainModel<TransactionEntity> {
         }
         return from(fine.getDescription(), fine.getDueDate(), fine.getValue().negate(),
                 fine.getCard(), fine.getAccount(), fine.getVehicle());
+    }
+
+    public TransactionEntity from(String description, LocalDate dueDate, BigDecimal value,
+                                  Long cardId, Long accountId, Long vehicleId) {
+        Card card = Objects.nonNull(cardId) ? new Card(cardId) : null;
+        return from(description, dueDate, value.negate(), card, new Account(accountId), new Vehicle(vehicleId));
     }
 
     @Override

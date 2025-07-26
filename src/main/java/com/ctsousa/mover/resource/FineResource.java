@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.mapper.Transform.toMapper;
@@ -42,12 +43,24 @@ public class FineResource extends BaseResource<FineResponse, FineRequest, FineEn
 
     @Override
     public ResponseEntity<FineResponse> update(Long id, FineRequest request) {
-        return null;
+        fineService.existsById(id);
+        Fine fine = toMapper(request, Fine.class);
+        Transaction transaction = toMapper(new Transaction().from(fine), Transaction.class);
+        return ResponseEntity.ok(toMapper(fineService.update(fine.toEntity(), transaction), FineResponse.class));
     }
 
     @Override
     public ResponseEntity<List<FineResponse>> findAll() {
         return super.findAll();
+    }
+
+    @Override
+    public ResponseEntity<FineResponse> synchronize(Long id) {
+        fineService.existsById(id);
+        FineEntity entity = fineService.findById(id);
+        Fine fine = toMapper(entity, Fine.class);
+        Transaction transaction = toMapper(new Transaction().from(fine), Transaction.class);
+        return ResponseEntity.ok(toMapper(fineService.synchronize(entity, transaction), FineResponse.class));
     }
 
     @Override
@@ -64,6 +77,7 @@ public class FineResource extends BaseResource<FineResponse, FineRequest, FineEn
             FineResponse fineResponse = responseMap.get(entity.getId());
             fineResponse.setStatus(FineStatus.getDescriptionByStatus(entity.getDueDate(), entity.getPaid()));
             fineResponse.setVehicleShortName(Vehicle.shortName(entity.getVehicle()));
+            fineResponse.setSyncronizedTransaction(Objects.nonNull(entity.getTransactionId()) && entity.getTransactionId() > 0);
         }
 
         super.updateResponse(response, entities);

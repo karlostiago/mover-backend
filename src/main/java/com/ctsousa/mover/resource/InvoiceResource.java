@@ -53,10 +53,9 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
     @Override
     @PreAuthorize(Security.PreAutorize.Transaction.UPDATE_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> update(Long id, TransactionRequest request) {
-        TransactionEntity invoice = invoiceService.findById(request.getInvoiceId());
         Transaction domain = toMapper(request, Transaction.class);
-        TransactionEntity updatedEntity = invoiceService.update(invoice, domain.toEntity(), true);
-        return ResponseEntity.ok(toMapper(updatedEntity, TransactionResponse.class));
+        TransactionEntity entity = invoiceService.updateItem(id, domain.toEntity(), true);
+        return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 
     @Override
@@ -90,8 +89,10 @@ public class InvoiceResource extends BaseResource<TransactionResponse, Transacti
     @Override
     @PreAuthorize(Security.PreAutorize.Transaction.PAYMENT_TRANSACTIONS)
     public ResponseEntity<TransactionResponse> pay(Long id, LocalDate paymentDate, TransactionRequest request) {
-        AccountEntity account = new AccountEntity(request.getAccountId());
-        TransactionEntity entity = invoiceService.pay(id, paymentDate, request.getValue(), account);
+        Transaction transaction = toMapper(request, Transaction.class);
+        transaction.setPaymentDate(paymentDate);
+        transaction.setId(id);
+        TransactionEntity entity = invoiceService.pay(transaction);
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 

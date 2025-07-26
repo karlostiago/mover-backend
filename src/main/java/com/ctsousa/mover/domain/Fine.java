@@ -1,7 +1,6 @@
 package com.ctsousa.mover.domain;
 
 import com.ctsousa.mover.core.entity.*;
-import com.ctsousa.mover.core.mapper.MapperToEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class Fine implements MapperToEntity<FineEntity> {
+public class Fine extends DomainModel<FineEntity> {
     private String infractionNotice;
     private BigInteger numberRenainf;
     private BigInteger infractionCode;
@@ -33,6 +32,7 @@ public class Fine implements MapperToEntity<FineEntity> {
     @Override
     public FineEntity toEntity() {
         FineEntity entity = new FineEntity();
+        entity.setId(this.getId());
         entity.setInfractionNotice(infractionNotice);
         entity.setNumberRenainf(numberRenainf);
         entity.setInfractionCode(infractionCode);

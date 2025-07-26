@@ -36,4 +36,5 @@ public class FineResponse {
     private Long accountId;
     private Long cardId;
     private String status;
+    private Boolean syncronizedTransaction;
 }

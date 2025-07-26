@@ -72,23 +72,22 @@ public class BaseTransactionServiceImpl extends BaseServiceImpl<TransactionEntit
     }
 
     public TransactionEntity update(Transaction transaction) {
-        String signature = repository.findBySignature(transaction.getId());
+        TransactionEntity existingEntity = repository.findById(transaction.getId())
+                .orElseThrow(() -> new NotificationException("Erro ao atualizar, transação não encontrado."));
         TransactionEntity entity = transaction.toEntity();
-        entity.setSignature(signature);
-
-        TransactionEntity invoice;
-
-        if (Objects.nonNull(entity.getInvoiceId())) {
-            invoice = findById(entity.getInvoiceId());
-            return invoiceService.update(invoice, entity, true);
-        }
+        entity.setSignature(existingEntity.getSignature());
 
         if (Objects.nonNull(entity.getCard())) {
-            invoice = invoiceRepository.findBy(entity.getDueDate(), entity.getCard());
-            return invoiceService.update(invoice, entity, true);
+            return invoiceService.update(entity);
         }
 
-        return repository.save(entity);
+        TransactionEntity savedTransaction = repository.save(entity);
+
+        if (Objects.nonNull(existingEntity.getCard()) && Objects.isNull(entity.getCard())) {
+            invoiceService.updateBalance(existingEntity.getDueDate(), existingEntity.getCard());
+        }
+
+        return savedTransaction;
     }
 
     public TransactionEntity batchUpdate(Transaction transaction) {

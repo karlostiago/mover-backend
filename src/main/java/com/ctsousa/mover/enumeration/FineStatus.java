@@ -8,9 +8,9 @@ import java.util.Objects;
 @Getter
 public enum FineStatus {
 
-    PENDING("PENDENTE"),
-    PAID("PAGO"),
-    OVERDUE("EM ATRASO");
+    PENDING("Pendente"),
+    PAID("Pago"),
+    OVERDUE("Em atraso");
 
     private final String description;
 
@@ -19,10 +19,10 @@ public enum FineStatus {
     }
 
     public static String getDescriptionByStatus(LocalDate dueDate, Boolean paid) {
-        if (Objects.nonNull(paid)) {
+        if (Objects.nonNull(paid) && paid) {
             return FineStatus.PAID.getDescription();
         }
-        else if (dueDate != null && dueDate.isBefore(LocalDate.now())) {
+        else if (Objects.nonNull(dueDate) && dueDate.isBefore(LocalDate.now())) {
             return FineStatus.OVERDUE.getDescription();
         } else {
             return FineStatus.PENDING.getDescription();

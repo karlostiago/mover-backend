@@ -73,4 +73,7 @@ public class FineEntity extends AbstractEntity {
 
     @Transient
     private Boolean paid;
+
+    @Transient
+    private Long transactionId;
 }

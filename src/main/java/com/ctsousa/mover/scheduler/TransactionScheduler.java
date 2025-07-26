@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,18 +41,7 @@ public class TransactionScheduler implements Scheduler {
             log.info("Iniciado processamento de insert de lançamentos :: {} ", LocalDateTime.now());
             while (!queue.isEmpty()) {
                 List<TransactionEntity> entities = queue.poll();
-                for (TransactionEntity entity : entities) {
-                    if (entity.getInvoiceId() != null) {
-                        TransactionEntity invoice = invoiceService.findById(entity.getInvoiceId());
-                        invoiceService.update(invoice, entity, true);
-                        continue;
-                    }
-                    if (entity.getCard() != null) {
-                        TransactionEntity invoice = invoiceService.toGenerateSendNotification(entity);
-                        entity.setInvoiceId(invoice.getId());
-                    }
-                    repository.save(entity);
-                }
+               processTransactions(entities);
             }
 
             while (!pedingQueue.isEmpty()) {
@@ -59,12 +49,36 @@ public class TransactionScheduler implements Scheduler {
             }
 
             log.info("Finalizado processamento de insert de lançamentos :: {} ", LocalDateTime.now());
-
-
         } catch(Exception e) {
             log.error("Erro ao processar transações :: ", e);
         } finally {
             processing.set(false);
+        }
+    }
+
+    private void processTransactions(List<TransactionEntity> entities) {
+        if (entities.isEmpty()) return;
+
+        log.info("Processando um total de: {}, transações.", entities.size());
+        repository.saveAll(entities);
+
+        List<TransactionEntity> cardTransactions = entities.stream()
+                .filter(transaction -> Objects.nonNull(transaction.getCard()))
+                .toList();
+
+        if (!cardTransactions.isEmpty()) {
+            for (TransactionEntity transaction : cardTransactions) {
+                processInvoice(transaction);
+            }
+        }
+    }
+
+    private void processInvoice(TransactionEntity transaction) {
+        boolean exists = invoiceService.exists(transaction.getDueDate(), transaction.getCard());
+        if (exists) {
+            invoiceService.update(transaction);
+        } else {
+            invoiceService.save(transaction);
         }
     }
 

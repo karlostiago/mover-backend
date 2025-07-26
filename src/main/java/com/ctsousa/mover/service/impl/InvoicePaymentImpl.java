@@ -81,6 +81,7 @@ public class InvoicePaymentImpl extends BaseServiceImpl<TransactionEntity, Long>
         payment.setInvoice(true);
         payment.setPredicted(false);
         payment.setActive(true);
+        payment.setTransactionType("SINGLE");
         TransactionEntity savedPayment = save(payment);
         createPaymentDetail(savedPayment, invoice, value, account);
         return savedPayment;

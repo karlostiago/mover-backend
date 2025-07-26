@@ -23,6 +23,12 @@ public class Card extends DomainModel<CardEntity> {
     private String cardType;
     private Long accountId;
 
+    public Card() { }
+
+    public Card(Long id) {
+        setId(id);
+    }
+
     @Override
     public CardEntity toEntity() {
         CardEntity entity = new CardEntity();

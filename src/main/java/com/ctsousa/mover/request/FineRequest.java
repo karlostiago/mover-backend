@@ -2,6 +2,7 @@ package com.ctsousa.mover.request;
 
 import com.ctsousa.mover.core.annotation.DateFormat;
 import com.ctsousa.mover.core.deserializer.LocalDateDeserializer;
+import com.ctsousa.mover.core.deserializer.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ public class FineRequest {
     private BigInteger numberRenainf;
     private BigInteger infractionCode;
 
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime dateTimeOfCommitment;
 
     @DateFormat(message = "Data inválida")

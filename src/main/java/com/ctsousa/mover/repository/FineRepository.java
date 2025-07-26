@@ -2,7 +2,6 @@ package com.ctsousa.mover.repository;
 
 import com.ctsousa.mover.core.FineProjection;
 import com.ctsousa.mover.core.entity.FineEntity;
-import com.ctsousa.mover.core.entity.TransactionEntity;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,7 +23,8 @@ public interface FineRepository extends JpaRepository<FineEntity, Long> {
             	COALESCE(t.paid, FALSE) AS paid,
             	v.license_plate,
              	m.name AS model,
-             	b.name AS brand
+             	b.name AS brand,
+             	t.id AS transaction_id
             FROM tb_fine f
             JOIN tb_vehicle v ON v.id = f.vehicle_id
             JOIN tb_model m ON m.id = v.model_id

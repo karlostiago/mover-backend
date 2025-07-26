@@ -15,4 +15,5 @@ public interface FineProjection {
     String getLicensePlate();
     String getModel();
     String getBrand();
+    Long getTransactionId();
 }

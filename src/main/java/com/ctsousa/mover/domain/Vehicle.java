@@ -31,6 +31,12 @@ public class Vehicle extends DomainModel<VehicleEntity> {
     private String fuelType;
     private BigDecimal odometer;
 
+    public Vehicle() { }
+
+    public Vehicle(Long id) {
+        this.setId(id);
+    }
+
     @Override
     public VehicleEntity toEntity() {
         VehicleEntity entity = new VehicleEntity();

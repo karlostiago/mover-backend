@@ -1,10 +1,10 @@
 package com.ctsousa.mover.service;
 
-import com.ctsousa.mover.core.entity.AccountEntity;
+import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.service.BaseService;
+import com.ctsousa.mover.domain.Transaction;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -12,17 +12,13 @@ public interface InvoiceService extends BaseService<TransactionEntity, Long> {
 
     List<TransactionEntity> searchById(Long id);
 
-    TransactionEntity toGenerateSendNotification(TransactionEntity entity);
-
-    TransactionEntity toGenerateWithoutSendNotification(TransactionEntity entity);
-
-    TransactionEntity update(TransactionEntity invoice, TransactionEntity entity, boolean sendNotify);
+    TransactionEntity updateItem(Long id, TransactionEntity invoiceItem, boolean sendNotify);
 
     TransactionEntity schedule(final Long id);
 
     TransactionEntity undoScheduling(final Long id);
 
-    TransactionEntity pay(final Long id, LocalDate paymentDate, final BigDecimal value, final AccountEntity account);
+    TransactionEntity pay(Transaction transaction);
 
     TransactionEntity refund(final Long id);
 
@@ -31,4 +27,8 @@ public interface InvoiceService extends BaseService<TransactionEntity, Long> {
     TransactionEntity next(Long cardId, LocalDate dueDate);
 
     TransactionEntity previous(Long cardId, LocalDate dueDate);
+
+    Boolean exists(LocalDate dueDate, CardEntity card);
+
+    void updateBalance(LocalDate dueDate, CardEntity card);
 }
