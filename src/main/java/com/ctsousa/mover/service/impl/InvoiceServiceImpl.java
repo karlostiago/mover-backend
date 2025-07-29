@@ -6,6 +6,7 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
+import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.InvoicePaymentDetailRepository;
@@ -185,12 +186,39 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
             t.setPaymentDate(transaction.getPaymentDate());
         });
 
-        TransactionEntity existingInvoice = getInvoice(entities, transaction.getId());
+        TransactionEntity invoice = getInvoice(entities, transaction.getId());
 
-        entities.forEach(e -> repository.save(e));
+        BigDecimal totalItems = entities.stream()
+                .filter(t -> !t.getInvoice())
+                .map(TransactionEntity::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return invoicePaymentService.create(existingInvoice, existingInvoice.getAccount(),
-                transaction.getPaymentDate(), transaction.getValue());
+        if (totalItems.abs().compareTo(transaction.getValue()) == 0) {
+            entities.forEach(e -> repository.save(e));
+        }
+        else {
+            BigDecimal residualValue = transaction.getValue().add(totalItems);
+            invoice.setResidualValue(residualValue);
+            handleResidualValue(invoice, residualValue, transaction.getPaymentDate());
+//            entities.forEach(e -> repository.save(e));
+            return null;
+        }
+
+        return invoicePaymentService.create(invoice, invoice.getAccount(),
+            transaction.getPaymentDate(), transaction.getValue());
+    }
+
+    private void handleResidualValue(TransactionEntity invoice, BigDecimal residualValue, LocalDate paymentDate) {
+        if (residualValue.compareTo(BigDecimal.ZERO) == 0) return;
+
+        LocalDate nextMonth = invoice.getDueDate().plusMonths(1);
+        TransactionEntity nextInvoice = repository.findBy(nextMonth, invoice.getCard());
+        Boolean isCreated = false;
+
+        if (nextInvoice == null) {
+//            nextInvoice = save(invoice);
+            isCreated = true;
+        }
     }
 
     @Override
