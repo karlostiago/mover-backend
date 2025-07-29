@@ -68,9 +68,10 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     public TransactionEntity save(TransactionEntity entity) {
         CardEntity card = cardService.findById(entity.getCard().getId());
         LocalDate dueDate = entity.getDueDate();
-        var invoiceCreated = repository.save(create(entity, createDescription(card, dueDate)));
-        entity.setInvoiceId(invoiceCreated.getId());
-        return repository.save(entity);
+        var invoice = repository.save(create(entity, createDescription(card, dueDate)));
+        entity.setInvoiceId(invoice.getId());
+        repository.save(entity);
+        return invoice;
     }
 
     @Override
@@ -100,39 +101,32 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         TransactionEntity existingInvoice = repository.findById(invoiceItem.getInvoiceId())
                 .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
 
-        TransactionEntity existingItem = findById(id);
+        TransactionEntity invoiceItemExists = findById(id);
 
-        Boolean differentDueDate = !invoiceItem.getDueDate().isEqual(existingItem.getDueDate());
-        Boolean differentCard = Objects.nonNull(invoiceItem.getCard()) && Objects.nonNull(existingItem.getCard())
-                && !invoiceItem.getCard().getId().equals(existingItem.getCard().getId());
-
-        if (differentCard || differentDueDate) {
-            return handleMoveItem();
+        if (isDueDateOrCardChanged(invoiceItem, invoiceItemExists)) {
+            return changeInvoiceItem(invoiceItemExists, invoiceItem);
         }
 
-        BeanUtils.copyProperties(invoiceItem, existingItem, "id", "signature");
+        BeanUtils.copyProperties(invoiceItem, invoiceItemExists, "id", "signature");
 
-        if (Objects.isNull(existingItem.getCard())) {
-            existingItem.setInvoiceId(null);
+        if (Objects.isNull(invoiceItemExists.getCard())) {
+            invoiceItemExists.setInvoiceId(null);
             invoiceItem.setInvoiceId(existingInvoice.getInvoiceId());
         }
 
         List<TransactionEntity> invoiceItems = getInvoiceItems(existingInvoice);
         invoiceItems.remove(invoiceItem);
 
-        if (Objects.nonNull(existingItem.getCard())) {
-            invoiceItems.add(existingItem);
+        if (Objects.nonNull(invoiceItemExists.getCard())) {
+            invoiceItems.add(invoiceItemExists);
         }
 
         BigDecimal value = recalculate(invoiceItems);
         existingInvoice.setValue(value);
         updateTransactionTypeAndTypeCategoryWhenCredit(value, existingInvoice);
-        repository.saveAll(List.of(existingInvoice, existingItem));
-        return existingItem;
-    }
+        repository.saveAll(List.of(existingInvoice, invoiceItemExists));
 
-    private TransactionEntity handleMoveItem() {
-        throw new NotificationException("Ação não suportada.");
+        return invoiceItemExists;
     }
 
     @Override
@@ -181,13 +175,6 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
                 .orElseThrow(() -> new NotificationException("Não existe fatura para desfazer agendamento."));
     }
 
-    private TransactionEntity getInvoice(List<TransactionEntity> entities, Long id) {
-        return entities.stream()
-                .filter(t -> t.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
-    }
-
     @Override
     public TransactionEntity pay(Transaction transaction) {
         List<TransactionEntity> entities = searchById(transaction.getId());
@@ -231,26 +218,6 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         return existingInvoice;
     }
 
-    private TransactionEntity refundItem(Long id) {
-        InvoicePaymentDetailEntity paymentDetail = invoicePaymentDetailRepository.findById(id)
-                .orElseThrow(() -> new NotificationException("Detalhe de pagamento não encontrado"));
-
-        List<InvoicePaymentDetailEntity> details = invoicePaymentDetailRepository.findByInvoiceId(paymentDetail.getInvoice().getId());
-        List<TransactionEntity> entities = searchById(paymentDetail.getInvoice().getId());
-
-        details.removeIf(detail -> detail.getId().equals(paymentDetail.getId()));
-
-        invoicePaymentDetailRepository.delete(paymentDetail);
-        invoicePaymentService.deleteById(paymentDetail.getPayment().getId());
-
-        if (details.isEmpty()) {
-            updateRefundAndPaidAndResidualValue(entities);
-            entities.forEach(t -> repository.save(t));
-        }
-
-        return paymentDetail.getInvoice();
-    }
-
     @Override
     public TransactionEntity next(Long cardId, LocalDate dueDate) {
         CardEntity entity = cardService.findById(cardId);
@@ -287,6 +254,80 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
     public Boolean exists(LocalDate dueDate, CardEntity card) {
         TransactionEntity invoice = repository.findBy(dueDate, card);
         return invoice != null;
+    }
+
+    private Boolean isDueDateOrCardChanged(TransactionEntity invoiceItem, TransactionEntity existingItem) {
+        Boolean differentDueDate = !invoiceItem.getDueDate().isEqual(existingItem.getDueDate());
+        Boolean differentCard = Objects.nonNull(invoiceItem.getCard()) && Objects.nonNull(existingItem.getCard())
+                && !invoiceItem.getCard().getId().equals(existingItem.getCard().getId());
+        return differentCard || differentDueDate;
+    }
+
+    private TransactionEntity getInvoice(List<TransactionEntity> entities, Long id) {
+        return entities.stream()
+                .filter(t -> t.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
+    }
+
+    private TransactionEntity refundItem(Long id) {
+        InvoicePaymentDetailEntity paymentDetail = invoicePaymentDetailRepository.findById(id)
+                .orElseThrow(() -> new NotificationException("Detalhe de pagamento não encontrado"));
+
+        List<InvoicePaymentDetailEntity> details = invoicePaymentDetailRepository.findByInvoiceId(paymentDetail.getInvoice().getId());
+        List<TransactionEntity> entities = searchById(paymentDetail.getInvoice().getId());
+
+        details.removeIf(detail -> detail.getId().equals(paymentDetail.getId()));
+
+        invoicePaymentDetailRepository.delete(paymentDetail);
+        invoicePaymentService.deleteById(paymentDetail.getPayment().getId());
+
+        if (details.isEmpty()) {
+            updateRefundAndPaidAndResidualValue(entities);
+            entities.forEach(t -> repository.save(t));
+        }
+
+        return paymentDetail.getInvoice();
+    }
+
+    private TransactionEntity changeInvoiceItem(TransactionEntity previousInvoiceItem, TransactionEntity currentInvoiceItem) {
+        TransactionEntity previousInvoice = repository.findById(previousInvoiceItem.getInvoiceId())
+                .orElseThrow(() -> new NotificationException("Fatura anterior não encontrada"));
+
+        List<TransactionEntity> previousItems = getInvoiceItems(previousInvoice);
+        previousInvoiceItem.setInvoiceId(null);
+        previousItems.remove(previousInvoiceItem);
+
+        updateInvoiceAndInvoiceItem(previousInvoice, previousInvoiceItem, previousItems);
+
+        TransactionEntity currentInvoice = repository.findBy(currentInvoiceItem.getDueDate(), currentInvoiceItem.getCard());
+        boolean isCreated = false;
+
+        if (currentInvoice == null) {
+            currentInvoiceItem.setSignature(previousInvoice.getSignature());
+            currentInvoice = save(currentInvoiceItem);
+            isCreated = true;
+        }
+
+        BeanUtils.copyProperties(previousInvoiceItem, currentInvoiceItem, "id", "dueDate");
+        List<TransactionEntity> currentItems = getInvoiceItems(currentInvoice);
+        currentInvoiceItem.setInvoiceId(currentInvoice.getId());
+
+        if (!isCreated) {
+            currentItems.add(currentInvoiceItem);
+        }
+
+        updateInvoiceAndInvoiceItem(currentInvoice, currentInvoiceItem, currentItems);
+
+        return currentInvoiceItem;
+    }
+
+    private void updateInvoiceAndInvoiceItem(TransactionEntity invoice, TransactionEntity invoiceItem, List<TransactionEntity> invoiceItems) {
+        BigDecimal value = recalculate(invoiceItems);
+        invoice.setValue(value);
+        updateTransactionTypeAndTypeCategoryWhenCredit(value, invoice);
+        repository.saveAll(List.of(invoice, invoiceItem));
+
     }
 
     private BigDecimal recalculate(List<TransactionEntity> invoiceItems) {

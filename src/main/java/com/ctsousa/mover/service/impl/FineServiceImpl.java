@@ -57,7 +57,7 @@ public class FineServiceImpl extends BaseServiceImpl<FineEntity, Long> implement
             throw new NotificationException("Multa já paga, não é possível atualizar.");
         }
 
-        if (Objects.nonNull(entity.getCard()) && entity.getCard().getId() == null) {
+        if (Objects.nonNull(entity.getCard()) && Objects.isNull(entity.getCard().getId())) {
             entity.setCard(null);
         }
 
@@ -67,13 +67,7 @@ public class FineServiceImpl extends BaseServiceImpl<FineEntity, Long> implement
         entity.setSignature(updatedTransaction.getSignature());
         fineRepository.save(entity);
 
-        Boolean differentDueDate = !transaction.getDueDate().isEqual(existingTransaction.getDueDate())
-                && Objects.nonNull(transaction.getCard());
-
-        Boolean differentCard = Objects.nonNull(transaction.getCard()) && Objects.nonNull(existingTransaction.getCard())
-            && !transaction.getCard().getId().equals(existingTransaction.getCard().getId());
-        
-        if (differentDueDate || differentCard) {
+        if (isDueDateOrCardChanged(transaction, existingTransaction)) {
             invoiceService.updateBalance(existingTransaction.getDueDate(), existingTransaction.getCard());
         }
 
@@ -129,6 +123,14 @@ public class FineServiceImpl extends BaseServiceImpl<FineEntity, Long> implement
                     return fine;
                 })
                 .toList();
+    }
+
+    private boolean isDueDateOrCardChanged(Transaction transaction, TransactionEntity existingTransaction) {
+        Boolean differentDueDate = !transaction.getDueDate().isEqual(existingTransaction.getDueDate())
+                && Objects.nonNull(transaction.getCard());
+        Boolean differentCard = Objects.nonNull(transaction.getCard()) && Objects.nonNull(existingTransaction.getCard())
+                && !transaction.getCard().getId().equals(existingTransaction.getCard().getId());
+        return differentDueDate || differentCard;
     }
 
     private SubCategoryEntity getSubCategory() {

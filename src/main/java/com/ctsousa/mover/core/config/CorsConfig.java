@@ -22,10 +22,11 @@ public class CorsConfig implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        response.setHeader("Access-Control-Allow-Origin", enabledOrigin(request));
-        response.setHeader("Access-Control-Allow-Credentials", "true");
+        String origin = enabledOrigin(request);
 
-        response.setHeader("Content-Security-Policy", "frame-ancestors " + enabledOrigin(request));
+        response.setHeader("Access-Control-Allow-Origin", origin);
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Content-Security-Policy", "frame-ancestors " + origin);
 
         if ("OPTIONS".equals(request.getMethod()) && isEnabledOrigin(request)) {
             response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, PATCH, OPTIONS");
@@ -42,12 +43,11 @@ public class CorsConfig implements Filter {
         String origemPermitida = null;
 
         for (String origin : CorsUtil.ALLOWED_ORIGINS) {
-            if (request.getHeader(ORIGIN) != null && request.getHeader(ORIGIN).equals(origin.trim())) {
+            if (request.getHeader(ORIGIN) != null && request.getHeader(ORIGIN).equalsIgnoreCase(origin.trim())) {
                 origemPermitida = origin;
                 break;
             }
         }
-
         return origemPermitida;
     }
 
