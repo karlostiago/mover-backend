@@ -7,7 +7,6 @@ import com.ctsousa.mover.core.entity.TransactionEntity;
 import com.ctsousa.mover.core.exception.notification.NotificationException;
 import com.ctsousa.mover.core.exception.severity.Severity;
 import com.ctsousa.mover.core.service.impl.BaseServiceImpl;
-import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.Transaction;
 import com.ctsousa.mover.enumeration.TypeCategory;
 import com.ctsousa.mover.repository.InvoicePaymentDetailRepository;
@@ -233,15 +232,19 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
                 .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
         updateRefundAndPaidAndResidualValue(entities);
 
-//        entities.forEach(t -> repository.save(t));
-//
-//        invoicePaymentService.findByPaymentDetails(existingInvoice.getId())
-//                .forEach(detail -> {
-//                    invoicePaymentService.deletePaymentDetail(detail.getId());
-//                    super.deleteById(detail.getPayment().getId());
-//                });
+        List<InvoicePaymentDetailEntity> paymentDetails = invoicePaymentService.findByPaymentDetails(existingInvoice.getId());
+        BigDecimal value = paymentDetails.stream()
+                .map(InvoicePaymentDetailEntity::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        refundResidualValue(existingInvoice, existingInvoice.getResidualValue());
+        entities.forEach(t -> repository.save(t));
+
+        paymentDetails.forEach(paymentDetail -> {
+            invoicePaymentService.deletePaymentDetail(paymentDetail.getId());
+            super.deleteById(paymentDetail.getPayment().getId());
+        });
+
+        refundResidualValue(existingInvoice, value);
         return existingInvoice;
     }
 
