@@ -1,5 +1,6 @@
 package com.ctsousa.mover.service.impl;
 
+import com.ctsousa.mover.core.entity.AccountEntity;
 import com.ctsousa.mover.core.entity.CardEntity;
 import com.ctsousa.mover.core.entity.InvoicePaymentDetailEntity;
 import com.ctsousa.mover.core.entity.TransactionEntity;
@@ -187,38 +188,35 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         });
 
         TransactionEntity invoice = getInvoice(entities, transaction.getId());
+        handleResidualValue(invoice, transaction.getValue());
+        entities.forEach(e -> repository.save(e));
 
-        BigDecimal totalItems = entities.stream()
-                .filter(t -> !t.getInvoice())
-                .map(TransactionEntity::getValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (totalItems.abs().compareTo(transaction.getValue()) == 0) {
-            entities.forEach(e -> repository.save(e));
-        }
-        else {
-            BigDecimal residualValue = transaction.getValue().add(totalItems);
-            invoice.setResidualValue(residualValue);
-            handleResidualValue(invoice, residualValue, transaction.getPaymentDate());
-//            entities.forEach(e -> repository.save(e));
-            return null;
-        }
-
-        return invoicePaymentService.create(invoice, invoice.getAccount(),
+        return invoicePaymentService.create(invoice, new AccountEntity(transaction.getAccount().getId()),
             transaction.getPaymentDate(), transaction.getValue());
     }
 
-    private void handleResidualValue(TransactionEntity invoice, BigDecimal residualValue, LocalDate paymentDate) {
-        if (residualValue.compareTo(BigDecimal.ZERO) == 0) return;
+    private void handleResidualValue(TransactionEntity invoice, BigDecimal value) {
+        BigDecimal residualValue = invoice.getResidualValue().compareTo(BigDecimal.ZERO) == 0
+                ? value.add(invoice.getValue())
+                : value.add(invoice.getResidualValue());
+        invoice.setResidualValue(residualValue);
 
-        LocalDate nextMonth = invoice.getDueDate().plusMonths(1);
-        TransactionEntity nextInvoice = repository.findBy(nextMonth, invoice.getCard());
-        Boolean isCreated = false;
+        if (invoice.getResidualValue().compareTo(BigDecimal.ZERO) == 0) return;
+
+        LocalDate nextDueDate = invoice.getDueDate().plusMonths(1);
+        TransactionEntity nextInvoice = repository.findBy(nextDueDate, invoice.getCard());
 
         if (nextInvoice == null) {
-//            nextInvoice = save(invoice);
-            isCreated = true;
+            nextInvoice = create(invoice, createDescription(invoice.getCard(), nextDueDate));
+            nextInvoice.setDueDate(nextDueDate);
+            nextInvoice.setPaymentDate(null);
+            nextInvoice.setPaid(false);
+            nextInvoice.setResidualValue(BigDecimal.ZERO);
         }
+
+        nextInvoice.setValue(invoice.getResidualValue());
+        updateTransactionTypeAndTypeCategoryWhenCredit(nextInvoice.getValue(), nextInvoice);
+        repository.save(nextInvoice);
     }
 
     @Override
@@ -235,15 +233,22 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
                 .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
         updateRefundAndPaidAndResidualValue(entities);
 
-        entities.forEach(t -> repository.save(t));
+//        entities.forEach(t -> repository.save(t));
+//
+//        invoicePaymentService.findByPaymentDetails(existingInvoice.getId())
+//                .forEach(detail -> {
+//                    invoicePaymentService.deletePaymentDetail(detail.getId());
+//                    super.deleteById(detail.getPayment().getId());
+//                });
 
-        invoicePaymentService.findByPaymentDetails(existingInvoice.getId())
-                .forEach(detail -> {
-                    invoicePaymentService.deletePaymentDetail(detail.getId());
-                    super.deleteById(detail.getPayment().getId());
-                });
-
+        refundResidualValue(existingInvoice, existingInvoice.getResidualValue());
         return existingInvoice;
+    }
+
+    private void refundResidualValue(TransactionEntity invoice, BigDecimal value) {
+        BigDecimal residualValue = value.add(invoice.getValue());
+        invoice.setResidualValue(residualValue);
+        System.out.println("");
     }
 
     @Override
@@ -302,18 +307,19 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         InvoicePaymentDetailEntity paymentDetail = invoicePaymentDetailRepository.findById(id)
                 .orElseThrow(() -> new NotificationException("Detalhe de pagamento não encontrado"));
 
-        List<InvoicePaymentDetailEntity> details = invoicePaymentDetailRepository.findByInvoiceId(paymentDetail.getInvoice().getId());
-        List<TransactionEntity> entities = searchById(paymentDetail.getInvoice().getId());
-
-        details.removeIf(detail -> detail.getId().equals(paymentDetail.getId()));
-
-        invoicePaymentDetailRepository.delete(paymentDetail);
-        invoicePaymentService.deleteById(paymentDetail.getPayment().getId());
-
-        if (details.isEmpty()) {
-            updateRefundAndPaidAndResidualValue(entities);
-            entities.forEach(t -> repository.save(t));
-        }
+        refundResidualValue(paymentDetail.getInvoice(), paymentDetail.getValue());
+//        List<InvoicePaymentDetailEntity> details = invoicePaymentDetailRepository.findByInvoiceId(paymentDetail.getInvoice().getId());
+//        List<TransactionEntity> entities = searchById(paymentDetail.getInvoice().getId());
+//
+//        details.removeIf(detail -> detail.getId().equals(paymentDetail.getId()));
+//
+//        invoicePaymentDetailRepository.delete(paymentDetail);
+//        invoicePaymentService.deleteById(paymentDetail.getPayment().getId());
+//
+//        if (details.isEmpty()) {
+//            updateRefundAndPaidAndResidualValue(entities);
+//            entities.forEach(t -> repository.save(t));
+//        }
 
         return paymentDetail.getInvoice();
     }
