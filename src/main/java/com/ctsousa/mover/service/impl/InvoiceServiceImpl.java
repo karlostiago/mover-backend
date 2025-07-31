@@ -22,10 +22,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ctsousa.mover.core.util.DateUtil.monthInFull;
@@ -187,18 +184,90 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         });
 
         TransactionEntity invoice = getInvoice(entities, transaction.getId());
-        handleResidualValue(invoice, transaction.getValue());
+        TransactionEntity payment = invoicePaymentService.create(invoice, new AccountEntity(transaction.getAccount().getId()),
+                transaction.getPaymentDate(), transaction.getValue());
+        handleResidualValue(invoice);
         entities.forEach(e -> repository.save(e));
 
-        return invoicePaymentService.create(invoice, new AccountEntity(transaction.getAccount().getId()),
-            transaction.getPaymentDate(), transaction.getValue());
+        return payment;
     }
 
-    private void handleResidualValue(TransactionEntity invoice, BigDecimal value) {
-        BigDecimal residualValue = invoice.getResidualValue().compareTo(BigDecimal.ZERO) == 0
-                ? value.add(invoice.getValue())
-                : value.add(invoice.getResidualValue());
-        invoice.setResidualValue(residualValue);
+    @Override
+    public TransactionEntity refund(Long id) {
+        List<TransactionEntity> entities = searchById(id);
+
+        if (entities.isEmpty()) {
+            return refundItem(id);
+        }
+
+        TransactionEntity existingInvoice = getInvoice(entities, id);
+        updateRefundAndPaidAndResidualValue(entities);
+
+        List<InvoicePaymentDetailEntity> paymentDetails = invoicePaymentService.findByPaymentDetails(existingInvoice.getId());
+        entities.forEach(t -> repository.save(t));
+
+        paymentDetails.forEach(paymentDetail -> {
+            invoicePaymentService.deletePaymentDetail(paymentDetail.getId());
+            super.deleteById(paymentDetail.getPayment().getId());
+        });
+
+        refundResidualValue(existingInvoice, BigDecimal.ZERO);
+        return existingInvoice;
+    }
+
+    @Override
+    public TransactionEntity next(Long cardId, LocalDate dueDate) {
+        CardEntity entity = cardService.findById(cardId);
+        TransactionEntity invoice = null;
+
+        for (int month = 1; month <= 12; month++) {
+            LocalDate nextDueDate = dueDate.plusMonths(month);
+            invoice = findNextInvoice(nextDueDate, entity);
+            if (invoice != null) break;
+        }
+
+        if (invoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
+
+        return invoice;
+    }
+
+    @Override
+    public TransactionEntity previous(Long cardId, LocalDate dueDate) {
+        CardEntity entity = cardService.findById(cardId);
+        TransactionEntity invoice = null;
+
+        for (int month = 1; month <= 12; month++) {
+            LocalDate nextDueDate = dueDate.minusMonths(month);
+            invoice = findNextInvoice(nextDueDate, entity);
+            if (invoice != null) break;
+        }
+
+        if (invoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
+
+        return invoice;
+    }
+
+    @Override
+    public Boolean exists(LocalDate dueDate, CardEntity card) {
+        TransactionEntity invoice = repository.findBy(dueDate, card);
+        return invoice != null;
+    }
+
+    private TransactionEntity findNextInvoice(LocalDate dueDate, CardEntity entity) {
+        return Optional.ofNullable(repository.next(dueDate, entity))
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.get(0))
+                .orElse(null);
+
+    }
+
+    private void handleResidualValue(TransactionEntity invoice) {
+        List<InvoicePaymentDetailEntity> paymentDetails = invoicePaymentService.findByPaymentDetails(invoice.getId());
+        BigDecimal amountPaid = paymentDetails.stream()
+                .map(InvoicePaymentDetailEntity::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        invoice.setResidualValue(amountPaid.add(invoice.getValue()));
 
         if (invoice.getResidualValue().compareTo(BigDecimal.ZERO) == 0) return;
 
@@ -218,78 +287,20 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         repository.save(nextInvoice);
     }
 
-    @Override
-    public TransactionEntity refund(Long id) {
-        List<TransactionEntity> entities = searchById(id);
-
-        if (entities.isEmpty()) {
-            return refundItem(id);
-        }
-
-        TransactionEntity existingInvoice = entities.stream()
-                .filter(t -> t.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
-        updateRefundAndPaidAndResidualValue(entities);
-
-        List<InvoicePaymentDetailEntity> paymentDetails = invoicePaymentService.findByPaymentDetails(existingInvoice.getId());
-        BigDecimal value = paymentDetails.stream()
-                .map(InvoicePaymentDetailEntity::getValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        entities.forEach(t -> repository.save(t));
-
-        paymentDetails.forEach(paymentDetail -> {
-            invoicePaymentService.deletePaymentDetail(paymentDetail.getId());
-            super.deleteById(paymentDetail.getPayment().getId());
-        });
-
-        refundResidualValue(existingInvoice, value);
-        return existingInvoice;
-    }
-
     private void refundResidualValue(TransactionEntity invoice, BigDecimal value) {
-        BigDecimal residualValue = value.add(invoice.getValue());
-        invoice.setResidualValue(residualValue);
-        System.out.println("");
-    }
+        LocalDate nextDueDate = invoice.getDueDate().plusMonths(1);
+        TransactionEntity nextInvoice = repository.findBy(nextDueDate, invoice.getCard());
 
-    @Override
-    public TransactionEntity next(Long cardId, LocalDate dueDate) {
-        CardEntity entity = cardService.findById(cardId);
-        TransactionEntity invoice = null;
+        if (nextInvoice == null) return;
 
-        for (int month = 1; month <= 12; month++) {
-            LocalDate nextDueDate = dueDate.plusMonths(month);
-            invoice = repository.findBy(nextDueDate, entity);
-            if (invoice != null) break;
-        }
+        BigDecimal residualValue = value.compareTo(BigDecimal.ZERO) == 0
+                ? BigDecimal.ZERO
+                : value.add(invoice.getValue());
 
-        if (invoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
-
-        return invoice;
-    }
-
-    @Override
-    public TransactionEntity previous(Long cardId, LocalDate dueDate) {
-        CardEntity entity = cardService.findById(cardId);
-        TransactionEntity invoice = null;
-
-        for (int month = 1; month <= 12; month++) {
-            LocalDate nextDueDate = dueDate.minusMonths(month);
-            invoice = repository.findBy(nextDueDate, entity);
-            if (invoice != null) break;
-        }
-
-        if (invoice == null) throw new NotificationException("Não há mais faturas.", Severity.INFO);
-
-        return invoice;
-    }
-
-    @Override
-    public Boolean exists(LocalDate dueDate, CardEntity card) {
-        TransactionEntity invoice = repository.findBy(dueDate, card);
-        return invoice != null;
+        nextInvoice.setValue(residualValue);
+        invoice.setResidualValue(nextInvoice.getValue());
+        updateTransactionTypeAndTypeCategoryWhenCredit(nextInvoice.getValue(), nextInvoice);
+        repository.save(nextInvoice);
     }
 
     private Boolean isDueDateOrCardChanged(TransactionEntity invoiceItem, TransactionEntity existingItem) {
@@ -299,30 +310,27 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         return differentCard || differentDueDate;
     }
 
-    private TransactionEntity getInvoice(List<TransactionEntity> entities, Long id) {
-        return entities.stream()
-                .filter(t -> t.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
-    }
-
     private TransactionEntity refundItem(Long id) {
         InvoicePaymentDetailEntity paymentDetail = invoicePaymentDetailRepository.findById(id)
                 .orElseThrow(() -> new NotificationException("Detalhe de pagamento não encontrado"));
 
-        refundResidualValue(paymentDetail.getInvoice(), paymentDetail.getValue());
-//        List<InvoicePaymentDetailEntity> details = invoicePaymentDetailRepository.findByInvoiceId(paymentDetail.getInvoice().getId());
-//        List<TransactionEntity> entities = searchById(paymentDetail.getInvoice().getId());
-//
-//        details.removeIf(detail -> detail.getId().equals(paymentDetail.getId()));
-//
-//        invoicePaymentDetailRepository.delete(paymentDetail);
-//        invoicePaymentService.deleteById(paymentDetail.getPayment().getId());
-//
-//        if (details.isEmpty()) {
-//            updateRefundAndPaidAndResidualValue(entities);
-//            entities.forEach(t -> repository.save(t));
-//        }
+        List<TransactionEntity> entities = searchById(paymentDetail.getInvoice().getId());
+        TransactionEntity invoice = getInvoice(entities, paymentDetail.getInvoice().getId());
+
+        invoicePaymentDetailRepository.delete(paymentDetail);
+        invoicePaymentService.deleteById(paymentDetail.getPayment().getId());
+        List<InvoicePaymentDetailEntity> details = invoicePaymentDetailRepository.findByInvoiceId(paymentDetail.getInvoice().getId());
+
+        BigDecimal refundValue = details.stream()
+                .map(InvoicePaymentDetailEntity::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        refundResidualValue(invoice, refundValue);
+
+        if (details.isEmpty()) {
+            updateRefundAndPaidAndResidualValue(entities);
+        }
+
+        entities.forEach(repository::save);
 
         return paymentDetail.getInvoice();
     }
@@ -399,6 +407,13 @@ public class InvoiceServiceImpl extends BaseServiceImpl<TransactionEntity, Long>
         List<TransactionEntity> entities = searchById(id);
         entities.forEach(t -> t.setScheduled(schedule));
         return entities;
+    }
+
+    private TransactionEntity getInvoice(List<TransactionEntity> entities, Long id) {
+        return entities.stream()
+                .filter(t -> t.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new NotificationException("Fatura não encontrada"));
     }
 
     private TransactionEntity create(TransactionEntity entity, String description) {
