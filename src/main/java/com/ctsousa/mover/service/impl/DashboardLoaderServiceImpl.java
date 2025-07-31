@@ -14,10 +14,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
@@ -96,26 +99,45 @@ public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
                 .filter(CardEntity::getActive)
                 .toList();
 
-        boolean allPreviousPaid = dashboardDataReaderService.allPreviousInvoicesPaid(cards, dtInitial, dtFinal);
+        List<TransactionEntity> invoices = dashboardDataReaderService.findAllInvoices(dtInitial, dtFinal, cards)
+                .stream()
+                .filter(transaction -> transaction.getValue().compareTo(BigDecimal.ZERO) != 0)
+                .toList();
 
-        List<CardDashboardResponse> response = new ArrayList<>(cards.size());
-        for (CardEntity card : cards) {
-            InvoiceProjection projection = dashboardDataReaderService.calculateInvoiceValue(card, dtInitial, dtFinal);
+        Map<CardEntity, TransactionEntity> invoiceMap = invoices.stream()
+                .collect(Collectors.toMap(TransactionEntity::getCard, Function.identity(), (existing, replacement) -> existing));
 
-            if (projection.getPaid() == 1 && !allPreviousPaid) {
-                projection = dashboardDataReaderService.calculateInvoiceValue(card, dtInitial.plusMonths(1), dtFinal.plusMonths(1));
-            }
+        boolean hasInvoices = !invoiceMap.isEmpty();
 
-            response.add(CardDashboardResponse.builder()
-                    .description(card.getName())
-                    .loading(true)
-                    .iconPath(Icon.toName(card.getIcon()).getUrlImage())
+        return cards.stream()
+                .map(card -> buildCardResponse(card, invoiceMap.get(card), dtInitial, dtFinal, hasInvoices))
+                .toList();
+    }
+
+    private CardDashboardResponse buildCardResponse(CardEntity card, TransactionEntity invoice, LocalDate dtInitial, LocalDate dtFinal, boolean hasInvoices) {
+        CardDashboardResponse.CardDashboardResponseBuilder builder = CardDashboardResponse.builder()
+                .description(card.getName())
+                .loading(true)
+                .iconPath(Icon.toName(card.getIcon()).getUrlImage());
+
+        if (invoice != null) {
+            return builder
+                    .value(invoice.getValue())
+                    .paid(invoice.getPaid())
+                    .dueDate(invoice.getDueDate())
+                    .build();
+        } else {
+            LocalDate projectionInitial = !hasInvoices ? dtInitial.plusMonths(1) : dtInitial;
+            LocalDate projectionFinal = !hasInvoices ? dtFinal.plusMonths(1) : dtFinal;
+
+            InvoiceProjection projection = dashboardDataReaderService
+                    .calculateInvoiceValue(card, projectionInitial, projectionFinal);
+
+            return builder
                     .value(projection.getValue())
                     .paid(projection.getPaid() == 1)
                     .dueDate(projection.getDueDate())
-                    .build());
+                    .build();
         }
-
-        return response;
     }
 }

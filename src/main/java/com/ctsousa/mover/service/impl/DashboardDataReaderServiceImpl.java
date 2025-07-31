@@ -6,6 +6,7 @@ import com.ctsousa.mover.enumeration.Situation;
 import com.ctsousa.mover.repository.*;
 import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.DashboardDataReaderService;
+import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +25,10 @@ public class DashboardDataReaderServiceImpl implements DashboardDataReaderServic
     private final ContractRepository contractRepository;
     private final VehicleRepository vehicleRepository;
     private final BalanceRepository balanceRepository;
+    private final InvoiceRepository invoiceRepository;
 
-    public DashboardDataReaderServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, CardService cardService, ContractRepository contractRepository, VehicleRepository vehicleRepository, BalanceRepository balanceRepository) {
+    public DashboardDataReaderServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository, CardService cardService, ContractRepository contractRepository, VehicleRepository vehicleRepository, BalanceRepository balanceRepository, InvoiceRepository invoiceRepository) {
+        this.invoiceRepository = invoiceRepository;
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.cardService = cardService;
@@ -90,5 +93,11 @@ public class DashboardDataReaderServiceImpl implements DashboardDataReaderServic
         List<Long> cardIds = entities.stream().map(CardEntity::getId)
                 .collect(Collectors.toList());
         return balanceRepository.existsInvoiceToPay(cardIds, dtInicial, dtFinal) == 1L;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<TransactionEntity> findAllInvoices(LocalDate dtInitial, LocalDate dtFinal, List<CardEntity> cards) {
+        return invoiceRepository.findBy(dtInitial, dtFinal, cards);
     }
 }
