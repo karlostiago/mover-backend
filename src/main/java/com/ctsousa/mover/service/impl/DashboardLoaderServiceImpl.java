@@ -2,6 +2,7 @@ package com.ctsousa.mover.service.impl;
 
 import com.ctsousa.mover.core.InvoiceProjection;
 import com.ctsousa.mover.core.entity.*;
+import com.ctsousa.mover.core.util.DateUtil;
 import com.ctsousa.mover.domain.DashboardCache;
 import com.ctsousa.mover.domain.DashboardSummary;
 import com.ctsousa.mover.enumeration.Icon;
@@ -125,8 +126,10 @@ public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
             }
         } else {
             for (CardEntity card : cards) {
-                responses.add(buildCardResponse(card, BigDecimal.ZERO, Boolean.FALSE,
-                        lowestDueDate == null ? LocalDate.now().plusMonths(1) : lowestDueDate));
+                InvoiceProjection projection = dashboardDataReaderService
+                        .calculateInvoiceValue(card, period.withDayOfMonth(1).plusMonths(1), period.plusMonths(1));
+                responses.add(buildCardResponse(card, projection.getValue(), projection.getPaid() == 1,
+                        projection.getDueDate() == null ? LocalDate.now().plusMonths(1) : projection.getDueDate()));
             }
         }
 
