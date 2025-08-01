@@ -53,25 +53,6 @@ public interface BalanceRepository extends JpaRepository<TransactionEntity, Long
     InvoiceProjection invoiceValue(@Param("cardId") Long cardId,
                                    @Param("dtInicial") LocalDate dtInicial, @Param("dtFinal") LocalDate dtFinal);
 
-    @Query(value = """
-            SELECT EXISTS(
-               SELECT 1
-               FROM tb_transaction t
-               WHERE t.card_id IN (:cardsId)
-                 AND t.invoice
-                 AND t.due_date BETWEEN :dtInicial AND :dtFinal
-                 AND t.paid = 0
-                 AND NOT EXISTS (
-                   SELECT distinct ipd.invoice_id
-                   FROM tb_invoice_payment_detail ipd
-                   WHERE ipd.invoice_id = t.id
-                 )
-            )
-            """, nativeQuery = true)
-    Long existsInvoiceToPay(@Param("cardsId") List<Long> cardsId,
-                            @Param("dtInicial") LocalDate dtInicial,
-                            @Param("dtFinal") LocalDate dtFinal);
-
     @Deprecated
     @Query(value = "SELECT SUM(t.value * -1) AS DESPESA FROM tb_transaction t WHERE AND t.invoice_id IS NUL AND t.category_type = 'EXPENSE'", nativeQuery = true)
     BigDecimal expenseBalance();

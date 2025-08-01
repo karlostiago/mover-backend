@@ -6,7 +6,6 @@ import com.ctsousa.mover.enumeration.Situation;
 import com.ctsousa.mover.repository.*;
 import com.ctsousa.mover.service.CardService;
 import com.ctsousa.mover.service.DashboardDataReaderService;
-import com.ctsousa.mover.service.InvoiceService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class DashboardDataReaderServiceImpl implements DashboardDataReaderService {
@@ -85,14 +83,6 @@ public class DashboardDataReaderServiceImpl implements DashboardDataReaderServic
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<VehicleEntity> onlyVehicleAvailable() {
         return vehicleRepository.onlyAvailable();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public boolean allPreviousInvoicesPaid(List<CardEntity> entities, LocalDate dtInicial, LocalDate dtFinal) {
-        List<Long> cardIds = entities.stream().map(CardEntity::getId)
-                .collect(Collectors.toList());
-        return balanceRepository.existsInvoiceToPay(cardIds, dtInicial, dtFinal) == 1L;
     }
 
     @Override
