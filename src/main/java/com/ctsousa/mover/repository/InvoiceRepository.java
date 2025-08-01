@@ -65,13 +65,13 @@ public interface InvoiceRepository extends JpaRepository<TransactionEntity, Long
             JOIN FETCH sb.category
             JOIN FETCH t.account
             LEFT JOIN FETCH t.card
-            WHERE t.dueDate BETWEEN :dtInitial AND :dtFinal
+            WHERE t.dueDate < :period
               AND t.invoice = true
               AND t.invoiceId IS NULL
               AND t.card IN :cards
               AND t.paymentDate IS NULL
             """)
-    List<TransactionEntity> findBy(@Param("dtInitial") LocalDate dtInitial, @Param("dtFinal") LocalDate dtFinal, @Param("cards") List<CardEntity> cards);
+    List<TransactionEntity> findBy(@Param("period") LocalDate period, @Param("cards") List<CardEntity> cards);
 
     @Query("""
             SELECT t

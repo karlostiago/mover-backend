@@ -16,11 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Component
 public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
@@ -50,7 +47,7 @@ public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
         List<TransactionEntity> transactions = dashboardDataReaderService.findAllTransactions(ids);
 
         List<AccountEntity> accounts = dashboardDataReaderService.findAllAccounts();
-        List<CardDashboardResponse> invoices = getInvoices(dtInitial, dtFinal);
+        List<CardDashboardResponse> invoices = getInvoices(dtFinal);
 
         DashboardSummary dashboardSummary = new DashboardSummary(transactions, accounts, invoices);
         dashboardSummary.addOtherCard("activeContracts", getActiveContracts());
@@ -93,51 +90,79 @@ public class DashboardLoaderServiceImpl implements DashboardCacheLoaderService {
                 .build();
     }
 
-    private List<CardDashboardResponse> getInvoices(LocalDate dtInitial, LocalDate dtFinal) {
+    private List<CardDashboardResponse> getInvoices(LocalDate period) {
         List<CardEntity> cards = dashboardDataReaderService.findAllCards()
                 .stream()
                 .filter(CardEntity::getActive)
                 .toList();
 
-        List<TransactionEntity> invoices = dashboardDataReaderService.findAllInvoices(dtInitial, dtFinal, cards)
+        List<TransactionEntity> invoices = dashboardDataReaderService.findAllInvoices(period, cards)
                 .stream()
                 .filter(transaction -> transaction.getValue().compareTo(BigDecimal.ZERO) != 0)
                 .toList();
 
-        Map<CardEntity, TransactionEntity> invoiceMap = invoices.stream()
-                .collect(Collectors.toMap(TransactionEntity::getCard, Function.identity(), (existing, replacement) -> existing));
+        Map<CardEntity, List<TransactionEntity>> groupedByCard = new HashMap<>();
+        for (TransactionEntity invoice : invoices) {
+            groupedByCard.computeIfAbsent(invoice.getCard(), k -> new java.util.ArrayList<>()).add(invoice);
+        }
+
+        LocalDate lowestDueDate = getLowestDueDate(invoices);
+        Map<CardEntity, TransactionEntity> invoiceMap = getGroupInvoicesEarliestDueDate(groupedByCard, lowestDueDate);
 
         boolean hasInvoices = !invoiceMap.isEmpty();
+        List<CardDashboardResponse> responses = new ArrayList<>();
 
-        return cards.stream()
-                .map(card -> buildCardResponse(card, invoiceMap.get(card), dtInitial, dtFinal, hasInvoices))
-                .toList();
+        if (hasInvoices) {
+            for (CardEntity card : cards) {
+                TransactionEntity invoice = invoiceMap.get(card);
+                if (invoice == null) {
+                    InvoiceProjection projection = dashboardDataReaderService
+                            .calculateInvoiceValue(card, lowestDueDate, lowestDueDate.withDayOfMonth(lowestDueDate.lengthOfMonth()));
+                    responses.add(buildCardResponse(card, projection.getValue(), projection.getPaid() == 1, projection.getDueDate()));
+                } else {
+                    responses.add(buildCardResponse(card, invoice.getValue(), invoice.getPaid(), invoice.getDueDate()));
+                }
+            }
+        } else {
+            for (CardEntity card : cards) {
+                responses.add(buildCardResponse(card, BigDecimal.ZERO, Boolean.FALSE,
+                        lowestDueDate == null ? LocalDate.now().plusMonths(1) : lowestDueDate));
+            }
+        }
+
+        return responses;
     }
 
-    private CardDashboardResponse buildCardResponse(CardEntity card, TransactionEntity invoice, LocalDate dtInitial, LocalDate dtFinal, boolean hasInvoices) {
-        CardDashboardResponse.CardDashboardResponseBuilder builder = CardDashboardResponse.builder()
-                .description(card.getName())
-                .loading(true)
-                .iconPath(Icon.toName(card.getIcon()).getUrlImage());
-
-        if (invoice != null) {
-            return builder
-                    .value(invoice.getValue())
-                    .paid(invoice.getPaid())
-                    .dueDate(invoice.getDueDate())
-                    .build();
-        } else {
-            LocalDate projectionInitial = !hasInvoices ? dtInitial.plusMonths(1) : dtInitial;
-            LocalDate projectionFinal = !hasInvoices ? dtFinal.plusMonths(1) : dtFinal;
-
-            InvoiceProjection projection = dashboardDataReaderService
-                    .calculateInvoiceValue(card, projectionInitial, projectionFinal);
-
-            return builder
-                    .value(projection.getValue())
-                    .paid(projection.getPaid() == 1)
-                    .dueDate(projection.getDueDate())
-                    .build();
+    private Map<CardEntity, TransactionEntity> getGroupInvoicesEarliestDueDate(Map<CardEntity, List<TransactionEntity>> groupedByCard, LocalDate lowestDueDate) {
+        Map<CardEntity, TransactionEntity> invoiceMap = new HashMap<>();
+        for (Map.Entry<CardEntity, List<TransactionEntity>> entry : groupedByCard.entrySet()) {
+            CardEntity card = entry.getKey();
+            List<TransactionEntity> entities = entry.getValue();
+            for (TransactionEntity entity : entities) {
+                if (card.equals(entity.getCard()) && entity.getDueDate().getMonth().equals(lowestDueDate.getMonth())) {
+                    invoiceMap.put(card, entity);
+                    break;
+                }
+            }
         }
+        return invoiceMap;
+    }
+
+    private CardDashboardResponse buildCardResponse(CardEntity entity, BigDecimal value, Boolean paid, LocalDate dueDate) {
+        return CardDashboardResponse.builder()
+                .description(entity.getName())
+                .loading(true)
+                .iconPath(Icon.toName(entity.getIcon()).getUrlImage())
+                .dueDate(dueDate)
+                .paid(paid)
+                .value(value)
+                .build();
+    }
+
+    private LocalDate getLowestDueDate(List<TransactionEntity> invoices) {
+        return invoices.stream()
+                .map(TransactionEntity::getDueDate)
+                .min(Comparator.naturalOrder())
+                .orElse(null);
     }
 }

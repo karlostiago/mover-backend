@@ -27,5 +27,5 @@ public interface DashboardDataReaderService {
 
     boolean allPreviousInvoicesPaid(List<CardEntity> entities, LocalDate dtInicial, LocalDate dtFinal);
 
-    List<TransactionEntity> findAllInvoices(LocalDate dtInitial, LocalDate dtFinal, List<CardEntity> cards);
+    List<TransactionEntity> findAllInvoices(LocalDate period, List<CardEntity> cards);
 }

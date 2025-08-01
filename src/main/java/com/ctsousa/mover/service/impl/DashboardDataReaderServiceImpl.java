@@ -97,7 +97,7 @@ public class DashboardDataReaderServiceImpl implements DashboardDataReaderServic
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<TransactionEntity> findAllInvoices(LocalDate dtInitial, LocalDate dtFinal, List<CardEntity> cards) {
-        return invoiceRepository.findBy(dtInitial, dtFinal, cards);
+    public List<TransactionEntity> findAllInvoices(LocalDate period, List<CardEntity> cards) {
+        return invoiceRepository.findBy(period, cards);
     }
 }
