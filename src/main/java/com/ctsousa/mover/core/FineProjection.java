@@ -16,4 +16,5 @@ public interface FineProjection {
     String getModel();
     String getBrand();
     Long getTransactionId();
+    String getSignature();
 }

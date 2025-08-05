@@ -51,6 +51,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<TransactionResponse> add(TransactionRequest request) {
         Transaction domain = toMapper(request, Transaction.class);
         TransactionEntity entity = transactionService.save(domain);
+        transactionService.sendChangeNotification();
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 
@@ -60,6 +61,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
         transactionService.existsById(id);
         Transaction domain = toMapper(request, Transaction.class);
         TransactionEntity entity = transactionService.update(domain);
+        transactionService.sendChangeNotification();
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 
@@ -78,6 +80,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<TransactionResponse> pay(Long id, LocalDate paymentDate) {
         TransactionEntity entity = transactionService.findById(id);
         TransactionEntity paidEntity = transactionService.pay(entity, paymentDate);
+        transactionService.sendChangeNotification();
         return ResponseEntity.ok(toMapper(paidEntity, TransactionResponse.class));
     }
 
@@ -86,6 +89,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     public ResponseEntity<TransactionResponse> refund(Long id) {
         TransactionEntity entity = transactionService.findById(id);
         TransactionEntity entityReversed = transactionService.refund(entity);
+        transactionService.sendChangeNotification();
         return ResponseEntity.ok(toMapper(entityReversed, TransactionResponse.class));
     }
 
@@ -93,6 +97,14 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
     @PreAuthorize(Security.PreAutorize.Transaction.DELETE_TRANSACTIONS)
     public void batchDelete(Long id) {
         transactionService.batchDelete(id);
+        transactionService.sendChangeNotification();
+    }
+
+    @Override
+    @PreAuthorize(Security.PreAutorize.Transaction.DELETE_TRANSACTIONS)
+    public void delete(Long id) {
+        super.delete(id);
+        transactionService.sendChangeNotification();
     }
 
     @Override
@@ -101,6 +113,7 @@ public class TransactionResource extends BaseResource<TransactionResponse, Trans
         transactionService.existsById(id);
         Transaction domain = toMapper(request, Transaction.class);
         TransactionEntity entity = transactionService.batchUpdate(id, domain);
+        transactionService.sendChangeNotification();
         return ResponseEntity.ok(toMapper(entity, TransactionResponse.class));
     }
 

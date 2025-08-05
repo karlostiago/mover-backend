@@ -101,18 +101,14 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionEntity save(Transaction transaction) {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
-        TransactionEntity entity = createTransactionServiceFactory.execute(type, transaction);
-        sendNotification();
-        return entity;
+        return createTransactionServiceFactory.execute(type, transaction);
     }
 
     @Override
     public TransactionEntity update(Transaction transaction) {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
         updateTransactionServiceFactory.batchUpdate(false);
-        TransactionEntity entity = updateTransactionServiceFactory.execute(type, transaction);
-        sendNotification();
-        return entity;
+        return updateTransactionServiceFactory.execute(type, transaction);
     }
 
     @Override
@@ -126,9 +122,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setId(entity.getId());
         transaction.setPaymentDate(paymentDate);
-        TransactionEntity paidEntity = paymentTransactionServiceFactory.execute(type, transaction);
-        sendNotification();
-        return paidEntity;
+        return paymentTransactionServiceFactory.execute(type, transaction);
     }
 
     @Override
@@ -148,9 +142,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionEntity refund(TransactionEntity entity) {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
-        TransactionEntity refundEntity = refundTransactionServiceFactory.execute(type, new Transaction(entity.getId()));
-        sendNotification();
-        return refundEntity;
+        return refundTransactionServiceFactory.execute(type, new Transaction(entity.getId()));
     }
 
     @Override
@@ -159,7 +151,6 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         deleteTransactionServiceFactory.batchDelete(false);
         deleteTransactionServiceFactory.execute(type, new Transaction(id));
-        sendNotification();
     }
 
     @Override
@@ -168,16 +159,13 @@ public class TransactionServiceImpl implements TransactionService {
         TypeCategory type = TypeCategory.toDescription(entity.getCategoryType());
         deleteTransactionServiceFactory.batchDelete(true);
         deleteTransactionServiceFactory.execute(type, toMapper(entity, Transaction.class));
-        sendNotification();
     }
 
     @Override
     public TransactionEntity batchUpdate(Long id, Transaction transaction) {
         TypeCategory type = TypeCategory.toDescription(transaction.getCategoryType());
         updateTransactionServiceFactory.batchUpdate(true);
-        TransactionEntity entity = updateTransactionServiceFactory.execute(type, transaction);
-        sendNotification();
-        return entity;
+        return updateTransactionServiceFactory.execute(type, transaction);
     }
 
     @Override
@@ -186,6 +174,13 @@ public class TransactionServiceImpl implements TransactionService {
             return searchFromDashboard(filter, pageable);
         }
         return search(filter.getDtInitial(), filter.getDtFinal(), filter.getAccountsId(), filter.getText(), pageable);
+    }
+
+    @Override
+    public void sendChangeNotification() {
+        publisher.publishEvent(new BalanceChangedEvent());
+        publisher.publishEvent(new TransactionCacheEvent());
+        balanceNotificationService.notifyBalanceChanged();
     }
 
     private Page<TransactionEntity> searchFromDashboard(Transaction.Filter filter, Pageable pageable) {
@@ -247,11 +242,5 @@ public class TransactionServiceImpl implements TransactionService {
 
     private boolean hasAccount(List<Long> accountListId) {
         return !accountListId.isEmpty();
-    }
-
-    private void sendNotification() {
-        publisher.publishEvent(new BalanceChangedEvent());
-        publisher.publishEvent(new TransactionCacheEvent());
-        balanceNotificationService.notifyBalanceChanged();
     }
 }

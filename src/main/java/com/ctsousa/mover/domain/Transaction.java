@@ -90,7 +90,8 @@ public class Transaction extends DomainModel<TransactionEntity> {
         if (fine == null) {
             return null;
         }
-        return from(fine.getDescription(), fine.getDueDate(), fine.getValue().negate(),
+        String description = fine.getInfractionNotice().concat(" - ").concat(fine.getDescription());
+        return from(description, fine.getDueDate(), fine.getValue().negate(),
                 fine.getCard(), fine.getAccount(), fine.getVehicle());
     }
 

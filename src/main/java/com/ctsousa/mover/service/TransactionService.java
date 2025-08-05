@@ -30,4 +30,6 @@ public interface TransactionService extends BaseService<TransactionEntity, Long>
     TransactionEntity schedule(final Long id);
 
     TransactionEntity undoScheduling(final Long id);
+
+    void sendChangeNotification();
 }

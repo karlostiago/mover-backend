@@ -120,6 +120,7 @@ public class FineServiceImpl extends BaseServiceImpl<FineEntity, Long> implement
                     fine.setPaid(fineProjection.getPaid().compareTo(BigDecimal.ZERO) > 0);
                     fine.setVehicle(getVehicle(fineProjection));
                     fine.setTransactionId(fineProjection.getTransactionId());
+                    fine.setSignature(fineProjection.getSignature());
                     return fine;
                 })
                 .toList();

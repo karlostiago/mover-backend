@@ -24,7 +24,8 @@ public interface FineRepository extends JpaRepository<FineEntity, Long> {
             	v.license_plate,
              	m.name AS model,
              	b.name AS brand,
-             	t.id AS transaction_id
+             	t.id AS transaction_id,
+             	f.signature
             FROM tb_fine f
             JOIN tb_vehicle v ON v.id = f.vehicle_id
             JOIN tb_model m ON m.id = v.model_id
